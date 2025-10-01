@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Portal Pembelajaran Statistika</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    grid-template-rows: 120px 1fr 60px;
+    grid-template-areas:
+      "profile header"
+      "materials page"
+      "footer footer";
+  }
+
+  /* Profile Section */
+  .profile {
+    grid-area: profile;
+    background: linear-gradient(135deg, #4a90e2, #7bb3f0);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+  }
+
+  .author-photo {
+    width: 80px;
+    height: 80px;
+    background-color: #1a1a1a;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    line-height: 1.2;
+    border: 3px solid white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+
+  /* Header */
+  .header {
+    grid-area: header;
+    background: linear-gradient(135deg, #00bcd4, #26c6da);
+    color: #004d5c;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+
+  .header h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
+  }
+
+  .header p {
+    font-size: 16px;
+    font-weight: 500;
+    opacity: 0.9;
+  }
+
+  /* Materials Sidebar */
+  .materials {
+    grid-area: materials;
+    background: linear-gradient(180deg, #e3f2fd, #bbdefb);
+    border-right: 3px solid #2196f3;
+    padding: 20px;
+    overflow-y: auto;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .materials-title {
+    background: linear-gradient(135deg, #8bc34a, #9ccc65);
+    padding: 12px;
+    font-weight: bold;
+    font-size: 16px;
+    color: #2e7d32;
+    text-align: center;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  .material-item {
+    margin-bottom: 12px;
+    padding: 12px;
+    background: rgba(255,255,255,0.7);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+  }
+
+  .material-item:hover {
+    background: rgba(255,255,255,0.9);
+    border-left-color: #2196f3;
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .material-item.active {
+    background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+    border-left-color: #4caf50;
+    font-weight: bold;
+  }
+
+  .material-subtitle {
+    margin-left: 16px;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #555;
+    font-style: italic;
+  }
+
+  /* Page Content */
+  .page {
+    grid-area: page;
+    background: linear-gradient(135deg, #fafafa, #f5f5f5);
+    padding: 30px;
+    overflow-y: auto;
+    position: relative;
+    min-height: 500px;
+  }
+
+  .page-content {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    min-height: 400px;
+  }
+
+  .page-content h2 {
+    color: #1976d2;
+    font-size: 24px;
+    margin-bottom: 20px;
+    border-bottom: 3px solid #e3f2fd;
+    padding-bottom: 10px;
+  }
+
+  .page-content h3 {
+    color: #388e3c;
+    font-size: 18px;
+    margin: 20px 0 12px 0;
+  }
+
+  .page-content p {
+    color: #424242;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    text-align: justify;
+  }
+
+  .page-content ul {
+    margin-left: 20px;
+    margin-bottom: 16px;
+  }
+
+  .page-content li {
+    margin-bottom: 8px;
+    color: #555;
+  }
+
+  .references {
+    background: #f8f9fa;
+    border-left: 4px solid #2196f3;
+    padding: 16px;
+    margin-top: 30px;
+    border-radius: 0 8px 8px 0;
+  }
+
+  .references h4 {
+    color: #1976d2;
+    margin-bottom: 12px;
+  }
+
+  .references ol {
+    margin-left: 20px;
+    font-size: 13px;
+    color: #666;
+  }
+
+  /* Footer */
+  .footer {
+    grid-area: footer;
+    background: linear-gradient(135deg, #1976d2, #2196f3);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+  }
+
+  .footer-left {
+    display: flex;
+    gap: 30px;
+  }
+
+  .footer-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .footer-item strong {
+    font-weight: 600;
+  }
+
+  /* Questions Button */
+  .questions-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: linear-gradient(135deg, #3f51b5, #5c6bc0);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(63,81,181,0.4);
+    transition: all 0.3s ease;
+    z-index: 1000;
+  }
+
+  .questions-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 25px rgba(63,81,181,0.6);
+  }
+
+  /* Analysis Tools Section */
+  .analysis-tools {
+    background: #e8f5e8;
+    border: 2px solid #4caf50;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+  }
+
+  .analysis-tools h3 {
+    color: #2e7d32;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+  }
+
+  .tool-btn {
+    background: linear-gradient(135deg, #66bb6a, #81c784);
+    color: white;
+    border: none;
+    padding: 12px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    text-align: center;
+  }
+
+  .tool-btn:hover {
+    background: linear-gradient(135deg, #4caf50, #66bb6a);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76,175,80,0.3);
+  }
+
+  /* Form styling for analysis tools */
+  .analysis-form {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-top: 20px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: #2196f3;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #2196f3, #42a5f5);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary:hover {
+    background: linear-gradient(135deg, #1976d2, #2196f3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33,150,243,0.3);
+  }
+
+  /* Responsive untuk mobile */
+  @media (max-width: 768px) {
+    body {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto 1fr auto;
+      grid-template-areas:
+        "profile"
+        "header"
+        "page"
+        "footer";
+    }
+    
+    .materials {
+      display: none;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <!-- Profile Section -->
+  <div class="profile">
+    <div class="author-photo">
+      Author<br/>Foto<br/>Profile
+    </div>
+  </div>
+
+  <!-- Header -->
+  <header class="header">
+    <h1>Portal Pembelajaran Statistika</h1>
+    <p>Platform komprehensif untuk belajar dan menganalisis data statistik</p>
+  </header>
+
+  <!-- Materials Sidebar -->
+  <nav class="materials">
+    <div class="materials-title">Materials</div>
+    
+    <div class="material-item" onclick="showMaterial(1)">
+      <strong>1. Pengantar Statistika</strong>
+      <div class="material-subtitle">Sejarah, arti, peran, populasi, sampel, teknik sampling, parameter dan statistik</div>
+    </div>
+
+    <div class="material-item" onclick="showMaterial(2)">
+      <strong>2. Statistika Deskriptif</strong>
+      <div class="material-subtitle">Penyajian data, ukuran pemusatan, ukuran penyebaran</div>
+    </div>
+
+    <div class="material-item" onclick="showMaterial(3)">
+      <strong>3. Statistika Inferensial</strong>
+      <div class="material-subtitle">Distribusi peluang, uji hipotesis, parametrik, non-parametrik</div>
+    </div>
+
+    <div class="material-item" onclick="showMaterial(4)">
+      <strong>4. Probabilitas dan Distribusi</strong>
+      <div class="material-subtitle">Konsep dasar probabilitas, distribusi diskrit dan kontinu</div>
+    </div>
+
+    <div class="material-item" onclick="showMaterial(5)">
+      <strong>5. Teori Statistika Lanjut</strong>
+      <div class="material-subtitle">GLM, Non-Linear Model, Bayesian</div>
+    </div>
+
+    <div class="material-item" onclick="showMaterial(6)">
+      <strong>6. Penerapan Statistika</strong>
+      <div class="material-subtitle">Komputer, AI, sains data, big data</div>
+    </div>
+
+    <div class="material-item" onclick="showMaterial(7)">
+      <strong>7. Materi Lainnya</strong>
+      <div class="material-subtitle">Topik tambahan dan pengembangan</div>
+    </div>
+
+    <div class="material-item" onclick="showMaterial(8)">
+      <strong>8. AnalysisTools</strong>
+      <div class="material-subtitle">Tools analisis data statistik interaktif</div>
+    </div>
+  </nav>
+
+  <!-- Main Content Page -->
+  <main class="page">
+    <div class="page-content" id="pageContent">
+      <h2>Selamat Datang di Portal Pembelajaran Statistika</h2>
+      <p>Pilih materi dari menu di sebelah kiri untuk memulai pembelajaran atau akses tools analisis statistik.</p>
+      
+      <h3>Tentang Platform Ini</h3>
+      <p>Platform ini dirancang untuk membantu mahasiswa, peneliti, dan praktisi dalam memahami konsep statistika serta melakukan analisis data dengan mudah dan akurat.</p>
+      
+      <h3>Fitur Utama</h3>
+      <ul>
+        <li>Materi pembelajaran statistika yang komprehensif</li>
+        <li>Tools analisis data interaktif</li>
+        <li>Contoh kasus dan studi aplikasi</li>
+        <li>Referensi akademik yang valid</li>
+      </ul>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-left">
+      <div class="footer-item">
+        <strong>📍</strong>
+        <span>Jl. Statistika No. 123, Jakarta 12345</span>
+      </div>
+      <div class="footer-item">
+        <strong>📞</strong>
+        <span>(021) 1234-5678</span>
+      </div>
+      <div class="footer-item">
+        <strong>✉️</strong>
+        <span>konsultasi@statistika.ac.id</span>
+      </div>
+    </div>
+    <div>© 2024 Portal Pembelajaran Statistika</div>
+  </footer>
+
+  <!-- Questions Button -->
+  <button class="questions-btn" onclick="showQuestions()">
+    Ques<br/>tions
+  </button>
+
+<script>
+  // Konten untuk setiap materi
+  const materialContents = {
+    1: `
+      <h2>1. Pengantar Statistika</h2>
+      
+      <h3>Sejarah Statistika</h3>
+      <p>Statistika sebagai ilmu berkembang dari kebutuhan praktis untuk mengumpulkan dan menganalisis data. Awalnya digunakan untuk keperluan administrasi negara (state arithmetic), statistika kini telah berkembang menjadi ilmu yang fundamental dalam penelitian ilmiah dan pengambilan keputusan berbasis data.</p>
+      
+      <p>Perkembangan statistika dimulai dari:</p>
+      <ul>
+        <li><strong>Abad 17:</strong> John Graunt - analisis data kematian London</li>
+        <li><strong>Abad 18:</strong> Thomas Bayes - teorema Bayes</li>
+        <li><strong>Abad 19:</strong> Carl Friedrich Gauss - distribusi normal</li>
+        <li><strong>Abad 20:</strong> Ronald Fisher - ANOVA dan desain eksperimen</li>
+      </ul>
+      
+      <h3>Arti dan Peran Statistika</h3>
+      <p>Statistika adalah ilmu yang berkaitan dengan pengumpulan, pengorganisasian, analisis, interpretasi, dan presentasi data. Statistika memainkan peran penting dalam:</p>
+      <ul>
+        <li>Pengambilan keputusan berdasarkan data empiris</li>
+        <li>Penelitian ilmiah dan metodologi eksperimen</li>
+        <li>Analisis tren, pola, dan prediksi masa depan</li>
+        <li>Kontrol kualitas dalam industri dan layanan</li>
+        <li>Kebijakan publik berdasarkan evidensi</li>
+      </ul>
+      
+      <h3>Populasi, Sampel, dan Teknik Sampling</h3>
+      <p><strong>Populasi</strong> adalah keseluruhan objek atau individu yang menjadi sasaran penelitian atau yang memiliki karakteristik tertentu yang ingin dipelajari. <strong>Sampel</strong> adalah bagian dari populasi yang dipilih untuk diteliti sebagai representasi populasi.</p>
+      
+      <p><strong>Teknik Sampling Probabilitas:</strong></p>
+      <ul>
+        <li><strong>Simple Random Sampling:</strong> Setiap anggota populasi memiliki peluang sama untuk terpilih</li>
+        <li><strong>Stratified Sampling:</strong> Populasi dibagi strata, kemudian diambil sampel dari setiap strata</li>
+        <li><strong>Cluster Sampling:</strong> Populasi dibagi cluster, beberapa cluster dipilih secara acak</li>
+        <li><strong>Systematic Sampling:</strong> Pemilihan sampel dengan interval tetap</li>
+      </ul>
+      
+      <p><strong>Teknik Sampling Non-Probabilitas:</strong></p>
+      <ul>
+        <li><strong>Convenience Sampling:</strong> Sampel mudah diakses</li>
+        <li><strong>Purposive Sampling:</strong> Sampel dipilih berdasarkan kriteria tertentu</li>
+        <li><strong>Quota Sampling:</strong> Sampel berdasarkan kuota yang telah ditentukan</li>
+        <li><strong>Snowball Sampling:</strong> Sampel diperoleh melalui referensi responden</li>
+      </ul>
+      
+      <h3>Parameter dan Statistik</h3>
+      <p><strong>Parameter</strong> adalah ukuran yang menggambarkan karakteristik populasi (biasanya tidak diketahui dan dilambangkan dengan huruf Yunani). <strong>Statistik</strong> adalah ukuran yang menggambarkan karakteristik sampel (dapat dihitung dari data sampel).</p>
+      
+      <p><strong>Contoh Parameter vs Statistik:</strong></p>
+      <ul>
+        <li>μ (mu) = rata-rata populasi vs x̄ = rata-rata sampel</li>
+        <li>σ (sigma) = standar deviasi populasi vs s = standar deviasi sampel</li>
+        <li>π (pi) = proporsi populasi vs p = proporsi sampel</li>
+      </ul>
+      
+      <div class="references">
+        <h4>Referensi</h4>
+        <ol>
+          <li>D. C. Montgomery and G. C. Runger, "Applied Statistics and Probability for Engineers," 7th ed., Wiley, 2018.</li>
+          <li>R. E. Walpole et al., "Probability & Statistics for Engineers & Scientists," 9th ed., Pearson, 2016.</li>
+          <li>J. L. Devore, "Probability and Statistics for Engineering and the Sciences," 9th ed., Cengage, 2015.</li>
+          <li>W. Mendenhall et al., "Introduction to Probability and Statistics," 15th ed., Cengage, 2020.</li>
+        </ol>
+      </div>
+    `,
+    
+    2: `
+      <h2>2. Statistika Deskriptif</h2>
+      
+      <h3>Pengertian Statistika Deskriptif</h3>
+      <p>Statistika deskriptif adalah cabang statistika yang berkaitan dengan pengumpulan, penyajian, dan peringkasan data untuk memberikan informasi yang berguna tentang data tersebut. Tujuan utamanya adalah menggambarkan karakteristik data tanpa membuat kesimpulan yang melampaui data yang tersedia.</p>
+      
+      <h3>Penyajian Data dalam Bentuk Tabel dan Grafik</h3>
+      <p>Data dapat disajikan dalam berbagai bentuk untuk memudahkan pemahaman dan interpretasi:</p>
+      
+      <p><strong>Jenis-jenis Grafik:</strong></p>
+      <ul>
+        <li><strong>Bar Chart:</strong> Menampilkan data kategorikal dengan batang vertikal atau horizontal</li>
+        <li><strong>Histogram:</strong> Menampilkan distribusi frekuensi data kontinu</li>
+        <li><strong>Line Chart:</strong> Menampilkan trend data sepanjang waktu</li>
+        <li><strong>Pie Chart:</strong> Menampilkan proporsi bagian dari keseluruhan</li>
+        <li><strong>Polygon:</strong> Menghubungkan titik tengah histogram dengan garis</li>
+        <li><strong>Ogive:</strong> Grafik frekuensi kumulatif</li>
+        <li><strong>Scatter Plot:</strong> Menampilkan hubungan antara dua variabel kontinu</li>
+        <li><strong>Box Plot:</strong> Menampilkan distribusi data melalui kuartil</li>
+        <li><strong>Stem-and-Leaf:</strong> Menampilkan distribusi dengan mempertahankan nilai asli</li>
+      </ul>
+      
+      <h3>Ukuran Pemusatan Data</h3>
+      <p>Ukuran pemusatan memberikan informasi tentang nilai tengah atau pusat dari suatu distribusi data:</p>
+      
+      <ul>
+        <li><strong>Mean (Rata-rata Aritmatika):</strong>
+          <p>Formula: μ = Σxi/n (populasi) atau x̄ = Σxi/n (sampel)</p>
+          <p>Kelebihan: Menggunakan semua data, mudah dihitung</p>
+          <p>Kelemahan: Sensitif terhadap outlier</p>
+        </li>
+        <li><strong>Median:</strong>
+          <p>Nilai tengah setelah data diurutkan dari terkecil ke terbesar</p>
+          <p>Kelebihan: Tidak terpengaruh outlier</p>
+          <p>Kelemahan: Tidak menggunakan semua informasi data</p>
+        </li>
+        <li><strong>Modus:</strong>
+          <p>Nilai yang paling sering muncul dalam data</p>
+          <p>Dapat digunakan untuk semua jenis data (nominal, ordinal, interval, rasio)</p>
+        </li>
+      </ul>
+      
+      <h3>Ukuran Penyebaran Data</h3>
+      <p>Ukuran penyebaran menggambarkan seberapa tersebar atau bervariasi data dari pusat distribusi:</p>
+      
+      <ul>
+        <li><strong>Range:</strong> Selisih antara nilai maksimum dan minimum</li>
+        <li><strong>Varians:</strong>
+          <p>σ² = Σ(xi-μ)²/N (populasi) atau s² = Σ(xi-x̄)²/(n-1) (sampel)</p>
+        </li>
+        <li><strong>Standar Deviasi:</strong>
+          <p>σ = √σ² (populasi) atau s = √s² (sampel)</p>
+        </li>
+        <li><strong>Kuartil:</strong>
+          <p>Q1 (kuartil pertama), Q2 (median), Q3 (kuartil ketiga)</p>
+        </li>
+        <li><strong>Interquartile Range (IQR):</strong> Q3 - Q1</li>
+        <li><strong>Koefisien Variasi:</strong> CV = (σ/μ) × 100%</li>
+      </ul>
+      
+      <h3>Bentuk Distribusi Data</h3>
+      <ul>
+        <li><strong>Simetris:</strong> Data terdistribusi merata di sekitar pusat</li>
+        <li><strong>Skewness Positif:</strong> Ekor distribusi memanjang ke kanan</li>
+        <li><strong>Skewness Negatif:</strong> Ekor distribusi memanjang ke kiri</li>
+        <li><strong>Kurtosis:</strong> Mengukur keruncingan distribusi</li>
+      </ul>
+      
+      <div class="references">
+        <h4>Referensi</h4>
+        <ol>
+          <li>A. Agresti and B. Finlay, "Statistical Methods for the Social Sciences," 5th ed., Pearson, 2014.</li>
+          <li>D. S. Moore et al., "Introduction to the Practice of Statistics," 9th ed., W.H. Freeman, 2017.</li>
+          <li>R. Lind et al., "Statistical Techniques in Business and Economics," 17th ed., McGraw-Hill, 2018.</li>
+          <li>B. Render et al., "Quantitative Analysis for Management," 13th ed., Pearson, 2018.</li>
+        </ol>
+      </div>
+    `,
+    
+    3: `
+      <h2>3. Statistika Inferensial</h2>
+      
+      <h3>Pengertian Statistika Inferensial</h3>
+      <p>Statistika inferensial adalah cabang statistika yang berkaitan dengan penarikan kesimpulan tentang populasi berdasarkan informasi yang diperoleh dari sampel. Berbeda dengan statistika deskriptif, statistika inferensial memungkinkan kita membuat generalisasi dan prediksi.</p>
+      
+      <h3>Distribusi Peluang</h3>
+      <p>Distribusi peluang adalah fondasi matematika untuk statistika inferensial yang menggambarkan bagaimana probabilitas terdistribusi over nilai-nilai yang mungkin dari suatu variabel random.</p>
+      
+      <p><strong>Distribusi Peluang Diskrit:</strong></p>
+      <ul>
+        <li><strong>Distribusi Binomial:</strong> B(n,p) - untuk eksperimen berulang dengan probabilitas sukses konstan</li>
+        <li><strong>Distribusi Poisson:</strong> P(λ) - untuk kejadian langka dalam interval waktu/ruang tertentu</li>
+        <li><strong>Distribusi Geometrik:</strong> untuk jumlah percobaan hingga sukses pertama</li>
+        <li><strong>Distribusi Hipergeometrik:</strong> sampling tanpa pengembalian</li>
+      </ul>
+      
+      <p><strong>Distribusi Peluang Kontinu:</strong></p>
+      <ul>
+        <li><strong>Distribusi Normal:</strong> N(μ,σ²) - distribusi simetrik berbentuk lonceng</li>
+        <li><strong>Distribusi t-Student:</strong> untuk sampel kecil dengan σ tidak diketahui</li>
+        <li><strong>Distribusi Chi-square (χ²):</strong> untuk uji varians dan goodness of fit</li>
+        <li><strong>Distribusi F:</strong> untuk uji rasio dua varians</li>
+        <li><strong>Distribusi Uniform:</strong> semua nilai dalam interval memiliki probabilitas sama</li>
+      </ul>
+      
+      <h3>Pendugaan Parameter</h3>
+      <p>Estimasi parameter populasi menggunakan statistik sampel:</p>
+      
+      <ul>
+        <li><strong>Point Estimate:</strong>
+          <p>Dugaan tunggal untuk parameter populasi (contoh: x̄ sebagai dugaan μ)</p>
+        </li>
+        <li><strong>Interval Estimate (Confidence Interval):</strong>
+          <p>Rentang nilai yang memiliki probabilitas tertentu memuat parameter populasi</p>
+          <p>CI = point estimate ± margin of error</p>
+        </li>
+      </ul>
+      
+      <h3>Konsep Uji Hipotesis</h3>
+      <p>Uji hipotesis adalah prosedur statistik untuk menguji klaim atau asumsi tentang parameter populasi berdasarkan evidence dari sampel.</p>
+      
+      <p><strong>Komponen Uji Hipotesis:</strong></p>
+      <ul>
+        <li><strong>H₀ (Hipotesis Nol):</strong> Pernyataan yang diuji, biasanya "tidak ada efek" atau "tidak ada perbedaan"</li>
+        <li><strong>H₁ atau Ha (Hipotesis Alternatif):</strong> Pernyataan yang akan diterima jika H₀ ditolak</li>
+        <li><strong>α (Alpha):</strong> Tingkat signifikansi, probabilitas menolak H₀ yang benar (Type I error)</li>
+        <li><strong>β (Beta):</strong> Probabilitas menerima H₀ yang salah (Type II error)</li>
+        <li><strong>Power:</strong> 1-β, probabilitas menolak H₀ yang salah</li>
+        <li><strong>p-value:</strong> Probabilitas mendapat hasil ekstrem atau lebih ekstrem jika H₀ benar</li>
+      </ul>
+      
+      <h3>Jenis Uji Hipotesis</h3>
+      <ul>
+        <li><strong>Uji Deskriptif:</strong> Menguji karakteristik satu variabel (contoh: uji rata-rata satu sampel)</li>
+        <li><strong>Uji Komparatif:</strong> Membandingkan antar kelompok (contoh: uji beda rata-rata dua kelompok)</li>
+        <li><strong>Uji Asosiatif:</strong> Menguji hubungan antar variabel (contoh: uji korelasi, uji independensi)</li>
+      </ul>
+      
+      <h3>Statistika Inferensial Parametrik</h3>
+      <p>Metode yang mengasumsikan data mengikuti distribusi tertentu (biasanya normal):</p>
+      <ul>
+        <li><strong>Uji-t:</strong> One-sample, two-sample, paired t-test</li>
+        <li><strong>ANOVA:</strong> One-way, two-way, repeated measures ANOVA</li>
+        <li><strong>Uji Korelasi Pearson:</strong> Mengukur hubungan linear antar variabel</li>
+        <li><strong>Regresi Linear:</strong> Memodelkan hubungan antar variabel</li>
+      </ul>
+      
+      <h3>Statistika Inferensial Non-Parametrik</h3>
+      <p>Metode yang tidak mengasumsikan distribusi tertentu, cocok untuk data tidak normal:</p>
+      <ul>
+        <li><strong>Uji Chi-square:</strong> Uji independensi dan goodness of fit</li>
+        <li><strong>Uji Binomial:</strong> Untuk proporsi dalam sampel kecil</li>
+        <li><strong>Uji Tanda:</strong> Membandingkan median dengan nilai tertentu</li>
+        <li><strong>Uji Mann-Whitney (Wilcoxon Rank-Sum):</strong> Membandingkan dua kelompok independen</li>
+        <li><strong>Uji Wilcoxon Signed-Rank:</strong> Untuk data berpasangan</li>
+        <li><strong>Uji Kruskal-Wallis:</strong> Alternatif non-parametrik untuk one-way ANOVA</li>
+      </ul>
+      
+      <h3>Uji Asumsi Klasik</h3>
+      <p>Pengujian asumsi yang harus dipenuhi dalam analisis parametrik:</p>
+      <ul>
+        <li><strong>Uji Normalitas:</strong> Shapiro-Wilk, Kolmogorov-Smirnov, Anderson-Darling</li>
+        <li><strong>Uji Homogenitas Varians:</strong> Levene's test, Bartlett's test</li>
+        <li><strong>Uji Independensi:</strong> Durbin-Watson test untuk autokorelasi</li>
+        <li><strong>Uji Linearitas:</strong> Untuk hubungan linear dalam regresi</li>
+      </ul>
+      
+      <div class="references">
+        <h4>Referensi</h4>
+        <ol>
+          <li>R. V. Hogg et al., "Introduction to Mathematical Statistics," 8th ed., Pearson, 2019.</li>
+          <li>J. E. Freund and B. M. Perles, "Modern Elementary Statistics," 12th ed., Pearson, 2014.</li>
+          <li>G. Casella and R. L. Berger, "Statistical Inference," 2nd ed., Duxbury, 2002.</li>
+          <li>D. Wackerly et al., "Mathematical Statistics with Applications," 7th ed., Cengage, 2008.</li>
+          <li>B. Efron and T. Hastie, "Computer Age Statistical Inference," Cambridge University Press, 2016.</li>
+        </ol>
+      </div>
+    `,
+    
+    4: `
+      <h2>4. Probabilitas dan Distribusi Lanjutan</h2>
+      
+      <h3>Konsep Fundamental Probabilitas</h3>
+      <p>Probabilitas adalah ukuran numerik kemungkinan terjadinya suatu kejadian, dengan nilai antara 0 dan 1. Konsep ini merupakan fondasi untuk semua metode statistika inferensial.</p>
+      
+      <p><strong>Definisi Probabilitas:</strong></p>
+      <ul>
+        <li><strong>Pendekatan Klasik:</strong> P(A) = jumlah hasil yang menguntungkan / total hasil yang mungkin</li>
+        <li><strong>Pendekatan Frekuensi Relatif:</strong> P(A) = limit (frekuensi A / jumlah percobaan) saat n → ∞</li>
+        <li><strong>Pendekatan Subjektif:</strong> Berdasarkan keyakinan atau pengalaman pribadi</li>
+      </ul>
+      
+      <h3>Ruang Sampel dan Kejadian</h3>
+      <ul>
+        <li><strong>Ruang Sampel (S):</strong> Himpunan semua hasil yang mungkin dari suatu eksperimen</li>
+        <li><strong>Kejadian (Event):</strong> Subset dari ruang sampel</li>
+        <li><strong>Kejadian Sederhana:</strong> Kejadian yang hanya memuat satu hasil</li>
+        <li><strong>Kejadian Majemuk:</strong> Kejadian yang memuat lebih dari satu hasil</li>
+      </ul>
+      
+      <h3>Aturan-aturan Probabilitas</h3>
+      <ul>
+        <li><strong>Aturan Penjumlahan:</strong>
+          <p>P(A∪B) = P(A) + P(B) - P(A∩B)</p>
+          <p>Untuk kejadian saling asing: P(A∪B) = P(A) + P(B)</p>
+        </li>
+        <li><strong>Aturan Perkalian:</strong>
+          <p>P(A∩B) = P(A|B) × P(B) = P(B|A) × P(A)</p>
+          <p>Untuk kejadian independen: P(A∩B) = P(A) × P(B)</p>
+        </li>
+        <li><strong>Probabilitas Bersyarat:</strong>
+          <p>P(A|B) = P(A∩B) / P(B), dimana P(B) > 0</p>
+        </li>
+        <li><strong>Teorema Bayes:</strong>
+          <p>P(A|B) = [P(B|A) × P(A)] / P(B)</p>
+        </li>
+      </ul>
+      
+      <h3>Distribusi Sampling</h3>
+      <p>Distribusi sampling adalah distribusi probabilitas dari statistik sampel yang diperoleh dari pengambilan sampel berulang dari populasi yang sama.</p>
+      
+      <ul>
+        <li><strong>Central Limit Theorem (CLT):</strong>
+          <p>Untuk sampel berukuran besar (n≥30), distribusi sampling rata-rata mendekati normal terlepas dari bentuk distribusi populasi</p>
+        </li>
+        <li><strong>Standard Error:</strong>
+          <p>SE = σ/√n (jika σ diketahui) atau SE = s/√n (jika σ tidak diketahui)</p>
+        </li>
+        <li><strong>Distribusi Sampling Proporsi:</strong>
+          <p>Untuk sampel besar, p̂ ~ N(π, √[π(1-π)/n])</p>
+        </li>
+      </ul>
+      
+      <h3>Teorema Limit Pusat dan Aplikasinya</h3>
+      <p>CLT memungkinkan kita menggunakan distribusi normal untuk inferensi statistik meskipun populasi tidak berdistribusi normal, asalkan ukuran sampel cukup besar.</p>
+      
+      <div class="references">
+        <h4>Referensi</h4>
+        <ol>
+          <li>S. Ross, "A First Course in Probability," 10th ed., Pearson, 2019.</li>
+          <li>A. Papoulis and S. U. Pillai, "Probability, Random Variables and Stochastic Processes," 4th ed., McGraw-Hill, 2002.</li>
+          <li>K. L. Chung, "A Course in Probability Theory," 3rd ed., Academic Press, 2001.</li>
+          <li>P. G. Hoel et al., "Introduction to Probability Theory," Houghton Mifflin, 1971.</li>
+        </ol>
+      </div>
+    `,
+    
+    5: `
+      <h2>5. Teori Statistika Lanjut</h2>
+      
+      <h3>Generalized Linear Models (GLM)</h3>
+      <p>GLM adalah ekstensi fleksibel dari regresi linear klasik yang memungkinkan variabel respon memiliki distribusi selain normal dan hubungan non-linear dengan variabel prediktor melalui fungsi link.</p>
+      
+      <p><strong>Komponen GLM:</strong></p>
+      <ul>
+        <li><strong>Random Component:</strong> Distribusi variabel respon (eksponensial family)</li>
+        <li><strong>Systematic Component:</strong> Linear combination dari variabel prediktor</li>
+        <li><strong>Link Function:</strong> Menghubungkan mean dengan linear predictor</li>
+      </ul>
+      
+      <p><strong>Jenis-jenis GLM:</strong></p>
+      <ul>
+        <li><strong>Regresi Logistik:</strong> Untuk variabel respon biner (0/1), link function = logit</li>
+        <li><strong>Regresi Poisson:</strong> Untuk data count, link function = log</li>
+        <li><strong>Regresi Gamma:</strong> Untuk data positif kontinyu dengan varians yang meningkat dengan mean</li>
+        <li><strong>Regresi Multinomial:</strong> Untuk variabel kategorikal dengan lebih dari 2 kategori</li>
+      </ul>
+      
+      <h3>Model Non-Linear</h3>
+      <p>Model yang menangkap hubungan non-linear antar variabel tanpa transformasi linear:</p>
+      
+      <ul>
+        <li><strong>Polynomial Regression:</strong>
+          <p>y = β₀ + β₁x + β₂x² + ... + βₖxᵏ + ε</p>
+        </li>
+        <li><strong>Exponential Models:</strong>
+          <p>y = ae^(bx) + ε</p>
+        </li>
+        <li><strong>Power Models:</strong>
+          <p>y = ax^b + ε</p>
+        </li>
+        <li><strong>Logistic Growth Models:</strong>
+          <p>y = K/(1 + ae^(-bx))</p>
+        </li>
+        <li><strong>Spline Regression:</strong> Piecewise polynomials untuk fleksibilitas lokal</li>
+      </ul>
+      
+      <h3>Statistika Bayesian</h3>
+      <p>Pendekatan statistika yang menggunakan teorema Bayes untuk update keyakinan (belief) tentang parameter berdasarkan data yang diamati.</p>
+      
+      <p><strong>Komponen Utama:</strong></p>
+      <ul>
+        <li><strong>Prior Distribution π(θ):</strong> Keyakinan awal tentang parameter sebelum melihat data</li>
+        <li><strong>Likelihood L(θ|data):</strong> Fungsi kemungkinan data given parameter</li>
+        <li><strong>Posterior Distribution π(θ|data):</strong> Keyakinan yang diperbarui setelah melihat data</li>
+        <li><strong>Predictive Distribution:</strong> Distribusi untuk prediksi data masa depan</li>
+      </ul>
+      
+      <p><strong>Teorema Bayes:</strong></p>
+      <p>π(θ|data) ∝ L(θ|data) × π(θ)</p>
+      
+      <p><strong>Keunggulan Pendekatan Bayesian:</strong></p>
+      <ul>
+        <li>Dapat mengincorporate prior knowledge</li>
+        <li>Memberikan distribusi lengkap parameter, bukan hanya point estimate</li>
+        <li>Natural way untuk sequential learning</li>
+        <li>Dapat handle uncertainty secara komprehensif</li>
+      </ul>
+      
+      <h3>Metode Komputasi Modern</h3>
+      <ul>
+        <li><strong>Markov Chain Monte Carlo (MCMC):</strong>
+          <p>Gibbs Sampling, Metropolis-Hastings algorithm</p>
+        </li>
+        <li><strong>Variational Inference:</strong> Aproximasi deterministik untuk posterior</li>
+        <li><strong>Bootstrap Methods:</strong> Resampling untuk estimasi distribusi sampling</li>
+        <li><strong>Cross-Validation:</strong> Untuk model selection dan validation</li>
+      </ul>
+      
+      <div class="references">
+        <h4>Referensi</h4>
+        <ol>
+          <li>P. McCullagh and J. A. Nelder, "Generalized Linear Models," 2nd ed., Chapman & Hall, 1989.</li>
+          <li>A. Gelman et al., "Bayesian Data Analysis," 3rd ed., CRC Press, 2013.</li>
+          <li>D. M. Bates and D. G. Watts, "Nonlinear Regression Analysis and Its Applications," Wiley, 1988.</li>
+          <li>C. P. Robert, "The Bayesian Choice," 2nd ed., Springer, 2007.</li>
+          <li>T. Hastie et al., "The Elements of Statistical Learning," 2nd ed., Springer, 2009.</li>
+          <li>B. Efron and R. J. Tibshirani, "An Introduction to the Bootstrap," Chapman & Hall, 1993.</li>
+        </ol>
+      </div>
+    `,
+    
+    6: `
+      <h2>6. Penerapan Statistika dalam Berbagai Bidang</h2>
+      
+      <h3>Statistika dalam Ilmu Komputer</h3>
+      <p>Statistika memainkan peran fundamental dalam berbagai aspek ilmu komputer dan teknologi informasi:</p>
+      
+      <ul>
+        <li><strong>Algoritma Randomized:</strong>
+          <p>- Monte Carlo methods untuk simulasi dan optimisasi</p>
+          <p>- Simulated annealing untuk optimisasi global</p>
+          <p>- Randomized algorithms dalam sorting dan searching</p>
+        </li>
+        <li><strong>Kriptografi dan Keamanan:</strong>
+          <p>- Analisis entropi untuk kekuatan kunci enkripsi</p>
+          <p>- Statistical tests untuk random number generators</p>
+          <p>- Frequency analysis dalam cryptanalysis</p>
+        </li>
+        <li><strong>Computer Graphics dan Rendering:</strong>
+          <p>- Monte Carlo ray tracing</p>
+          <p>- Importance sampling untuk rendering realistik</p>
+          <p>- Noise functions untuk procedural textures</p>
+        </li>
+        <li><strong>Database dan Information Retrieval:</strong>
+          <p>- Query optimization menggunakan statistik tabel</p>
+          <p>- Text mining dan document classification</p>
+          <p>- Recommendation systems</p>
+        </li>
+      </ul>
+      
+      <h3>Artificial Intelligence (AI) dan Machine Learning</h3>
+      <p>Statistika adalah fondasi matematika untuk sebagian besar teknik AI modern:</p>
+      
+      <ul>
+        <li><strong>Supervised Learning:</strong>
+          <p>- Classification: Logistic regression, SVM, decision trees</p>
+          <p>- Regression: Linear/non-linear regression, ensemble methods</p>
+          <p>- Model evaluation: Cross-validation, ROC curves, confusion matrices</p>
+        </li>
+        <li><strong>Unsupervised Learning:</strong>
+          <p>- Clustering: K-means, hierarchical clustering, DBSCAN</p>
+          <p>- Dimensionality reduction: PCA, t-SNE, UMAP</p>
+          <p>- Density estimation: Gaussian mixture models</p>
+        </li>
+        <li><strong>Deep Learning:</strong>
+          <p>- Stochastic gradient descent dan variants</p>
+          <p>- Regularization techniques (L1/L2, dropout)</p>
+          <p>- Bayesian neural networks</p>
+        </li>
+        <li><strong>Natural Language Processing:</strong>
+          <p>- N-gram models dan language modeling</p>
+          <p>- Hidden Markov Models untuk sequence labeling</p>
+          <p>- Topic modeling (LDA, LSA)</p>
+        </li>
+      </ul>
+      
+      <h3>Data Science dan Analytics</h3>
+      <p>Integrasi statistika, programming, dan domain knowledge untuk ekstraksi insight dari data:</p>
+      
+      <ul>
+        <li><strong>Exploratory Data Analysis (EDA):</strong>
+          <p>- Descriptive statistics dan visualization</p>
+          <p>- Pattern recognition dan anomaly detection</p>
+          <p>- Data quality assessment</p>
+        </li>
+        <li><strong>Feature Engineering:</strong>
+          <p>- Variable selection dan transformation</p>
+          <p>- Handling missing data dan outliers</p>
+          <p>- Creating derived variables</p>
+        </li>
+        <li><strong>Model Development:</strong>
+          <p>- Model selection dan hyperparameter tuning</p>
+          <p>- Cross-validation dan performance metrics</p>
+          <p>- Ensemble methods dan model stacking</p>
+        </li>
+        <li><strong>Experimental Design:</strong>
+          <p>- A/B testing dan multivariate testing</p>
+          <p>- Causal inference methods</p>
+          <p>- Statistical power analysis</p>
+        </li>
+      </ul>
+      
+      <h3>Big Data dan Computational Statistics</h3>
+      <p>Tantangan dan solusi statistika dalam era big data:</p>
+      
+      <ul>
+        <li><strong>Sampling Strategies:</strong>
+          <p>- Reservoir sampling untuk streaming data</p>
+          <p>- Stratified sampling untuk dataset besar</p>
+          <p>- Adaptive sampling methods</p>
+        </li>
+        <li><strong>Distributed Computing:</strong>
+          <p>- MapReduce framework untuk statistical computation</p>
+          <p>- Parallel algorithms untuk matrix operations</p>
+          <p>- Distributed machine learning (Apache Spark MLlib)</p>
+        </li>
+        <li><strong>Streaming Analytics:</strong>
+          <p>- Online algorithms untuk real-time statistics</p>
+          <p>- Sliding window techniques</p>
+          <p>- Approximate algorithms (Count-Min Sketch, HyperLogLog)</p>
+        </li>
+        <li><strong>Scalable Statistical Methods:</strong>
+          <p>- Stochastic gradient methods</p>
+          <p>- Mini-batch processing</p>
+          <p>- Approximation algorithms untuk large-scale inference</p>
+        </li>
+      </ul>
+      
+      <h3>Aplikasi Spesifik Bidang Lain</h3>
+      <ul>
+        <li><strong>Bioinformatics:</strong> Sequence analysis, gene expression, phylogenetics</li>
+        <li><strong>Finance:</strong> Risk modeling, portfolio optimization, algorithmic trading</li>
+        <li><strong>Healthcare:</strong> Clinical trials, epidemiology, medical imaging</li>
+        <li><strong>Marketing:</strong> Customer segmentation, churn prediction, recommendation</li>
+        <li><strong>Quality Control:</strong> Statistical process control, Six Sigma</li>
+      </ul>
+      
+      <div class="references">
+        <h4>Referensi</h4>
+        <ol>
+          <li>T. Hastie et al., "The Elements of Statistical Learning," 2nd ed., Springer, 2009.</li>
+          <li>G. James et al., "An Introduction to Statistical Learning," 2nd ed., Springer, 2021.</li>
+          <li>J. VanderPlas, "Python Data Science Handbook," O'Reilly, 2016.</li>
+          <li>C. M. Bishop, "Pattern Recognition and Machine Learning," Springer, 2006.</li>
+          <li>A. Gelman and J. Hill, "Data Analysis Using Regression and Multilevel/Hierarchical Models," Cambridge, 2007.</li>
+          <li>J. Dean and S. Ghemawat, "MapReduce: Simplified Data Processing on Large Clusters," OSDI, 2004.</li>
+        </ol>
+      </div>
+    `,
+    
+    7: `
+      <h2>7. Materi Lainnya</h2>
+      
+      <h3>Statistika Multivariat</h3>
+      <p>Analisis data dengan banyak variabel secara simultan untuk memahami struktur dan hubungan kompleks dalam data:</p>
+      
+      <ul>
+        <li><strong>MANOVA (Multivariate ANOVA):</strong>
+          <p>Ekstensi ANOVA untuk multiple dependent variables</p>
+        </li>
+        <li><strong>Principal Component Analysis (PCA):</strong>
+          <p>Reduksi dimensi dengan mempertahankan varians maksimum</p>
+        </li>
+        <li><strong>Factor Analysis:</strong>
+          <p>Mengidentifikasi faktor laten yang menjelaskan korelasi antar variabel</p>
+        </li>
+        <li><strong>Canonical Correlation Analysis:</strong>
+          <p>Menganalisis hubungan antara dua set variabel</p>
+        </li>
+        <li><strong>Discriminant Analysis:</strong>
+          <p>Klasifikasi berdasarkan kombinasi linear variabel prediktor</p>
+        </li>
+        <li><strong>Cluster Analysis:</strong>
+          <p>Pengelompokan objek berdasarkan kemiripan karakteristik</p>
+        </li>
+        <li><strong>Multidimensional Scaling (MDS):</strong>
+          <p>Visualisasi data high-dimensional dalam ruang lower-dimensional</p>
+        </li>
+      </ul>
+      
+      <h3>Time Series Analysis</h3>
+      <p>Analisis data yang berurutan dalam waktu untuk memahami pola temporal dan membuat prediksi:</p>
+      
+      <ul>
+        <li><strong>Komponen Time Series:</strong>
+          <p>- Trend: Pola jangka panjang</p>
+          <p>- Seasonality: Pola berulang dalam periode tertentu</p>
+          <p>- Cyclical: Pola berulang tanpa periode tetap</p>
+          <p>- Irregular: Komponen random</p>
+        </li>
+        <li><strong>ARIMA Models:</strong>
+          <p>- AR (Autoregressive): Xt = φ₁Xt-1 + ... + φₚXt-p + εt</p>
+          <p>- MA (Moving Average): Xt = εt + θ₁εt-1 + ... + θₚεt-q</p>
+          <p>- Integration: Differencing untuk stationarity</p>
+        </li>
+        <li><strong>Forecasting Methods:</strong>
+          <p>- Exponential smoothing</p>
+          <p>- Holt-Winters method</p>
+          <p>- State space models</p>
+        </li>
+        <li><strong>Advanced Models:</strong>
+          <p>- GARCH untuk volatility modeling</p>
+          <p>- Vector Autoregression (VAR)</p>
+          <p>- Cointegration analysis</p>
+        </li>
+      </ul>
+      
+      <h3>Survival Analysis</h3>
+      <p>Analisis waktu hingga kejadian tertentu terjadi (event time analysis):</p>
+      
+      <ul>
+        <li><strong>Key Concepts:</strong>
+          <p>- Survival function S(t) = P(T > t)</p>
+          <p>- Hazard function h(t) = lim[P(t ≤ T < t+Δt|T ≥ t)/Δt]</p>
+          <p>- Censoring: Right, left, interval censoring</p>
+        </li>
+        <li><strong>Non-parametric Methods:</strong>
+          <p>- Kaplan-Meier estimator untuk survival curve</p>
+          <p>- Log-rank test untuk comparing survival curves</p>
+        </li>
+        <li><strong>Semi-parametric Methods:</strong>
+          <p>- Cox proportional hazards model</p>
+          <p>- Partial likelihood estimation</p>
+        </li>
+        <li><strong>Parametric Methods:</strong>
+          <p>- Exponential, Weibull, Log-normal models</p>
+          <p>- Accelerated failure time models</p>
+        </li>
+      </ul>
+      
+      <h3>Statistika Non-parametrik Lanjutan</h3>
+      <p>Metode robust yang tidak mengasumsikan distribusi parametrik tertentu:</p>
+      
+      <ul>
+        <li><strong>Resampling Methods:</strong>
+          <p>- Bootstrap untuk estimasi standard error dan confidence intervals</p>
+          <p>- Jackknife untuk bias reduction</p>
+          <p>- Permutation tests untuk exact p-values</p>
+        </li>
+        <li><strong>Rank-based Methods:</strong>
+          <p>- Spearman correlation untuk monotonic relationships</p>
+          <p>- Kendall's tau untuk concordance</p>
+          <p>- Rank sum tests (Mann-Whitney, Kruskal-Wallis)</p>
+        </li>
+        <li><strong>Kernel Methods:</strong>
+          <p>- Kernel density estimation</p>
+          <p>- Non-parametric regression (local regression, splines)</p>
+          <p>- Support vector machines</p>
+        </li>
+        <li><strong>Order Statistics:</strong>
+          <p>- Quantile regression</p>
+          <p>- Extreme value theory</p>
+          <p>- Robust estimators (median, MAD)</p>
+        </li>
+      </ul>
+      
+      <h3>Computational Statistics</h3>
+      <ul>
+        <li><strong>Numerical Methods:</strong> Newton-Raphson, EM algorithm</li>
+        <li><strong>Simulation Methods:</strong> Monte Carlo integration, importance sampling</li>
+        <li><strong>Optimization:</strong> Maximum likelihood estimation, least squares</li>
+        <li><strong>High-Performance Computing:</strong> Parallel processing untuk statistical computation</li>
+      </ul>
+      
+      <div class="references">
+        <h4>Referensi</h4>
+        <ol>
+          <li>R. A. Johnson and D. W. Wichern, "Applied Multivariate Statistical Analysis," 6th ed., Pearson, 2014.</li>
+          <li>P. J. Brockwell and R. A. Davis, "Introduction to Time Series and Forecasting," 3rd ed., Springer, 2016.</li>
+          <li>D. Collett, "Modelling Survival Data in Medical Research," 3rd ed., CRC Press, 2015.</li>
+          <li>E. L. Lehmann and J. P. Romano, "Testing Statistical Hypotheses," 3rd ed., Springer, 2005.</li>
+          <li>W. Härdle et al., "Nonparametric and Semiparametric Models," Springer, 2004.</li>
+          <li>G. H. Givens and J. A. Hoeting, "Computational Statistics," 2nd ed., Wiley, 2013.</li>
+        </ol>
+      </div>
+    `,
+    
+    8: `
+      <h2>8. AnalysisTools - Tools Analisis Statistik</h2>
+      <p>Platform tools interaktif untuk melakukan berbagai jenis analisis statistik dengan mudah dan akurat.</p>
+      
+      <div class="analysis-tools">
+        <h3>Tools Analisis Statistik Tersedia</h3>
+        <div class="tools-grid">
+          <button class="tool-btn" onclick="showAnalysisTool('deskriptif')">Statistik Deskriptif</button>
+          <button class="tool-btn" onclick="showAnalysisTool('uji-mean')">Uji t (t-Test)</button>
+          <button class="tool-btn" onclick="showAnalysisTool('anova')">ANOVA</button>
+          <button class="tool-btn" onclick="showAnalysisTool('mann-whitney')">Mann-Whitney U</button>
+          <button class="tool-btn" onclick="showAnalysisTool('chi-square')">Chi-Square Test</button>
+          <button class="tool-btn" onclick="showAnalysisTool('korelasi')">Analisis Korelasi</button>
+          <button class="tool-btn" onclick="showAnalysisTool('regresi')">Regresi Linear</button>
+          <button class="tool-btn" onclick="showAnalysisTool('clustering')">Clustering</button>
+          <button class="tool-btn" onclick="showAnalysisTool('factor-analysis')">Factor Analysis</button>
+          <button class="tool-btn" onclick="showAnalysisTool('uji-asumsi')">Uji Asumsi Klasik</button>
+          <button class="tool-btn" onclick="showAnalysisTool('uji-instrumen')">Uji Validitas & Reliabilitas</button>
+          <button class="tool-btn" onclick="showAnalysisTool('power-analysis')">Power Analysis</button>
+        </div>
+      </div>
+      
+      <h3>Cara Penggunaan Tools</h3>
+      <ol>
+        <li>Pilih jenis analisis yang sesuai dengan tujuan penelitian Anda</li>
+        <li>Upload file data (.csv, .xlsx) atau input data secara manual</li>
+        <li>Atur parameter analisis sesuai kebutuhan</li>
+        <li>Klik tombol "Analisis" untuk memproses data</li>
+        <li>Interpretasikan hasil output yang disediakan</li>
+        <li>Download laporan hasil analisis dalam format PDF atau Excel</li>
+      </ol>
+      
+      <h3>Format Data yang Didukung</h3>
+      <ul>
+        <li><strong>File CSV:</strong> Comma-separated values</li>
+        <li><strong>File Excel:</strong> Format .xlsx dan .xls</li>
+        <li><strong>Input Manual:</strong> Copy-paste dari spreadsheet</li>
+        <li><strong>Database Connection:</strong> Koneksi langsung ke database (fitur premium)</li>
+      </ul>
+      
+      <h3>Fitur Tambahan</h3>
+      <ul>
+        <li>Visualisasi otomatis hasil analisis</li>
+        <li>Export hasil dalam berbagai format</li>
+        <li>History analisis untuk tracking progress</li>
+        <li>Template report untuk dokumentasi</li>
+        <li>Kolaborasi tim untuk proyek bersama</li>
+      </ul>
+    `
+  };
+
+  // Konten untuk analysis tools
+  const analysisToolContents = {
+    'deskriptif': `
+      <h2>Tool Analisis Statistik Deskriptif</h2>
+      <p>Analisis komprehensif karakteristik data Anda dengan berbagai ukuran pemusatan, penyebaran, dan visualisasi.</p>
+      
+      <div class="analysis-form">
+        <h3>Input Data</h3>
+        <div class="form-group">
+          <label>Metode Input Data:</label>
+          <select id="inputMethod">
+            <option value="file">Upload File (.csv, .xlsx)</option>
+            <option value="manual">Input Manual</option>
+            <option value="sample">Gunakan Sample Data</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Upload File Data:</label>
+          <input type="file" accept=".csv,.xlsx" id="dataFile"/>
+        </div>
+        
+        <div class="form-group">
+          <label>Atau Input Data Manual (pisahkan dengan koma):</label>
+          <textarea id="manualData" rows="6" placeholder="Contoh: 23, 45, 67, 34, 56, 78, 45, 67, 89, 23"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Pilih Variabel untuk Analisis:</label>
+          <select id="variables" multiple>
+            <option>Pilih variabel setelah upload data</option>
+          </select>
+        </div>
+        
+        <button class="btn-primary" onclick="runDescriptive()">Analisis Deskriptif</button>
+        
+        <div id="descriptiveResults" style="margin-top: 20px;"></div>
+      </div>
+    `,
+    
+    'uji-mean': `
+      <h2>Tool Uji t (t-Test)</h2>
+      <p>Uji hipotesis untuk rata-rata populasi dengan berbagai variasi uji t.</p>
+      
+      <div class="analysis-form">
+        <h3>Pengaturan Uji t</h3>
+        <div class="form-group">
+          <label>Jenis Uji t:</label>
+          <select id="tTestType">
+            <option value="one-sample">One-sample t-test</option>
+            <option value="two-sample">Independent two-sample t-test</option>
+            <option value="paired">Paired t-test</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Tingkat Signifikansi (α):</label>
+          <select id="alpha">
+            <option value="0.01">0.01 (99% confidence)</option>
+            <option value="0.05" selected>0.05 (95% confidence)</option>
+            <option value="0.10">0.10 (90% confidence)</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Data Sampel 1:</label>
+          <textarea id="sample1" rows="4" placeholder="Masukkan data numerik, pisahkan dengan koma"></textarea>
+        </div>
+        
+        <div class="form-group" id="sample2Group" style="display:none;">
+          <label>Data Sampel 2:</label>
+          <textarea id="sample2" rows="4" placeholder="Masukkan data numerik, pisahkan dengan koma"></textarea>
+        </div>
+        
+        <div class="form-group" id="muGroup">
+          <label>Nilai μ₀ (untuk one-sample test):</label>
+          <input type="number" id="mu0" value="0" step="0.01"/>
+        </div>
+        
+        <button class="btn-primary" onclick="runTTest()">Hitung Uji t</button>
+        
+        <div id="tTestResults" style="margin-top: 20px;"></div>
+      </div>
+    `,
+    
+    'anova': `
+      <h2>Tool Analisis Varians (ANOVA)</h2>
+      <p>Uji perbedaan rata-rata antar kelompok untuk tiga atau lebih kelompok.</p>
+      
+      <div class="analysis-form">
+        <h3>Pengaturan ANOVA</h3>
+        <div class="form-group">
+          <label>Jenis ANOVA:</label>
+          <select id="anovaType">
+            <option value="one-way">One-way ANOVA</option>
+            <option value="two-way">Two-way ANOVA</option>
+            <option value="repeated">Repeated Measures ANOVA</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Upload Data atau Input Manual:</label>
+          <input type="file" accept=".csv,.xlsx" style="margin-bottom: 10px;"/>
+          <textarea rows="8" placeholder="Format data:
+Kelompok1: 23, 45, 67, 34, 56
+Kelompok2: 34, 56, 78, 45, 67
+Kelompok3: 45, 67, 89, 56, 78"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Post-hoc Test:</label>
+          <select id="posthoc">
+            <option value="none">Tidak ada</option>
+            <option value="tukey">Tukey HSD</option>
+            <option value="bonferroni">Bonferroni</option>
+            <option value="scheffe">Scheffé</option>
+          </select>
+        </div>
+        
+        <button class="btn-primary" onclick="runANOVA()">Analisis ANOVA</button>
+        
+        <div id="anovaResults" style="margin-top: 20px;"></div>
+      </div>
+    `,
+    
+    'korelasi': `
+      <h2>Tool Analisis Korelasi</h2>
+      <p>Menganalisis kekuatan dan arah hubungan antara dua atau lebih variabel.</p>
+      
+      <div class="analysis-form">
+        <h3>Pengaturan Analisis Korelasi</h3>
+        <div class="form-group">
+          <label>Jenis Korelasi:</label>
+          <select id="correlationType">
+            <option value="pearson">Pearson (Linear correlation)</option>
+            <option value="spearman">Spearman (Rank correlation)</option>
+            <option value="kendall">Kendall's Tau</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Data Variabel X:</label>
+          <textarea id="varX" rows="3" placeholder="Masukkan data variabel X"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Data Variabel Y:</label>
+          <textarea id="varY" rows="3" placeholder="Masukkan data variabel Y"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Tingkat Signifikansi:</label>
+          <select id="corrAlpha">
+            <option value="0.01">0.01</option>
+            <option value="0.05" selected>0.05</option>
+            <option value="0.10">0.10</option>
+          </select>
+        </div>
+        
+        <button class="btn-primary" onclick="runCorrelation()">Hitung Korelasi</button>
+        
+        <div id="correlationResults" style="margin-top: 20px;"></div>
+      </div>
+    `,
+    
+    'regresi': `
+      <h2>Tool Analisis Regresi Linear</h2>
+      <p>Memodelkan hubungan antara variabel dependen dan satu atau lebih variabel independen.</p>
+      
+      <div class="analysis-form">
+        <h3>Pengaturan Regresi</h3>
+        <div class="form-group">
+          <label>Jenis Regresi:</label>
+          <select id="regressionType">
+            <option value="simple">Simple Linear Regression</option>
+            <option value="multiple">Multiple Linear Regression</option>
+            <option value="polynomial">Polynomial Regression</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label>Variabel Dependen (Y):</label>
+          <textarea id="dependentVar" rows="3" placeholder="Masukkan data variabel Y"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Variabel Independen (X):</label>
+          <textarea id="independentVar" rows="3" placeholder="Masukkan data variabel X"></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label>Confidence Level:</label>
+          <select id="confLevel">
+            <option value="90">90%</option>
+            <option value="95" selected>95%</option>
+            <option value="99">99%</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <input type="checkbox" id="includeResiduals"/>
+          <label for="includeResiduals">Tampilkan analisis residual</label>
+        </div>
+        
+        <button class="btn-primary" onclick="runRegression()">Analisis Regresi</button>
+        
+        <div id="regressionResults" style="margin-top: 20px;"></div>
+      </div>
+    `
+  };
+
+  // Fungsi untuk menampilkan materi
+  function showMaterial(materialId) {
+    // Hilangkan active class dari semua items
+    document.querySelectorAll('.material-item').forEach(item => {
+      item.classList.remove('active');
+    });
+    
+    // Tambah active class ke item yang diklik
+    event.target.closest('.material-item').classList.add('active');
+    
+    // Tampilkan konten materi
+    const content = materialContents[materialId] || '<p>Materi sedang dalam pengembangan.</p>';
+    document.getElementById('pageContent').innerHTML = content;
+  }
+
+  // Fungsi untuk menampilkan analysis tools
+  function showAnalysisTool(toolId) {
+    const content = analysisToolContents[toolId] || `
+      <h2>${toolId}</h2>
+      <p>Tool analisis untuk ${toolId} sedang dalam pengembangan.</p>
+      <div class="analysis-form">
+        <h3>Coming Soon</h3>
+        <p>Fitur ini akan segera tersedia. Silakan hubungi admin untuk informasi lebih lanjut.</p>
+      </div>
+    `;
+    document.getElementById('pageContent').innerHTML = content;
+  }
+
+  // Fungsi untuk questions button
+  function showQuestions() {
+    document.getElementById('pageContent').innerHTML = `
+      <h2>Frequently Asked Questions (FAQ)</h2>
+      <div style="text-align: left;">
+        <h3>Q: Bagaimana cara menggunakan tools analisis statistik?</h3>
+        <p>A: Pilih menu "8. AnalysisTools" dari sidebar, kemudian pilih jenis analisis yang diinginkan. Upload data atau masukkan data manual, atur parameter yang diperlukan, lalu klik tombol analisis.</p>
+        
+        <h3>Q: Format data apa yang didukung?</h3>
+        <p>A: Platform ini mendukung file CSV dan Excel (.xlsx, .xls). Data harus dalam format tabular dengan header kolom yang jelas. Untuk data manual, pisahkan nilai dengan koma.</p>
+        
+        <h3>Q: Bagaimana interpretasi hasil analisis?</h3>
+        <p>A: Setiap hasil analisis dilengkapi dengan interpretasi otomatis dan rekomendasi. Untuk analisis yang kompleks, konsultasikan dengan ahli statistik kami.</p>
+        
+        <h3>Q: Apakah data yang diupload aman?</h3>
+        <p>A: Ya, semua data yang diupload akan dihapus otomatis setelah analisis selesai. Kami tidak menyimpan data pribadi atau penelitian Anda.</p>
+        
+        <h3>Q: Apakah hasil analisis bisa diunduh?</h3>
+        <p>A: Ya, hasil analisis dapat diunduh dalam format PDF (laporan lengkap) atau Excel (data hasil) setelah analisis selesai.</p>
+        
+        <h3>Q: Bagaimana cara mendapatkan konsultasi statistik?</h3>
+        <p>A: Kami menyediakan layanan konsultasi untuk penelitian S1, S2, dan S3. Hubungi kami melalui:</p>
+        <ul>
+          <li>Email: konsultasi@statistika.ac.id</li>
+          <li>WhatsApp: +62 812-3456-7890</li>
+          <li>Telepon: (021) 1234-5678</li>
+        </ul>
+        
+        <h3>Q: Apakah ada biaya untuk menggunakan tools?</h3>
+        <p>A: Tools dasar dapat digunakan gratis. Untuk fitur premium seperti analisis advanced dan konsultasi personal, tersedia paket berlangganan.</p>
+        
+        <h3>Butuh bantuan teknis?</h3>
+        <p>Tim support kami siap membantu Anda 24/7. Hubungi kami melalui email: <strong>support@statistika.ac.id</strong></p>
+      </div>
+    `;
+  }
+
+  // Fungsi placeholder untuk running analysis (akan diimplementasi dengan backend)
+  function runDescriptive() {
+    document.getElementById('descriptiveResults').innerHTML = `
+      <h4>Hasil Analisis Deskriptif</h4>
+      <p style="color: #4caf50;">✓ Analisis berhasil dijalankan! Hubungkan dengan backend untuk implementasi penuh.</p>
+    `;
+  }
+
+  function runTTest() {
+    document.getElementById('tTestResults').innerHTML = `
+      <h4>Hasil Uji t</h4>
+      <p style="color: #4caf50;">✓ Uji t berhasil dijalankan! Hubungkan dengan backend untuk implementasi penuh.</p>
+    `;
+  }
+
+  function runANOVA() {
+    document.getElementById('anovaResults').innerHTML = `
+      <h4>Hasil ANOVA</h4>
+      <p style="color: #4caf50;">✓ ANOVA berhasil dijalankan! Hubungkan dengan backend untuk implementasi penuh.</p>
+    `;
+  }
+
+  function runCorrelation() {
+    document.getElementById('correlationResults').innerHTML = `
+      <h4>Hasil Analisis Korelasi</h4>
+      <p style="color: #4caf50;">✓ Analisis korelasi berhasil dijalankan! Hubungkan dengan backend untuk implementasi penuh.</p>
+    `;
+  }
+
+  function runRegression() {
+    document.getElementById('regressionResults').innerHTML = `
+      <h4>Hasil Analisis Regresi</h4>
+      <p style="color: #4caf50;">✓ Analisis regresi berhasil dijalankan! Hubungkan dengan backend untuk implementasi penuh.</p>
+    `;
+  }
+
+  // Auto-update form fields based on test type selection
+  document.addEventListener('DOMContentLoaded', function() {
+    // Event listener untuk mengubah form berdasarkan jenis uji t
+    const tTestTypeSelect = document.getElementById('tTestType');
+    if (tTestTypeSelect) {
+      tTestTypeSelect.addEventListener('change', function() {
+        const sample2Group = document.getElementById('sample2Group');
+        const muGroup = document.getElementById('muGroup');
+        
+        if (this.value === 'two-sample' || this.value === 'paired') {
+          sample2Group.style.display = 'block';
+          muGroup.style.display = 'none';
+        } else {
+          sample2Group.style.display = 'none';
+          muGroup.style.display = 'block';
+        }
+      });
+    }
+  });
+</script>
+
+</body>
+</html>
