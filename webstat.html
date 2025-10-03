@@ -490,29 +490,6 @@
   <!-- Admin Mode Toggle Button -->
   <button class="admin-mode-toggle" onclick="toggleAdminMode()">Admin Mode OFF</button>
 
-    function toggleAdminMode() {
-        if (!isAdminMode) { // Jika ingin mengaktifkan mode admin
-            const password = prompt("Masukkan password admin:");
-            if (password === "admin123") { // Ganti "admin123" dengan password Anda
-            isAdminMode = true;
-                // Lanjutkan dengan kode untuk mengaktifkan tampilan admin
-                document.body.classList.add('admin-active');
-                document.querySelector('.admin-mode-toggle').textContent = 'Admin Mode ON';
-                document.querySelector('.admin-mode-toggle').classList.add('active');
-                enableAdminEditing();
-            } else {
-            alert("Password salah!");
-           }
-        } else { // Jika ingin menonaktifkan mode admin
-        isAdminMode = false;
-            // Lanjutkan dengan kode untuk menonaktifkan tampilan admin
-            document.body.classList.remove('admin-active');
-            document.querySelector('.admin-mode-toggle').textContent = 'Admin Mode OFF';
-            document.querySelector('.admin-mode-toggle').classList.remove('active');
-            disableAdminEditing();
-        }
-    },
-
   <!-- Profile Section -->
   <div class="profile">
     <div class="author-photo">
