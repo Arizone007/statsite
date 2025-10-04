@@ -117,7 +117,8 @@
     background: linear-gradient(180deg, #e3f2fd, #bbdefb);
     border-right: 0.1875rem solid #2196f3; /* 3px */
     padding: 1.25rem; /* 20px */
-    overflow-y: auto;
+    overflow-y: auto; /* Enable vertical scrolling */
+    max-height: calc(100vh - 10rem); /* Limit height to allow scrolling, adjust 10rem as needed */
     font-size: 0.875rem; /* 14px */
     line-height: 1.5;
     display: none; /* Hidden by default on mobile */
@@ -125,8 +126,8 @@
     top: 0;
     left: -100%; /* Hide off-screen */
     width: 80%; /* Take up 80% of screen width */
-    max-width: 300px; /* Max width for larger phones */
-    height: 100%;
+    max-width: 500px; /* Max width for larger phones */
+    height: 100%; /* This will be overridden by max-height on desktop */
     z-index: 1000;
     transition: left 0.3s ease-in-out;
     box-shadow: 0.25rem 0 1rem rgba(0,0,0,0.2);
@@ -752,6 +753,7 @@
     /* Mobile sidebar toggle button is removed, sidebar is fixed and toggled */
     .materials {
       display: block; /* Show sidebar as fixed overlay */
+      max-height: 100vh; /* On mobile, sidebar can take full height */
     }
     .resizer {
       display: none; /* Hide resizer on mobile */
@@ -841,6 +843,7 @@
       left: 0; /* Reset left position */
       width: auto; /* Reset width */
       height: auto; /* Reset height */
+      max-height: calc(100vh - 10rem); /* Apply max-height for scrolling */
       box-shadow: none; /* Remove shadow */
       border-right: none; /* Resizer acts as border */
       padding: 1rem;
@@ -928,6 +931,7 @@
   /* Large Laptops and Desktops */
   @media (min-width: 1025px) {
     body {
+      /* Updated grid-template-columns to use the CSS variable */
       grid-template-columns: var(--sidebar-width) 0.5rem 1fr; /* Sidebar, resizer, page */
       grid-template-rows: 7.5rem 1fr 3.75rem; /* 120px 1fr 60px */
       grid-template-areas:
@@ -942,6 +946,7 @@
       left: 0; /* Reset left position */
       width: auto; /* Reset width */
       height: auto; /* Reset height */
+      max-height: calc(100vh - 10rem); /* Apply max-height for scrolling */
       box-shadow: none; /* Remove shadow */
       overflow-x: hidden; /* Prevent horizontal scrolling for sidebar content */
       white-space: normal; /* Allow wrapping of content */
@@ -3800,7 +3805,7 @@ Kelompok3: 45, 67, 89, 56, 78`;
     if (parseFloat(pValue) < alpha) {
       resultHtml += `<p style="color: green;">Kesimpulan: p-value (${pValue}) < α (${alpha}). Tolak H₀. Ada perbedaan signifikan antar rata-rata kelompok.</p>`;
       if (posthoc !== 'none') {
-        resultHtml += `<p>Melakukan Post-hoc Test (${posthoc})...</p>`;
+        resultHtml += `<p>Melakukan Post-hoc Test (${posthoc})... (Simulasi)</p>`;
         // Simulate post-hoc results
         const groupNames = groups.map(g => g.name);
         if (groupNames.length > 1) {
@@ -4496,8 +4501,8 @@ Kelompok3: 45, 67, 89, 56, 78`;
 
     function mouseDownHandler(e) {
       x = e.clientX;
-      const sidebarWidth = sidebar.offsetWidth;
-      w = sidebarWidth;
+      // Get the current computed width of the sidebar
+      w = sidebar.offsetWidth;
 
       document.addEventListener('mousemove', mouseMoveHandler);
       document.addEventListener('mouseup', mouseUpHandler);
@@ -4514,7 +4519,13 @@ Kelompok3: 45, 67, 89, 56, 78`;
         newWidth = maxSidebarWidth;
       }
 
+      // Update the CSS variable for sidebar width
       body.style.setProperty('--sidebar-width', `${newWidth}px`);
+      // Explicitly update grid-template-columns to reflect the new width
+      // This ensures the grid layout adjusts correctly
+      if (window.innerWidth >= 769) { // Apply only for desktop layouts
+        body.style.gridTemplateColumns = `var(--sidebar-width) 0.5rem 1fr`;
+      }
     }
 
     function mouseUpHandler() {
