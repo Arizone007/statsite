@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Portal Pembelajaran Statistika</title>
+<title>Statistical Analysis and Research Consulting (SARC)</title>
 <style>
   /* Reset CSS */
   * {
@@ -54,6 +54,29 @@
     line-height: 1.2;
     border: 3px solid white;
     box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    overflow: hidden; /* Ensure image fits within circle */
+  }
+
+  .author-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Cover the area without distortion */
+  }
+
+  .profile-upload-btn {
+    margin-top: 10px;
+    padding: 5px 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    display: none; /* Hidden by default, shown in admin mode */
+  }
+
+  body.admin-active .profile-upload-btn {
+    display: block;
   }
 
   /* Header */
@@ -66,15 +89,12 @@
     flex-direction: column;
     justify-content: center;
     position: relative;
-    /* Removed box-shadow to prevent any perceived outline */
-    /* box-shadow: 0 4px 12px rgba(0,0,0,0.1); */
   }
 
   .header h1 {
     font-size: 28px;
     font-weight: 800;
     margin-bottom: 8px;
-    /* Ensure no text-shadow or outline */
     text-shadow: none;
     outline: none;
   }
@@ -83,7 +103,6 @@
     font-size: 16px;
     font-weight: 500;
     opacity: 0.9;
-    /* Ensure no text-shadow or outline */
     text-shadow: none;
     outline: none;
   }
@@ -119,7 +138,7 @@
     cursor: pointer;
     transition: all 0.3s ease;
     border-left: 4px solid transparent;
-    position: relative; /* Added for edit button */
+    position: relative;
   }
 
   .material-item:hover {
@@ -221,8 +240,6 @@
     justify-content: space-between;
     align-items: center;
     font-size: 14px;
-    /* Removed box-shadow to prevent any perceived outline */
-    /* box-shadow: 0 -4px 12px rgba(0,0,0,0.1); */
   }
 
   .footer-left {
@@ -241,7 +258,6 @@
   }
 
   .footer-item span {
-    /* Ensure no text-shadow or outline */
     text-shadow: none;
     outline: none;
   }
@@ -253,12 +269,12 @@
     right: 30px;
     background: linear-gradient(135deg, #3f51b5, #5c6bc0);
     color: white;
-    width: 50px; /* Adjusted width for icon */
-    height: 50px; /* Adjusted height */
-    border-radius: 50%; /* Circular shape for icon */
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
     border: none;
-    cursor: grab; /* Cursor to indicate draggable */
-    font-size: 24px; /* Icon size */
+    cursor: pointer; /* Changed from grab to pointer */
+    font-size: 24px;
     font-weight: bold;
     text-align: center;
     box-shadow: 0 6px 20px rgba(63,81,181,0.4);
@@ -267,7 +283,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    touch-action: none; /* Prevent default touch actions */
+    /* Removed touch-action: none; to allow default touch behavior if not dragging */
   }
 
   .help-faq-btn:hover {
@@ -385,21 +401,21 @@
 
   /* Admin Mode Styles */
   .admin-mode-toggle {
-    position: fixed;
+    position: fixed; /* Changed from absolute to fixed */
     top: 20px;
     right: 20px;
-    background: linear-gradient(135deg, #2196f3, #42a5f5); /* Changed to blue gradient */
+    background: linear-gradient(135deg, #2196f3, #42a5f5);
     color: white;
     padding: 10px 15px;
     border-radius: 5px;
-    cursor: grab; /* Cursor to indicate draggable */
+    cursor: pointer; /* Changed from grab to pointer */
     font-weight: bold;
     z-index: 1001;
     display: flex;
     align-items: center;
     gap: 8px;
     transition: all 0.3s ease;
-    touch-action: none; /* Prevent default touch actions */
+    /* Removed touch-action: none; to allow default touch behavior if not dragging */
   }
 
   .admin-mode-toggle:hover {
@@ -408,7 +424,7 @@
   }
 
   .admin-mode-toggle.active {
-    background: linear-gradient(135deg, #f44336, #ef5350); /* Red when active */
+    background: linear-gradient(135deg, #f44336, #ef5350);
   }
   .admin-mode-toggle.active:hover {
     background: linear-gradient(135deg, #d32f2f, #f44336);
@@ -416,7 +432,7 @@
 
   /* Admin Login Section */
   .admin-login-section {
-    position: fixed;
+    position: fixed; /* Changed from absolute to fixed */
     top: 60px;
     right: 20px;
     background-color: #f0f0f0;
@@ -424,23 +440,23 @@
     border-radius: 5px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     z-index: 1001;
-    display: none; /* Hidden by default */
+    display: none;
     flex-direction: column;
     gap: 10px;
   }
 
   body.admin-active .admin-login-section {
-    display: flex; /* Changed to flex to stack elements */
+    display: flex;
   }
 
   .admin-login-section .form-group {
-    margin-bottom: 0; /* Remove extra margin */
+    margin-bottom: 0;
   }
 
   .admin-login-section label {
     margin-right: 5px;
     font-weight: bold;
-    display: block; /* Make label take full width */
+    display: block;
     margin-bottom: 5px;
   }
 
@@ -448,7 +464,7 @@
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 3px;
-    width: calc(100% - 16px); /* Adjust width for padding */
+    width: calc(100% - 16px);
     margin-bottom: 5px;
   }
 
@@ -459,7 +475,7 @@
     background-color: #2196f3;
     color: white;
     cursor: pointer;
-    width: 100%; /* Make button take full width */
+    width: 100%;
   }
 
   .admin-login-section button:hover {
@@ -467,15 +483,14 @@
   }
 
   .editable-content {
-    /* Default styles for editable content */
-    border: none; /* No border by default */
-    padding: 0; /* No padding by default */
-    min-height: auto; /* Auto height by default */
+    border: none;
+    padding: 0;
+    min-height: auto;
   }
 
   /* Styles for editable content when admin mode is active */
   body.admin-active .editable-content {
-    border: 1px dashed #ff9800; /* Dashed border in admin mode */
+    border: 1px dashed #ff9800;
     padding: 5px;
     min-height: 1.5em;
   }
@@ -489,7 +504,7 @@
     padding: 15px;
     background-color: #fff3e0;
     border-left: 5px solid #ff9800;
-    display: none; /* Hidden by default */
+    display: none;
   }
 
   body.admin-active .admin-controls {
@@ -531,12 +546,12 @@
     padding: 3px 6px;
     font-size: 10px;
     cursor: pointer;
-    display: none; /* Hidden by default */
+    display: none;
     margin-left: 5px;
   }
 
   .material-item .delete-btn {
-    right: 45px; /* Adjust position for delete button */
+    right: 45px;
     background-color: #f44336;
   }
 
@@ -632,8 +647,8 @@
     padding: 10px;
     overflow-y: auto;
     background-color: #e3f2fd;
-    display: flex; /* Enable flex for messages */
-    flex-direction: column; /* Stack messages vertically */
+    display: flex;
+    flex-direction: column;
   }
 
   .chatbot-message {
@@ -772,15 +787,18 @@
 
   <!-- Profile Section -->
   <div class="profile">
-    <div class="author-photo">
-      Author<br/>Foto<br/>Profile
+    <div class="author-photo" id="author-photo-container">
+      <!-- Image will be loaded here -->
+      <span id="author-photo-placeholder">Author<br/>Foto<br/>Profile</span>
     </div>
+    <input type="file" id="profile-image-upload" accept="image/*" style="display: none;" onchange="handleProfileImageUpload(event)"/>
+    <button class="profile-upload-btn" onclick="document.getElementById('profile-image-upload').click()">Upload Foto</button>
   </div>
 
   <!-- Header -->
   <header class="header">
-    <h1 class="editable-content" data-editable-id="header-title">Portal Pembelajaran Statistika</h1>
-    <p class="editable-content" data-editable-id="header-subtitle">Platform komprehensif untuk belajar dan menganalisis data statistik</p>
+    <h1 class="editable-content" data-editable-id="header-title">Statistical Analysis and Research Consulting (SARC)</h1>
+    <p class="editable-content" data-editable-id="header-subtitle">Platform komprehensif untuk belajar dan konsultasi analisis data statistik, research, instrumen penelitian, survei, dan data sains.</p>
   </header>
 
   <!-- Materials Sidebar -->
@@ -851,7 +869,7 @@
   <!-- Main Content Page -->
   <main class="page">
     <div class="page-content" id="pageContent">
-      <h2 class="editable-content" data-editable-id="welcome-title">Selamat Datang di Portal Pembelajaran Statistika</h2>
+      <h2 class="editable-content" data-editable-id="welcome-title">Selamat Datang di Statistical Analysis and Research Consulting (SARC)</h2>
       <p class="editable-content" data-editable-id="welcome-text">Pilih materi dari menu di sebelah kiri untuk memulai pembelajaran atau akses tools analisis statistik.</p>
       
       <h3 class="editable-content" data-editable-id="about-platform-title">Tentang Platform Ini</h3>
@@ -883,7 +901,7 @@
         <span class="editable-content" data-editable-id="footer-email">konsultasi@statistika.ac.id</span>
       </div>
     </div>
-    <div class="editable-content" data-editable-id="footer-copyright">© 2024 Portal Pembelajaran Statistika</div>
+    <div class="editable-content" data-editable-id="footer-copyright">© 2024 Statistical Analysis and Research Consulting (SARC)</div>
   </footer>
 
   <!-- Help & FAQ Button (Draggable) -->
@@ -2589,10 +2607,6 @@ Kelompok2: 34, 56, 78"></textarea>
   function enableAdminEditing() {
     document.querySelectorAll('.editable-content').forEach(el => {
       el.setAttribute('contenteditable', 'true');
-      // The border is now controlled by CSS class `body.admin-active .editable-content`
-      // el.style.border = '1px dashed #ff9800';
-      // el.style.padding = '5px';
-      // el.style.minHeight = '1.5em';
       el.addEventListener('focus', handleEditFocus);
       el.addEventListener('blur', handleEditBlur);
     });
@@ -2604,10 +2618,6 @@ Kelompok2: 34, 56, 78"></textarea>
   function disableAdminEditing() {
     document.querySelectorAll('.editable-content').forEach(el => {
       el.removeAttribute('contenteditable');
-      // Reset styles to default (controlled by .editable-content without admin-active)
-      // el.style.border = '';
-      // el.style.padding = '';
-      // el.style.minHeight = '';
       el.removeEventListener('focus', handleEditFocus);
       el.removeEventListener('blur', handleEditBlur);
     });
@@ -2799,10 +2809,6 @@ Kelompok2: 34, 56, 78"></textarea>
    */
   function enableAdminEditingForElement(el) {
     el.setAttribute('contenteditable', 'true');
-    // The border is now controlled by CSS class `body.admin-active .editable-content`
-    // el.style.border = '1px dashed #ff9800';
-    // el.style.padding = '5px';
-    // el.style.minHeight = '1.5em';
     el.addEventListener('focus', handleEditFocus);
     el.addEventListener('blur', handleEditBlur);
   }
@@ -4138,11 +4144,39 @@ Kelompok3: 45, 67, 89, 56, 78`;
     }, true); // Use capture phase to intercept click before it reaches the handler
   }
 
+  // --- Profile Image Upload Functionality ---
+  function loadProfileImage() {
+    const savedImage = loadFromLocalStorage('profileImage');
+    const photoContainer = document.getElementById('author-photo-container');
+    const placeholder = document.getElementById('author-photo-placeholder');
+
+    if (savedImage) {
+      photoContainer.innerHTML = `<img src="${savedImage}" alt="Author Photo"/>`;
+    } else {
+      photoContainer.innerHTML = `<span id="author-photo-placeholder">Author<br/>Foto<br/>Profile</span>`;
+    }
+  }
+
+  function handleProfileImageUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const imageDataUrl = e.target.result;
+        saveToLocalStorage('profileImage', imageDataUrl);
+        loadProfileImage(); // Update the displayed image
+        alert('Foto profil berhasil diunggah dan disimpan!');
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
 
   // --- DOMContentLoaded ---
   document.addEventListener('DOMContentLoaded', function() {
     // Load initial content and apply local storage changes
     loadInitialContent();
+    loadProfileImage(); // Load profile image on startup
 
     // Display welcome content by default
     document.getElementById('pageContent').innerHTML = initialWelcomeContent;
@@ -4158,11 +4192,11 @@ Kelompok3: 45, 67, 89, 56, 78`;
       makeDraggable(helpFaqBtn);
     }
 
-    // Make the admin-mode-toggle-btn draggable
-    const adminToggleBtn = document.getElementById('admin-mode-toggle-btn');
-    if (adminToggleBtn) {
-      makeDraggable(adminToggleBtn);
-    }
+    // The admin-mode-toggle-btn is no longer draggable, so remove the call to makeDraggable for it.
+    // const adminToggleBtn = document.getElementById('admin-mode-toggle-btn');
+    // if (adminToggleBtn) {
+    //   makeDraggable(adminToggleBtn);
+    // }
 
     // Event listener to close admin login section when clicking outside
     document.addEventListener('click', function(event) {
