@@ -5,12 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Portal Pembelajaran Statistika</title>
 <style>
+  /* Reset CSS */
   * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
   }
 
+  /* Body Layout */
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     height: 100vh;
@@ -21,6 +23,7 @@
       "profile header"
       "materials page"
       "footer footer";
+    overflow: hidden; /* Prevent body scroll when content overflows */
   }
 
   /* Profile Section */
@@ -63,19 +66,26 @@
     flex-direction: column;
     justify-content: center;
     position: relative;
+    /* Removed box-shadow to prevent any perceived outline */
+    /* box-shadow: 0 4px 12px rgba(0,0,0,0.1); */
   }
 
   .header h1 {
     font-size: 28px;
     font-weight: 800;
     margin-bottom: 8px;
-    text-shadow: 1px 1px 2px rgba(255,255,255,0.3);
+    /* Ensure no text-shadow or outline */
+    text-shadow: none;
+    outline: none;
   }
 
   .header p {
     font-size: 16px;
     font-weight: 500;
     opacity: 0.9;
+    /* Ensure no text-shadow or outline */
+    text-shadow: none;
+    outline: none;
   }
 
   /* Materials Sidebar */
@@ -168,8 +178,8 @@
   .page-content p {
     color: #424242;
     line-height: 1.6;
-    margin-bottom: 16px;
     text-align: justify;
+    margin-bottom: 16px;
   }
 
   .page-content ul {
@@ -211,6 +221,8 @@
     justify-content: space-between;
     align-items: center;
     font-size: 14px;
+    /* Removed box-shadow to prevent any perceived outline */
+    /* box-shadow: 0 -4px 12px rgba(0,0,0,0.1); */
   }
 
   .footer-left {
@@ -228,18 +240,25 @@
     font-weight: 600;
   }
 
-  /* Questions Button */
-  .questions-btn {
+  .footer-item span {
+    /* Ensure no text-shadow or outline */
+    text-shadow: none;
+    outline: none;
+  }
+
+  /* Help & FAQ Button */
+  .help-faq-btn {
     position: fixed;
-    bottom: 30px;
+    bottom: 80px;
     right: 30px;
     background: linear-gradient(135deg, #3f51b5, #5c6bc0);
     color: white;
+    width: 50px; /* Adjusted width for icon */
+    height: 50px; /* Adjusted height */
+    border-radius: 50%; /* Circular shape for icon */
     border: none;
-    width: 70px;
-    height: 70px;
-    cursor: pointer;
-    font-size: 12px;
+    cursor: grab; /* Cursor to indicate draggable */
+    font-size: 24px; /* Icon size */
     font-weight: bold;
     text-align: center;
     box-shadow: 0 6px 20px rgba(63,81,181,0.4);
@@ -248,39 +267,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    touch-action: none; /* Prevent default touch actions */
   }
 
-  .questions-btn:hover {
-    transform: scale(1.1);
+  .help-faq-btn:hover {
+    transform: scale(1.05);
     box-shadow: 0 8px 25px rgba(63,81,181,0.6);
   }
 
-  /* Bubble QA Variations */
-  .questions-btn.oval {
-    border-radius: 50%;
-  }
-
-  .questions-btn.tail-bubble {
-    border-radius: 10px;
-    position: relative;
-  }
-  .questions-btn.tail-bubble::after {
-    content: '';
-    position: absolute;
-    bottom: -10px; /* Adjust to position the tail */
-    right: 20px; /* Adjust to position the tail */
-    width: 0;
-    height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-top: 10px solid #5c6bc0; /* Match button background */
-  }
-
-  .questions-btn.clip-path {
-    border-radius: 0; /* Reset border-radius */
-    clip-path: polygon(
-      0% 15%, 15% 0%, 100% 0%, 100% 85%, 85% 100%, 0% 100%
-    );
+  .help-faq-btn svg {
+    fill: white;
+    width: 24px;
+    height: 24px;
   }
 
   /* Analysis Tools Section */
@@ -390,20 +388,30 @@
     position: fixed;
     top: 20px;
     right: 20px;
-    background-color: #ff9800;
+    background: linear-gradient(135deg, #2196f3, #42a5f5); /* Changed to blue gradient */
     color: white;
     padding: 10px 15px;
     border-radius: 5px;
-    cursor: pointer;
+    cursor: grab; /* Cursor to indicate draggable */
     font-weight: bold;
     z-index: 1001;
     display: flex;
     align-items: center;
     gap: 8px;
+    transition: all 0.3s ease;
+    touch-action: none; /* Prevent default touch actions */
+  }
+
+  .admin-mode-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33,150,243,0.3);
   }
 
   .admin-mode-toggle.active {
-    background-color: #f44336;
+    background: linear-gradient(135deg, #f44336, #ef5350); /* Red when active */
+  }
+  .admin-mode-toggle.active:hover {
+    background: linear-gradient(135deg, #d32f2f, #f44336);
   }
 
   /* Admin Login Section */
@@ -459,7 +467,15 @@
   }
 
   .editable-content {
-    border: 1px dashed #ccc;
+    /* Default styles for editable content */
+    border: none; /* No border by default */
+    padding: 0; /* No padding by default */
+    min-height: auto; /* Auto height by default */
+  }
+
+  /* Styles for editable content when admin mode is active */
+  body.admin-active .editable-content {
+    border: 1px dashed #ff9800; /* Dashed border in admin mode */
     padding: 5px;
     min-height: 1.5em;
   }
@@ -529,6 +545,145 @@
     display: block;
   }
 
+  /* Help/FAQ Modal */
+  .help-faq-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1002;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s, opacity 0.3s ease;
+  }
+
+  .help-faq-modal.open {
+    visibility: visible;
+    opacity: 1;
+  }
+
+  .help-faq-content {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    width: 90%;
+    max-width: 600px;
+    max-height: 90%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .help-faq-header {
+    background: linear-gradient(135deg, #3f51b5, #5c6bc0);
+    color: white;
+    padding: 15px 20px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 1.2em;
+  }
+
+  .help-faq-header .close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5em;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .help-faq-body {
+    flex-grow: 1;
+    padding: 20px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Chatbot Styles within Modal */
+  .chatbot-container-modal {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 15px;
+  }
+
+  .chatbot-header {
+    background-color: #f0f0f0;
+    padding: 10px;
+    font-weight: bold;
+    border-bottom: 1px solid #eee;
+  }
+
+  .chatbot-messages {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #e3f2fd;
+    display: flex; /* Enable flex for messages */
+    flex-direction: column; /* Stack messages vertically */
+  }
+
+  .chatbot-message {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+    border-radius: 15px;
+    max-width: 80%;
+    word-wrap: break-word;
+  }
+
+  .chatbot-message.user {
+    background-color: #dcf8c6;
+    align-self: flex-end;
+    margin-left: auto;
+  }
+
+  .chatbot-message.bot {
+    background-color: #f1f0f0;
+    align-self: flex-start;
+    margin-right: auto;
+  }
+
+  .chatbot-input {
+    display: flex;
+    padding: 10px;
+    border-top: 1px solid #eee;
+    background-color: #f9f9f9;
+  }
+
+  .chatbot-input input {
+    flex-grow: 1;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    padding: 8px 12px;
+    margin-right: 10px;
+  }
+
+  .chatbot-input button {
+    background: #5c6bc0;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  .chatbot-input button:hover {
+    background-color: #3f51b5;
+  }
+
   /* Responsive untuk mobile */
   @media (max-width: 768px) {
     body {
@@ -558,14 +713,46 @@
         width: calc(100% - 20px);
         max-width: 300px;
     }
+
+    .help-faq-btn {
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      font-size: 12px;
+      border-radius: 50%;
+    }
+
+    .help-faq-modal {
+      padding: 10px;
+    }
+
+    .help-faq-content {
+      width: 100%;
+      max-width: unset;
+      max-height: 95%;
+    }
+
+    .help-faq-header {
+      font-size: 1em;
+      padding: 10px 15px;
+    }
+
+    .help-faq-header .close-btn {
+      font-size: 1.2em;
+    }
+
+    .help-faq-body {
+      padding: 15px;
+    }
   }
 </style>
 </head>
 <body>
 
   <!-- Admin Mode Toggle Button -->
-  <button class="admin-mode-toggle" onclick="toggleAdminMode()">
-    <span id="admin-mode-icon">🔒</span> Admin Mode
+  <button class="admin-mode-toggle" id="admin-mode-toggle-btn" onclick="toggleAdminMode()">
+    Login
   </button>
 
   <!-- Admin Login/Logout Section -->
@@ -699,16 +886,61 @@
     <div class="editable-content" data-editable-id="footer-copyright">© 2024 Portal Pembelajaran Statistika</div>
   </footer>
 
-  <!-- Questions Button -->
-  <button class="questions-btn oval" onclick="showQuestions()">
-    Ques<br/>tions
+  <!-- Help & FAQ Button (Draggable) -->
+  <button class="help-faq-btn" id="help-faq-btn" onclick="toggleHelpFAQModal()">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+      <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM7 9h2v2H7V9zm4 0h2v2h-2V9zm4 0h2v2h-2V9z"/>
+    </svg>
   </button>
+
+  <!-- Help & FAQ Modal (contains Chatbot) -->
+  <div class="help-faq-modal" id="help-faq-modal">
+    <div class="help-faq-content">
+      <div class="help-faq-header">
+        <span>Bantuan & FAQ</span>
+        <button class="close-btn" onclick="toggleHelpFAQModal()">×</button>
+      </div>
+      <div class="help-faq-body">
+        <h3>Pertanyaan Umum (FAQ)</h3>
+        <p>Di sini Anda dapat menemukan jawaban atas pertanyaan yang sering diajukan. Jika Anda tidak menemukan jawaban, silakan gunakan chatbot di bawah ini.</p>
+        <ul>
+          <li><strong>Apa itu Statistika?</strong> Statistika adalah ilmu yang berkaitan dengan pengumpulan, pengorganisasian, analisis, interpretasi, dan presentasi data.</li>
+          <li><strong>Bagaimana cara menggunakan Analysis Tools?</strong> Pilih tool yang Anda inginkan dari menu, masukkan data, dan klik 'Analisis'.</li>
+          <li><strong>Apakah saya bisa mengunduh materi?</strong> Saat ini fitur unduh belum tersedia, namun Anda bisa menyalin teks materi.</li>
+        </ul>
+
+        <div class="chatbot-container-modal">
+          <div class="chatbot-header">
+            <span>Statistika Chatbot</span>
+          </div>
+          <div class="chatbot-messages" id="chatbot-messages">
+            <div class="chatbot-message bot">Halo! Saya Chatbot Statistika. Ada yang bisa saya bantu?</div>
+          </div>
+          <div class="chatbot-input">
+            <input type="text" id="chatbot-input-field" placeholder="Ketik pesan Anda..." onkeypress="handleChatInput(event)"/>
+            <button onclick="sendChatMessage()">Kirim</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 <script>
   let isAdminMode = false;
   let currentEditableContent = null; // To store the currently edited element
   let originalContent = ''; // To store original content before editing
   const ADMIN_PASSWORD = '12345'; // Password standar untuk admin
+  const LOCAL_STORAGE_PREFIX = 'webstat_'; // Prefix for local storage keys
+
+  // Helper functions for local storage
+  function saveToLocalStorage(key, value) {
+    localStorage.setItem(LOCAL_STORAGE_PREFIX + key, JSON.stringify(value));
+  }
+
+  function loadFromLocalStorage(key) {
+    const stored = localStorage.getItem(LOCAL_STORAGE_PREFIX + key);
+    return stored ? JSON.parse(stored) : null;
+  }
 
   // Konten untuk setiap materi (sekarang disimpan dalam objek global)
   // Ini akan menjadi sumber kebenaran untuk konten yang dapat diedit
@@ -961,7 +1193,7 @@
             <li>J. E. Freund and B. M. Perles, "Modern Elementary Statistics," 12th ed., Pearson, 2014.</li>
             <li>G. Casella and R. L. Berger, "Statistical Inference," 2nd ed., Duxbury, 2002.</li>
             <li>D. Wackerly et al., "Mathematical Statistics with Applications," 7th ed., Cengage, 2008.</li>
-            <li>B. Efron and T. Hastie, "Computer Age Statistical Inference," Cambridge University Press, 2016.</li>
+            <li>B. Efron and T. Hastie, "Computer Age Statistical Inference", Cambridge University Press, 2016.</li>
           </ol>
         </div>
       `
@@ -978,7 +1210,7 @@
         <p><strong>Definisi Probabilitas:</strong></p>
         <ul>
           <li><strong>Pendekatan Klasik:</strong> P(A) = jumlah hasil yang menguntungkan / total hasil yang mungkin</li>
-          <li><strong>Pendekatan Frekuensi Relatif:</strong> P(A) = limit (frekuensi A / jumlah percobaan) saat n → ∞</li>
+          <li><strong>Pendekatan Frekuensi Relatif:</b> P(A) = limit (frekuensi A / jumlah percobaan) saat n → ∞</li>
           <li><strong>Pendekatan Subjektif:</strong> Berdasarkan keyakinan atau pengalaman pribadi</li>
         </ul>
         
@@ -1107,7 +1339,7 @@
           <li><strong>Markov Chain Monte Carlo (MCMC):</strong>
             <p>Gibbs Sampling, Metropolis-Hastings algorithm</p>
           </li>
-          <li><strong>Variational Inference:</strong> Aproximasi deterministik untuk posterior</li>
+          <li><strong>Variational Inference:</strong> Aproksimasi deterministik untuk posterior</li>
           <li><strong>Bootstrap Methods:</strong> Resampling untuk estimasi distribusi sampling</li>
           <li><strong>Cross-Validation:</strong> Untuk model selection dan validation</li>
         </ul>
@@ -1496,6 +1728,31 @@
       <p>Uji hipotesis untuk rata-rata populasi dengan berbagai variasi uji t.</p>
       
       <div class="analysis-form">
+        <h3>Input Data</h3>
+        <div class="form-group">
+          <label>Metode Input Data:</label>
+          <select id="inputMethod_uji-mean" onchange="toggleInputMethod('uji-mean')">
+            <option value="manual">Input Manual</option>
+            <option value="sample">Gunakan Sample Data</option>
+            <option value="file">Upload File (.csv, .xlsx)</option>
+          </select>
+        </div>
+        
+        <div class="form-group file-input-group_uji-mean" style="display:none;">
+          <label>Upload File Data:</label>
+          <input type="file" accept=".csv,.xlsx" id="dataFile_uji-mean" onchange="handleFileUpload('uji-mean')"/>
+        </div>
+        
+        <div class="form-group sample-input-group_uji-mean" style="display:none;">
+          <label>Pilih Sample Data:</label>
+          <select id="sampleData_uji-mean" onchange="loadSampleData('uji-mean')">
+            <option value="">-- Pilih Sample --</option>
+            <option value="sample_one_sample">One-sample t-test (Data A)</option>
+            <option value="sample_two_sample">Two-sample t-test (Data A & B)</option>
+            <option value="sample_paired">Paired t-test (Pre & Post)</option>
+          </select>
+        </div>
+
         <h3>Pengaturan Uji t</h3>
         <div class="form-group">
           <label>Jenis Uji t:</label>
@@ -1515,7 +1772,7 @@
           </select>
         </div>
         
-        <div class="form-group">
+        <div class="form-group manual-input-group_uji-mean">
           <label>Data Sampel 1 (pisahkan dengan koma atau baris baru):</label>
           <textarea id="sample1_tTest" rows="4" placeholder="Contoh: 23, 45, 67, 34, 56"></textarea>
         </div>
@@ -1541,6 +1798,29 @@
       <p>Uji perbedaan rata-rata antar kelompok untuk tiga atau lebih kelompok.</p>
       
       <div class="analysis-form">
+        <h3>Input Data</h3>
+        <div class="form-group">
+          <label>Metode Input Data:</label>
+          <select id="inputMethod_anova" onchange="toggleInputMethod('anova')">
+            <option value="manual">Input Manual</option>
+            <option value="sample">Gunakan Sample Data</option>
+            <option value="file">Upload File (.csv, .xlsx)</option>
+          </select>
+        </div>
+        
+        <div class="form-group file-input-group_anova" style="display:none;">
+          <label>Upload File Data:</label>
+          <input type="file" accept=".csv,.xlsx" id="dataFile_anova" onchange="handleFileUpload('anova')"/>
+        </div>
+        
+        <div class="form-group sample-input-group_anova" style="display:none;">
+          <label>Pilih Sample Data:</label>
+          <select id="sampleData_anova" onchange="loadSampleData('anova')">
+            <option value="">-- Pilih Sample --</option>
+            <option value="sample_one_way">One-way ANOVA (3 Kelompok)</option>
+          </select>
+        </div>
+
         <h3>Pengaturan ANOVA</h3>
         <div class="form-group">
           <label>Jenis ANOVA:</label>
@@ -1551,7 +1831,7 @@
           </select>
         </div>
         
-        <div class="form-group">
+        <div class="form-group manual-input-group_anova">
           <label>Input Data Kelompok (pisahkan nilai dengan koma, kelompok dengan baris baru):</label>
           <textarea id="anovaData" rows="8" placeholder="Format data:
 Kelompok1: 23, 45, 67, 34, 56
@@ -1589,6 +1869,29 @@ Kelompok3: 45, 67, 89, 56, 78"></textarea>
       <p>Menganalisis kekuatan dan arah hubungan antara dua atau lebih variabel.</p>
       
       <div class="analysis-form">
+        <h3>Input Data</h3>
+        <div class="form-group">
+          <label>Metode Input Data:</label>
+          <select id="inputMethod_korelasi" onchange="toggleInputMethod('korelasi')">
+            <option value="manual">Input Manual</option>
+            <option value="sample">Gunakan Sample Data</option>
+            <option value="file">Upload File (.csv, .xlsx)</option>
+          </select>
+        </div>
+        
+        <div class="form-group file-input-group_korelasi" style="display:none;">
+          <label>Upload File Data:</label>
+          <input type="file" accept=".csv,.xlsx" id="dataFile_korelasi" onchange="handleFileUpload('korelasi')"/>
+        </div>
+        
+        <div class="form-group sample-input-group_korelasi" style="display:none;">
+          <label>Pilih Sample Data:</label>
+          <select id="sampleData_korelasi" onchange="loadSampleData('korelasi')">
+            <option value="">-- Pilih Sample --</option>
+            <option value="sample_pearson">Pearson Correlation (X & Y)</option>
+          </select>
+        </div>
+
         <h3>Pengaturan Analisis Korelasi</h3>
         <div class="form-group">
           <label>Jenis Korelasi:</label>
@@ -1599,12 +1902,12 @@ Kelompok3: 45, 67, 89, 56, 78"></textarea>
           </select>
         </div>
         
-        <div class="form-group">
+        <div class="form-group manual-input-group_korelasi">
           <label>Data Variabel X (pisahkan dengan koma atau baris baru):</label>
           <textarea id="varX_korelasi" rows="3" placeholder="Contoh: 10, 12, 15, 18, 20"></textarea>
         </div>
         
-        <div class="form-group">
+        <div class="form-group manual-input-group_korelasi">
           <label>Data Variabel Y (pisahkan dengan koma atau baris baru):</label>
           <textarea id="varY_korelasi" rows="3" placeholder="Contoh: 25, 28, 30, 35, 38"></textarea>
         </div>
@@ -1629,6 +1932,29 @@ Kelompok3: 45, 67, 89, 56, 78"></textarea>
       <p>Memodelkan hubungan antara variabel dependen dan satu atau lebih variabel independen.</p>
       
       <div class="analysis-form">
+        <h3>Input Data</h3>
+        <div class="form-group">
+          <label>Metode Input Data:</label>
+          <select id="inputMethod_regresi" onchange="toggleInputMethod('regresi')">
+            <option value="manual">Input Manual</option>
+            <option value="sample">Gunakan Sample Data</option>
+            <option value="file">Upload File (.csv, .xlsx)</option>
+          </select>
+        </div>
+        
+        <div class="form-group file-input-group_regresi" style="display:none;">
+          <label>Upload File Data:</label>
+          <input type="file" accept=".csv,.xlsx" id="dataFile_regresi" onchange="handleFileUpload('regresi')"/>
+        </div>
+        
+        <div class="form-group sample-input-group_regresi" style="display:none;">
+          <label>Pilih Sample Data:</label>
+          <select id="sampleData_regresi" onchange="loadSampleData('regresi')">
+            <option value="">-- Pilih Sample --</option>
+            <option value="sample_simple_linear">Simple Linear Regression (X & Y)</option>
+          </select>
+        </div>
+
         <h3>Pengaturan Regresi</h3>
         <div class="form-group">
           <label>Jenis Regresi:</label>
@@ -1639,12 +1965,12 @@ Kelompok3: 45, 67, 89, 56, 78"></textarea>
           </select>
         </div>
         
-        <div class="form-group">
+        <div class="form-group manual-input-group_regresi">
           <label>Variabel Dependen (Y) (pisahkan dengan koma atau baris baru):</label>
           <textarea id="dependentVar_regresi" rows="3" placeholder="Contoh: 25, 28, 30, 35, 38"></textarea>
         </div>
         
-        <div class="form-group">
+        <div class="form-group manual-input-group_regresi">
           <label>Variabel Independen (X) (pisahkan dengan koma atau baris baru):</label>
           <textarea id="independentVar_regresi" rows="3" placeholder="Contoh: 10, 12, 15, 18, 20"></textarea>
         </div>
@@ -1672,12 +1998,35 @@ Kelompok3: 45, 67, 89, 56, 78"></textarea>
       <h2>Tool Uji Mann-Whitney U</h2>
       <p>Uji non-parametrik untuk membandingkan dua kelompok independen.</p>
       <div class="analysis-form">
-        <h3>Pengaturan Uji Mann-Whitney U</h3>
+        <h3>Input Data</h3>
         <div class="form-group">
+          <label>Metode Input Data:</label>
+          <select id="inputMethod_mann-whitney" onchange="toggleInputMethod('mann-whitney')">
+            <option value="manual">Input Manual</option>
+            <option value="sample">Gunakan Sample Data</option>
+            <option value="file">Upload File (.csv, .xlsx)</option>
+          </select>
+        </div>
+        
+        <div class="form-group file-input-group_mann-whitney" style="display:none;">
+          <label>Upload File Data:</label>
+          <input type="file" accept=".csv,.xlsx" id="dataFile_mann-whitney" onchange="handleFileUpload('mann-whitney')"/>
+        </div>
+        
+        <div class="form-group sample-input-group_mann-whitney" style="display:none;">
+          <label>Pilih Sample Data:</label>
+          <select id="sampleData_mann-whitney" onchange="loadSampleData('mann-whitney')">
+            <option value="">-- Pilih Sample --</option>
+            <option value="sample_two_groups">Dua Kelompok Independen</option>
+          </select>
+        </div>
+
+        <h3>Pengaturan Uji Mann-Whitney U</h3>
+        <div class="form-group manual-input-group_mann-whitney">
           <label>Data Kelompok 1 (pisahkan dengan koma atau baris baru):</label>
           <textarea id="group1_mannwhitney" rows="4" placeholder="Contoh: 10, 12, 15, 11, 13"></textarea>
         </div>
-        <div class="form-group">
+        <div class="form-group manual-input-group_mann-whitney">
           <label>Data Kelompok 2 (pisahkan dengan koma atau baris baru):</label>
           <textarea id="group2_mannwhitney" rows="4" placeholder="Contoh: 14, 16, 13, 17, 15"></textarea>
         </div>
@@ -1697,6 +2046,30 @@ Kelompok3: 45, 67, 89, 56, 78"></textarea>
       <h2>Tool Uji Chi-Square</h2>
       <p>Uji untuk menganalisis hubungan antara variabel kategorikal (uji independensi) atau kesesuaian distribusi (goodness of fit).</p>
       <div class="analysis-form">
+        <h3>Input Data</h3>
+        <div class="form-group">
+          <label>Metode Input Data:</label>
+          <select id="inputMethod_chi-square" onchange="toggleInputMethod('chi-square')">
+            <option value="manual">Input Manual</option>
+            <option value="sample">Gunakan Sample Data</option>
+            <option value="file">Upload File (.csv, .xlsx)</option>
+          </select>
+        </div>
+        
+        <div class="form-group file-input-group_chi-square" style="display:none;">
+          <label>Upload File Data:</label>
+          <input type="file" accept=".csv,.xlsx" id="dataFile_chi-square" onchange="handleFileUpload('chi-square')"/>
+        </div>
+        
+        <div class="form-group sample-input-group_chi-square" style="display:none;">
+          <label>Pilih Sample Data:</label>
+          <select id="sampleData_chi-square" onchange="loadSampleData('chi-square')">
+            <option value="">-- Pilih Sample --</option>
+            <option value="sample_independence">Uji Independensi (Tabel 2x2)</option>
+            <option value="sample_goodness_of_fit">Uji Goodness of Fit (3 Kategori)</option>
+          </select>
+        </div>
+
         <h3>Pengaturan Uji Chi-Square</h3>
         <div class="form-group">
           <label>Jenis Uji Chi-Square:</label>
@@ -1705,14 +2078,14 @@ Kelompok3: 45, 67, 89, 56, 78"></textarea>
             <option value="goodness-of-fit">Uji Goodness of Fit</option>
           </select>
         </div>
-        <div class="form-group" id="contingencyTableGroup">
+        <div class="form-group manual-input-group_chi-square" id="contingencyTableGroup">
           <label>Input Tabel Kontingensi (pisahkan nilai dengan koma, baris dengan baris baru):</label>
           <textarea id="contingencyTable" rows="6" placeholder="Contoh (2x2):
 10, 20
 15, 5"></textarea>
           <small>Pastikan jumlah kolom konsisten untuk setiap baris.</small>
         </div>
-        <div class="form-group" id="goodnessOfFitGroup" style="display:none;">
+        <div class="form-group manual-input-group_chi-square" id="goodnessOfFitGroup" style="display:none;">
           <label>Input Frekuensi Observasi (pisahkan dengan koma):</label>
           <textarea id="observedFrequencies" rows="3" placeholder="Contoh: 20, 30, 50"></textarea>
           <label>Input Frekuensi Harapan (pisahkan dengan koma, opsional, jika tidak diisi akan dianggap sama rata):</label>
@@ -1734,8 +2107,31 @@ Kelompok3: 45, 67, 89, 56, 78"></textarea>
       <h2>Tool Clustering (K-Means)</h2>
       <p>Mengelompokkan data ke dalam K kelompok berdasarkan kemiripan.</p>
       <div class="analysis-form">
-        <h3>Pengaturan K-Means Clustering</h3>
+        <h3>Input Data</h3>
         <div class="form-group">
+          <label>Metode Input Data:</label>
+          <select id="inputMethod_clustering" onchange="toggleInputMethod('clustering')">
+            <option value="manual">Input Manual</option>
+            <option value="sample">Gunakan Sample Data</option>
+            <option value="file">Upload File (.csv, .xlsx)</option>
+          </select>
+        </div>
+        
+        <div class="form-group file-input-group_clustering" style="display:none;">
+          <label>Upload File Data:</label>
+          <input type="file" accept=".csv,.xlsx" id="dataFile_clustering" onchange="handleFileUpload('clustering')"/>
+        </div>
+        
+        <div class="form-group sample-input-group_clustering" style="display:none;">
+          <label>Pilih Sample Data:</label>
+          <select id="sampleData_clustering" onchange="loadSampleData('clustering')">
+            <option value="">-- Pilih Sample --</option>
+            <option value="sample_2d">Data 2 Dimensi</option>
+          </select>
+        </div>
+
+        <h3>Pengaturan K-Means Clustering</h3>
+        <div class="form-group manual-input-group_clustering">
           <label>Input Data (pisahkan nilai dengan koma, observasi dengan baris baru):</label>
           <textarea id="clusteringData" rows="8" placeholder="Contoh (data 2 dimensi):
 1.0, 1.1
@@ -1756,8 +2152,31 @@ Kelompok3: 45, 67, 89, 56, 78"></textarea>
       <h2>Tool Factor Analysis (Analisis Faktor)</h2>
       <p>Mengidentifikasi faktor laten yang menjelaskan korelasi antar variabel yang diamati.</p>
       <div class="analysis-form">
-        <h3>Pengaturan Analisis Faktor</h3>
+        <h3>Input Data</h3>
         <div class="form-group">
+          <label>Metode Input Data:</label>
+          <select id="inputMethod_factor-analysis" onchange="toggleInputMethod('factor-analysis')">
+            <option value="manual">Input Manual</option>
+            <option value="sample">Gunakan Sample Data</option>
+            <option value="file">Upload File (.csv, .xlsx)</option>
+          </select>
+        </div>
+        
+        <div class="form-group file-input-group_factor-analysis" style="display:none;">
+          <label>Upload File Data:</label>
+          <input type="file" accept=".csv,.xlsx" id="dataFile_factor-analysis" onchange="handleFileUpload('factor-analysis')"/>
+        </div>
+        
+        <div class="form-group sample-input-group_factor-analysis" style="display:none;">
+          <label>Pilih Sample Data:</label>
+          <select id="sampleData_factor-analysis" onchange="loadSampleData('factor-analysis')">
+            <option value="">-- Pilih Sample --</option>
+            <option value="sample_3vars">Data 3 Variabel</option>
+          </select>
+        </div>
+
+        <h3>Pengaturan Analisis Faktor</h3>
+        <div class="form-group manual-input-group_factor-analysis">
           <label>Input Data (pisahkan nilai dengan koma, observasi dengan baris baru):</label>
           <textarea id="factorAnalysisData" rows="8" placeholder="Contoh (data 3 variabel):
 10, 12, 11
@@ -1777,6 +2196,30 @@ Kelompok3: 45, 67, 89, 56, 78"></textarea>
       <h2>Tool Uji Asumsi Klasik</h2>
       <p>Melakukan pengujian asumsi normalitas, homogenitas varians, dan linearitas.</p>
       <div class="analysis-form">
+        <h3>Input Data</h3>
+        <div class="form-group">
+          <label>Metode Input Data:</label>
+          <select id="inputMethod_uji-asumsi" onchange="toggleInputMethod('uji-asumsi')">
+            <option value="manual">Input Manual</option>
+            <option value="sample">Gunakan Sample Data</option>
+            <option value="file">Upload File (.csv, .xlsx)</option>
+          </select>
+        </div>
+        
+        <div class="form-group file-input-group_uji-asumsi" style="display:none;">
+          <label>Upload File Data:</label>
+          <input type="file" accept=".csv,.xlsx" id="dataFile_uji-asumsi" onchange="handleFileUpload('uji-asumsi')"/>
+        </div>
+        
+        <div class="form-group sample-input-group_uji-asumsi" style="display:none;">
+          <label>Pilih Sample Data:</label>
+          <select id="sampleData_uji-asumsi" onchange="loadSampleData('uji-asumsi')">
+            <option value="">-- Pilih Sample --</option>
+            <option value="sample_normalitas">Uji Normalitas</option>
+            <option value="sample_homogenitas">Uji Homogenitas</option>
+          </select>
+        </div>
+
         <h3>Pengaturan Uji Asumsi</h3>
         <div class="form-group">
           <label>Pilih Uji Asumsi:</label>
@@ -1786,11 +2229,11 @@ Kelompok3: 45, 67, 89, 56, 78"></textarea>
             <!-- <option value="linearitas">Uji Linearitas</option> -->
           </select>
         </div>
-        <div class="form-group" id="normalitasDataGroup">
+        <div class="form-group manual-input-group_uji-asumsi" id="normalitasDataGroup">
           <label>Input Data untuk Normalitas (pisahkan dengan koma atau baris baru):</label>
           <textarea id="normalitasData" rows="4" placeholder="Contoh: 23, 45, 67, 34, 56, 78, 45, 67, 89, 23"></textarea>
         </div>
-        <div class="form-group" id="homogenitasDataGroup" style="display:none;">
+        <div class="form-group manual-input-group_uji-asumsi" id="homogenitasDataGroup" style="display:none;">
           <label>Input Data Kelompok untuk Homogenitas (pisahkan nilai dengan koma, kelompok dengan baris baru):</label>
           <textarea id="homogenitasData" rows="6" placeholder="Contoh:
 Kelompok1: 23, 45, 67
@@ -1812,8 +2255,31 @@ Kelompok2: 34, 56, 78"></textarea>
       <h2>Tool Uji Validitas & Reliabilitas</h2>
       <p>Menguji kualitas instrumen penelitian (kuesioner).</p>
       <div class="analysis-form">
-        <h3>Pengaturan Uji Instrumen</h3>
+        <h3>Input Data</h3>
         <div class="form-group">
+          <label>Metode Input Data:</label>
+          <select id="inputMethod_uji-instrumen" onchange="toggleInputMethod('uji-instrumen')">
+            <option value="manual">Input Manual</option>
+            <option value="sample">Gunakan Sample Data</option>
+            <option value="file">Upload File (.csv, .xlsx)</option>
+          </select>
+        </div>
+        
+        <div class="form-group file-input-group_uji-instrumen" style="display:none;">
+          <label>Upload File Data:</label>
+          <input type="file" accept=".csv,.xlsx" id="dataFile_uji-instrumen" onchange="handleFileUpload('uji-instrumen')"/>
+        </div>
+        
+        <div class="form-group sample-input-group_uji-instrumen" style="display:none;">
+          <label>Pilih Sample Data:</label>
+          <select id="sampleData_uji-instrumen" onchange="loadSampleData('uji-instrumen')">
+            <option value="">-- Pilih Sample --</option>
+            <option value="sample_instrument">Data Kuesioner (3 Item)</option>
+          </select>
+        </div>
+
+        <h3>Pengaturan Uji Instrumen</h3>
+        <div class="form-group manual-input-group_uji-instrumen">
           <label>Input Data Respon Kuesioner (pisahkan nilai dengan koma, responden dengan baris baru):</label>
           <textarea id="instrumentData" rows="8" placeholder="Contoh (3 item, 5 responden):
 1, 2, 3
@@ -1875,20 +2341,23 @@ Kelompok2: 34, 56, 78"></textarea>
   // Initial content for the welcome page
   let initialWelcomeContent = ''; // Will be set after DOMContentLoaded
 
-  // Fungsi untuk menampilkan materi
+  /**
+   * Displays the content of a selected material.
+   * @param {number} materialId - The ID of the material to display.
+   */
   function showMaterial(materialId) {
-    // Hilangkan active class dari semua items
+    // Remove active class from all material items
     document.querySelectorAll('.material-item').forEach(item => {
       item.classList.remove('active');
     });
     
-    // Tambah active class ke item yang diklik
+    // Add active class to the clicked item
     const clickedItem = document.querySelector(`.material-item[data-material-id="${materialId}"]`);
     if (clickedItem) {
       clickedItem.classList.add('active');
     }
     
-    // Tampilkan konten materi
+    // Display material content
     const material = materialContents[materialId];
     if (material) {
       document.getElementById('pageContent').innerHTML = material.content;
@@ -1902,9 +2371,12 @@ Kelompok2: 34, 56, 78"></textarea>
     }
   }
 
-  // Fungsi untuk menampilkan analysis tools
+  /**
+   * Displays the content of a selected analysis tool.
+   * @param {string} toolId - The ID of the analysis tool to display.
+   */
   function showAnalysisTool(toolId) {
-    // Hilangkan active class dari semua items
+    // Remove active class from all material items
     document.querySelectorAll('.material-item').forEach(item => {
       item.classList.remove('active');
     });
@@ -1918,9 +2390,8 @@ Kelompok2: 34, 56, 78"></textarea>
     if (content) {
       document.getElementById('pageContent').innerHTML = content;
       // Initialize specific tool forms if needed
-      if (toolId === 'deskriptif') {
-        toggleInputMethod('deskriptif'); // Initialize input method display
-      } else if (toolId === 'uji-mean') {
+      toggleInputMethod(toolId); // Initialize input method display for all tools
+      if (toolId === 'uji-mean') {
         updateTTestForm();
       } else if (toolId === 'chi-square') {
         updateChiSquareForm();
@@ -1941,95 +2412,144 @@ Kelompok2: 34, 56, 78"></textarea>
     }
   }
 
-  // Fungsi untuk questions button
-  function showQuestions() {
-    // Hilangkan active class dari semua items
-    document.querySelectorAll('.material-item').forEach(item => {
-      item.classList.remove('active');
-    });
+  /**
+   * Toggles the visibility of the Help & FAQ modal.
+   */
+  function toggleHelpFAQModal() {
+    const modal = document.getElementById('help-faq-modal');
+    modal.classList.toggle('open');
+    // Scroll chatbot messages to bottom when opened
+    if (modal.classList.contains('open')) {
+      const messagesContainer = document.getElementById('chatbot-messages');
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+  }
 
-    document.getElementById('pageContent').innerHTML = `
-      <h2>Frequently Asked Questions (FAQ)</h2>
-      <div style="text-align: left;">
-        <h3>Q: Bagaimana cara menggunakan tools analisis statistik?</h3>
-        <p>A: Pilih menu "8. AnalysisTools" dari sidebar, kemudian pilih jenis analisis yang diinginkan. Upload data atau masukkan data manual, atur parameter yang diperlukan, lalu klik tombol analisis.</p>
-        
-        <h3>Q: Format data apa yang didukung?</h3>
-        <p>A: Platform ini mendukung file CSV dan Excel (.xlsx, .xls). Data harus dalam format tabular dengan header kolom yang jelas. Untuk data manual, pisahkan nilai dengan koma atau baris baru.</p>
-        
-        <h3>Q: Bagaimana interpretasi hasil analisis?</h3>
-        <p>A: Setiap hasil analisis dilengkapi dengan interpretasi otomatis dan rekomendasi. Untuk analisis yang kompleks, konsultasikan dengan ahli statistik kami.</p>
-        
-        <h3>Q: Apakah data yang diupload aman?</h3>
-        <p>A: Ya, semua data yang diupload akan dihapus otomatis setelah analisis selesai. Kami tidak menyimpan data pribadi atau penelitian Anda.</p>
-        
-        <h3>Q: Apakah hasil analisis bisa diunduh?</h3>
-        <p>A: Ya, hasil analisis dapat diunduh dalam format PDF (laporan lengkap) atau Excel (data hasil) setelah analisis selesai.</p>
-        
-        <h3>Q: Bagaimana cara mendapatkan konsultasi statistik?</h3>
-        <p>A: Kami menyediakan layanan konsultasi untuk penelitian S1, S2, dan S3. Hubungi kami melalui:</p>
-        <ul>
-          <li>Email: <span class="editable-content" data-editable-id="faq-email">konsultasi@statistika.ac.id</span></li>
-          <li>WhatsApp: <span class="editable-content" data-editable-id="faq-whatsapp">+62 812-3456-7890</span></li>
-          <li>Telepon: <span class="editable-content" data-editable-id="faq-phone">(021) 1234-5678</span></li>
-        </ul>
-        
-        <h3>Q: Apakah ada biaya untuk menggunakan tools?</h3>
-        <p>A: Tools dasar dapat digunakan gratis. Untuk fitur premium seperti analisis advanced dan konsultasi personal, tersedia paket berlangganan.</p>
-        
-        <h3>Butuh bantuan teknis?</h3>
-        <p>Tim support kami siap membantu Anda 24/7. Hubungi kami melalui email: <strong><span class="editable-content" data-editable-id="faq-support-email">support@statistika.ac.id</span></strong></p>
-      </div>
-    `;
+  /**
+   * Sends a message to the chatbot and displays the response.
+   */
+  function sendChatMessage() {
+    const inputField = document.getElementById('chatbot-input-field');
+    const message = inputField.value.trim();
+    if (message === '') return;
 
-    // Re-enable editable content if in admin mode
-    if (isAdminMode) {
-      enableAdminEditing();
+    const messagesContainer = document.getElementById('chatbot-messages');
+    
+    // Add user message
+    const userMessageDiv = document.createElement('div');
+    userMessageDiv.classList.add('chatbot-message', 'user');
+    userMessageDiv.textContent = message;
+    messagesContainer.appendChild(userMessageDiv);
+
+    inputField.value = ''; // Clear input
+    messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to bottom
+
+    // Get bot response
+    setTimeout(() => {
+      const botResponse = getBotResponse(message);
+      const botMessageDiv = document.createElement('div');
+      botMessageDiv.classList.add('chatbot-message', 'bot');
+      botMessageDiv.innerHTML = botResponse; // Use innerHTML for potential links/formatting
+      messagesContainer.appendChild(botMessageDiv);
+      messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to bottom
+    }, 500);
+  }
+
+  /**
+   * Handles Enter key press in the chatbot input field.
+   * @param {KeyboardEvent} event - The keyboard event.
+   */
+  function handleChatInput(event) {
+    if (event.key === 'Enter') {
+      sendChatMessage();
+    }
+  }
+
+  /**
+   * Provides a simulated response from the chatbot based on user input.
+   * @param {string} userMessage - The user's message.
+   * @returns {string} The chatbot's response.
+   */
+  function getBotResponse(userMessage) {
+    const lowerCaseMessage = userMessage.toLowerCase();
+
+    if (lowerCaseMessage.includes('halo') || lowerCaseMessage.includes('hai')) {
+      return 'Halo! Ada yang bisa saya bantu terkait statistika?';
+    } else if (lowerCaseMessage.includes('apa itu statistika')) {
+      return 'Statistika adalah ilmu yang berkaitan dengan pengumpulan, pengorganisasian, analisis, interpretasi, dan presentasi data. Anda bisa membaca lebih lanjut di materi <a href="#" onclick="showMaterial(1); toggleHelpFAQModal();">Pengantar Statistika</a>.';
+    } else if (lowerCaseMessage.includes('tools analisis')) {
+      return 'Kami memiliki berbagai tools analisis statistik interaktif. Anda bisa melihatnya di menu <a href="#" onclick="showMaterial(8); toggleHelpFAQModal();">AnalysisTools</a>.';
+    } else if (lowerCaseMessage.includes('uji t') || lowerCaseMessage.includes('t-test')) {
+      return 'Uji t digunakan untuk membandingkan rata-rata satu atau dua kelompok. Anda bisa mencobanya di <a href="#" onclick="showAnalysisTool(\'uji-mean\'); toggleHelpFAQModal();">Tool Uji t</a>.';
+    } else if (lowerCaseMessage.includes('anova')) {
+      return 'ANOVA (Analysis of Variance) digunakan untuk membandingkan rata-rata tiga atau lebih kelompok. Coba di <a href="#" onclick="showAnalysisTool(\'anova\'); toggleHelpFAQModal();">Tool ANOVA</a>.';
+    } else if (lowerCaseMessage.includes('korelasi')) {
+      return 'Analisis korelasi mengukur kekuatan dan arah hubungan antara dua variabel. Anda bisa menggunakannya di <a href="#" onclick="showAnalysisTool(\'korelasi\'); toggleHelpFAQModal();">Tool Analisis Korelasi</a>.';
+    } else if (lowerCaseMessage.includes('regresi')) {
+      return 'Regresi linear memodelkan hubungan antara variabel dependen dan independen. Coba di <a href="#" onclick="showAnalysisTool(\'regresi\'); toggleHelpFAQModal();">Tool Analisis Regresi Linear</a>.';
+    } else if (lowerCaseMessage.includes('statistik deskriptif')) {
+      return 'Statistik deskriptif meringkas dan menggambarkan data. Anda bisa mencobanya di <a href="#" onclick="showAnalysisTool(\'deskriptif\'); toggleHelpFAQModal();">Tool Statistik Deskriptif</a>.';
+    } else if (lowerCaseMessage.includes('uji asumsi')) {
+      return 'Uji asumsi klasik meliputi normalitas, homogenitas, dan linearitas. Anda bisa mengujinya di <a href="#" onclick="showAnalysisTool(\'uji-asumsi\'); toggleHelpFAQModal();">Tool Uji Asumsi Klasik</a>.';
+    } else if (lowerCaseMessage.includes('kontak') || lowerCaseMessage.includes('bantuan')) {
+      return 'Anda bisa menghubungi kami melalui email: konsultasi@statistika.ac.id atau telepon: (021) 1234-5678.';
+    } else if (lowerCaseMessage.includes('terima kasih')) {
+      return 'Sama-sama! Senang bisa membantu.';
+    } else {
+      return 'Maaf, saya tidak mengerti pertanyaan Anda. Bisakah Anda bertanya dengan cara lain atau memilih topik dari menu?';
     }
   }
 
   // --- Admin Mode Functionality ---
-  const LOCAL_STORAGE_PREFIX = 'webstat_';
 
-  function saveToLocalStorage(key, value) {
-    localStorage.setItem(LOCAL_STORAGE_PREFIX + key, JSON.stringify(value));
-  }
-
-  function loadFromLocalStorage(key) {
-    const stored = localStorage.getItem(LOCAL_STORAGE_PREFIX + key);
-    return stored ? JSON.parse(stored) : null;
-  }
-
-  function toggleAdminMode() {
-    const adminToggleBtn = document.querySelector('.admin-mode-toggle');
+  /**
+   * Menutup bagian login admin.
+   */
+  function closeAdminLoginSection() {
     const adminLoginSection = document.getElementById('admin-login-section');
-    const adminModeIcon = document.getElementById('admin-mode-icon');
-
-    if (!isAdminMode) { // If currently OFF, try to activate
-      adminLoginSection.style.display = 'flex'; // Show login form
-      adminToggleBtn.classList.add('active');
-      document.body.classList.add('admin-active');
-      adminModeIcon.textContent = '🔓'; // Open lock icon
-    } else { // If currently ON, deactivate
-      logoutAdmin(); // Force logout
-      adminToggleBtn.classList.remove('active');
-      document.body.classList.remove('admin-active');
-      adminLoginSection.style.display = 'none';
-      adminModeIcon.textContent = '🔒'; // Closed lock icon
+    adminLoginSection.style.display = 'none';
+    document.getElementById('admin-password').value = ''; // Clear password field
+    const adminToggleBtn = document.getElementById('admin-mode-toggle-btn');
+    if (!isAdminMode) { // Only reset button text if not logged in
+        adminToggleBtn.textContent = 'Login';
+        adminToggleBtn.classList.remove('active');
     }
   }
 
+  /**
+   * Toggles the admin mode login/logout section visibility.
+   */
+  function toggleAdminMode() {
+    const adminToggleBtn = document.getElementById('admin-mode-toggle-btn');
+    const adminLoginSection = document.getElementById('admin-login-section');
+
+    if (isAdminMode) { // If currently ON, just logout
+      logoutAdmin();
+    } else { // If currently OFF, toggle login form visibility
+      if (adminLoginSection.style.display === 'flex') {
+        closeAdminLoginSection(); // Hide if already visible
+      } else {
+        adminLoginSection.style.display = 'flex'; // Show login form
+        adminToggleBtn.classList.add('active'); // Keep active state for visual feedback
+        adminToggleBtn.textContent = 'Login'; // Ensure button text is "Login" when form is shown
+      }
+    }
+  }
+
+  /**
+   * Handles admin login attempt.
+   */
   function loginAdmin() {
     const passwordInput = document.getElementById('admin-password');
     const adminLoginSection = document.getElementById('admin-login-section');
-    const adminModeIcon = document.getElementById('admin-mode-icon');
+    const adminToggleBtn = document.getElementById('admin-mode-toggle-btn');
 
     if (passwordInput.value === ADMIN_PASSWORD) {
       isAdminMode = true;
       document.body.classList.add('admin-active');
       document.getElementById('admin-login-form').style.display = 'none';
       document.getElementById('admin-logout-form').style.display = 'block';
-      adminModeIcon.textContent = '🔓'; // Open lock icon
+      adminToggleBtn.textContent = 'Logout Admin'; // Update button text
       enableAdminEditing();
       alert('Berhasil masuk mode Admin!');
       adminLoginSection.style.display = 'none'; // Hide login section after successful login
@@ -2039,14 +2559,17 @@ Kelompok2: 34, 56, 78"></textarea>
     }
   }
 
+  /**
+   * Handles admin logout.
+   */
   function logoutAdmin() {
     isAdminMode = false;
     document.body.classList.remove('admin-active');
     document.getElementById('admin-login-form').style.display = 'block';
     document.getElementById('admin-logout-form').style.display = 'none';
     document.getElementById('admin-password').value = '';
-    document.getElementById('admin-mode-icon').textContent = '🔒'; // Closed lock icon
-    document.querySelector('.admin-mode-toggle').classList.remove('active');
+    document.getElementById('admin-mode-toggle-btn').textContent = 'Login'; // Update button text
+    document.getElementById('admin-mode-toggle-btn').classList.remove('active');
     disableAdminEditing();
     alert('Berhasil keluar dari mode Admin.');
     // Reload current page content to remove editable borders
@@ -2057,35 +2580,52 @@ Kelompok2: 34, 56, 78"></textarea>
         document.getElementById('pageContent').innerHTML = initialWelcomeContent;
         loadPageContentFromLocalStorage(); // Re-apply non-admin content
     }
+    closeAdminLoginSection(); // Ensure the login section is hidden after logout
   }
 
+  /**
+   * Enables contenteditable for all elements with class 'editable-content'.
+   */
   function enableAdminEditing() {
     document.querySelectorAll('.editable-content').forEach(el => {
       el.setAttribute('contenteditable', 'true');
-      el.style.border = '1px dashed #ff9800';
-      el.style.padding = '5px';
-      el.style.minHeight = '1.5em';
+      // The border is now controlled by CSS class `body.admin-active .editable-content`
+      // el.style.border = '1px dashed #ff9800';
+      // el.style.padding = '5px';
+      // el.style.minHeight = '1.5em';
       el.addEventListener('focus', handleEditFocus);
       el.addEventListener('blur', handleEditBlur);
     });
   }
 
+  /**
+   * Disables contenteditable for all elements with class 'editable-content'.
+   */
   function disableAdminEditing() {
     document.querySelectorAll('.editable-content').forEach(el => {
       el.removeAttribute('contenteditable');
-      el.style.border = '';
-      el.style.padding = '';
-      el.style.minHeight = '';
+      // Reset styles to default (controlled by .editable-content without admin-active)
+      // el.style.border = '';
+      // el.style.padding = '';
+      // el.style.minHeight = '';
       el.removeEventListener('focus', handleEditFocus);
       el.removeEventListener('blur', handleEditBlur);
     });
   }
 
+  /**
+   * Stores the original content of an editable element when it gains focus.
+   * @param {FocusEvent} event - The focus event.
+   */
   function handleEditFocus(event) {
     currentEditableContent = event.target;
     originalContent = event.target.innerHTML;
   }
 
+  /**
+   * Saves the new content of an editable element to local storage when it loses focus.
+   * @param {FocusEvent} event - The blur event.
+   */
   function handleEditBlur(event) {
     const id = event.target.dataset.editableId;
     const newContent = event.target.innerHTML;
@@ -2111,7 +2651,7 @@ Kelompok2: 34, 56, 78"></textarea>
         saveToLocalStorage('materialContents', materialContents);
       }
     } else {
-      // For other general editable content on the page (header, footer, FAQ)
+      // For other general editable content on the page (header, footer,, welcome, etc.)
       const pageData = loadFromLocalStorage('pageData') || {};
       pageData[id] = newContent;
       saveToLocalStorage('pageData', pageData);
@@ -2120,6 +2660,11 @@ Kelompok2: 34, 56, 78"></textarea>
     originalContent = '';
   }
 
+  /**
+   * Displays the edit form for a specific material.
+   * @param {number} materialId - The ID of the material to edit.
+   * @param {Event} event - The event object (to stop propagation).
+   */
   function editMaterial(materialId, event) {
     event.stopPropagation(); // Prevent showMaterial from being called immediately
     if (!isAdminMode) return; // Only allow editing in admin mode
@@ -2144,6 +2689,10 @@ Kelompok2: 34, 56, 78"></textarea>
     enableAdminEditing(); // Make the newly loaded content editable
   }
 
+  /**
+   * Saves the edited content of a material.
+   * @param {number} materialId - The ID of the material to save.
+   */
   function saveMaterialContent(materialId) {
     const titleEl = document.querySelector(`[data-editable-id="material-title-${materialId}"]`);
     const subtitleEl = document.querySelector(`[data-editable-id="material-subtitle-${materialId}"]`);
@@ -2166,6 +2715,9 @@ Kelompok2: 34, 56, 78"></textarea>
     showMaterial(materialId); // Reload the material to show saved content
   }
 
+  /**
+   * Cancels the material editing and reverts to the previous view.
+   */
   function cancelMaterialEdit() {
     // Reload the welcome page or the last viewed material
     document.getElementById('pageContent').innerHTML = initialWelcomeContent;
@@ -2178,6 +2730,9 @@ Kelompok2: 34, 56, 78"></textarea>
 
   let nextMaterialId = 9; // Start from the next available ID
 
+  /**
+   * Adds a new material item to the sidebar and content.
+   */
   function addNewMaterial() {
     if (!isAdminMode) return; // Only allow adding in admin mode
 
@@ -2218,6 +2773,11 @@ Kelompok2: 34, 56, 78"></textarea>
     showMaterial(newId); // Display the new material
   }
 
+  /**
+   * Deletes a material item.
+   * @param {number} materialId - The ID of the material to delete.
+   * @param {Event} event - The event object (to stop propagation).
+   */
   function deleteMaterial(materialId, event) {
     event.stopPropagation(); // Prevent showMaterial from being called
     if (!isAdminMode) return; // Only allow deleting in admin mode
@@ -2233,15 +2793,23 @@ Kelompok2: 34, 56, 78"></textarea>
     }
   }
 
+  /**
+   * Enables admin editing for a specific element.
+   * @param {HTMLElement} el - The element to make editable.
+   */
   function enableAdminEditingForElement(el) {
     el.setAttribute('contenteditable', 'true');
-    el.style.border = '1px dashed #ff9800';
-    el.style.padding = '5px';
-    el.style.minHeight = '1.5em';
+    // The border is now controlled by CSS class `body.admin-active .editable-content`
+    // el.style.border = '1px dashed #ff9800';
+    // el.style.padding = '5px';
+    // el.style.minHeight = '1.5em';
     el.addEventListener('focus', handleEditFocus);
     el.addEventListener('blur', handleEditBlur);
   }
 
+  /**
+   * Loads initial content from local storage and rebuilds the sidebar.
+   */
   function loadInitialContent() {
     // Load material contents from local storage
     const storedMaterialContents = loadFromLocalStorage('materialContents');
@@ -2271,6 +2839,7 @@ Kelompok2: 34, 56, 78"></textarea>
         `;
         materialsNav.insertBefore(newMaterialItem, adminControls);
       });
+      // Update nextMaterialId to ensure new materials get unique IDs
       nextMaterialId = Math.max(...Object.keys(materialContents).map(Number)) + 1;
     }
 
@@ -2281,6 +2850,9 @@ Kelompok2: 34, 56, 78"></textarea>
     initialWelcomeContent = document.getElementById('pageContent').innerHTML;
   }
 
+  /**
+   * Loads general page content (header, footer, welcome text) from local storage.
+   */
   function loadPageContentFromLocalStorage() {
     const pageData = loadFromLocalStorage('pageData');
     if (pageData) {
@@ -2295,7 +2867,11 @@ Kelompok2: 34, 56, 78"></textarea>
 
   // --- Analysis Tools Enhancements (Frontend Logic) ---
 
-  // Helper to parse data from textarea
+  /**
+   * Parses numerical data from a textarea, handling comma or newline separators.
+   * @param {string} textareaId - The ID of the textarea element.
+   * @returns {number[]|null} An array of numbers or null if invalid.
+   */
   function parseData(textareaId) {
     const dataString = document.getElementById(textareaId).value.trim();
     if (!dataString) {
@@ -2311,6 +2887,12 @@ Kelompok2: 34, 56, 78"></textarea>
     return parsed;
   }
 
+  /**
+   * Parses multi-group data from a textarea (e.g., for ANOVA).
+   * Format: "GroupName: val1, val2, val3\nGroupName2: val4, val5"
+   * @param {string} textareaId - The ID of the textarea element.
+   * @returns {Array<{name: string, values: number[]}>|null} An array of group objects or null if invalid.
+   */
   function parseMultiGroupData(textareaId) {
     const dataString = document.getElementById(textareaId).value.trim();
     if (!dataString) {
@@ -2332,6 +2914,12 @@ Kelompok2: 34, 56, 78"></textarea>
     return groups;
   }
 
+  /**
+   * Parses a contingency table from a textarea.
+   * Format: "val1, val2\nval3, val4"
+   * @param {string} textareaId - The ID of the textarea element.
+   * @returns {number[][]|null} A 2D array of numbers or null if invalid.
+   */
   function parseContingencyTable(textareaId) {
     const dataString = document.getElementById(textareaId).value.trim();
     if (!dataString) {
@@ -2349,7 +2937,11 @@ Kelompok2: 34, 56, 78"></textarea>
     return rows;
   }
 
-  // Placeholder for CSV/Excel parsing (requires a library or backend)
+  /**
+   * Placeholder for CSV/Excel file upload handling.
+   * In a real application, this would involve a backend or a client-side library.
+   * @param {string} toolId - The ID of the analysis tool.
+   */
   function handleFileUpload(toolId) {
     const fileInput = document.getElementById(`dataFile_${toolId}`);
     if (fileInput.files.length > 0) {
@@ -2368,11 +2960,22 @@ Kelompok2: 34, 56, 78"></textarea>
     }
   }
 
+  /**
+   * Toggles the visibility of input method groups (manual, sample, file) for analysis tools.
+   * @param {string} toolId - The ID of the analysis tool.
+   */
   function toggleInputMethod(toolId) {
-    const method = document.getElementById(`inputMethod_${toolId}`).value;
-    document.querySelector(`.file-input-group_${toolId}`).style.display = (method === 'file' ? 'block' : 'none');
-    document.querySelector(`.manual-input-group_${toolId}`).style.display = (method === 'manual' ? 'block' : 'none');
-    document.querySelector(`.sample-input-group_${toolId}`).style.display = (method === 'sample' ? 'block' : 'none');
+    const inputMethodSelect = document.getElementById(`inputMethod_${toolId}`);
+    if (!inputMethodSelect) return; // Exit if the tool doesn't have this selector
+
+    const method = inputMethodSelect.value;
+    const fileInputGroup = document.querySelector(`.file-input-group_${toolId}`);
+    const manualInputGroup = document.querySelector(`.manual-input-group_${toolId}`);
+    const sampleInputGroup = document.querySelector(`.sample-input-group_${toolId}`);
+
+    if (fileInputGroup) fileInputGroup.style.display = (method === 'file' ? 'block' : 'none');
+    if (manualInputGroup) manualInputGroup.style.display = (method === 'manual' ? 'block' : 'none');
+    if (sampleInputGroup) sampleInputGroup.style.display = (method === 'sample' ? 'block' : 'none');
 
     if (method === 'sample') {
       loadSampleData(toolId);
@@ -2380,69 +2983,171 @@ Kelompok2: 34, 56, 78"></textarea>
         // Clear sample data if switching to manual
         const manualDataTextarea = document.getElementById(`manualData_${toolId}`);
         if (manualDataTextarea) manualDataTextarea.value = '';
+        // For descriptive, clear variables select
         const variablesSelect = document.getElementById(`variables_${toolId}`);
         if (variablesSelect) variablesSelect.innerHTML = '<option value="Data">Data</option>';
+        // For other tools, clear their specific textareas
+        if (toolId === 'uji-mean') {
+            document.getElementById('sample1_tTest').value = '';
+            document.getElementById('sample2_tTest').value = '';
+        } else if (toolId === 'anova') {
+            document.getElementById('anovaData').value = '';
+        } else if (toolId === 'korelasi') {
+            document.getElementById('varX_korelasi').value = '';
+            document.getElementById('varY_korelasi').value = '';
+        } else if (toolId === 'regresi') {
+            document.getElementById('dependentVar_regresi').value = '';
+            document.getElementById('independentVar_regresi').value = '';
+        } else if (toolId === 'mann-whitney') {
+            document.getElementById('group1_mannwhitney').value = '';
+            document.getElementById('group2_mannwhitney').value = '';
+        } else if (toolId === 'chi-square') {
+            document.getElementById('contingencyTable').value = '';
+            document.getElementById('observedFrequencies').value = '';
+            document.getElementById('expectedFrequencies').value = '';
+        } else if (toolId === 'clustering') {
+            document.getElementById('clusteringData').value = '';
+        } else if (toolId === 'factor-analysis') {
+            document.getElementById('factorAnalysisData').value = '';
+        } else if (toolId === 'uji-asumsi') {
+            document.getElementById('normalitasData').value = '';
+            document.getElementById('homogenitasData').value = '';
+        } else if (toolId === 'uji-instrumen') {
+            document.getElementById('instrumentData').value = '';
+        }
     }
   }
 
+  /**
+   * Loads sample data into the input fields for a given analysis tool.
+   * @param {string} toolId - The ID of the analysis tool.
+   */
   function loadSampleData(toolId) {
     const sampleSelect = document.getElementById(`sampleData_${toolId}`);
-    const manualDataTextarea = document.getElementById(`manualData_${toolId}`);
-    const variablesSelect = document.getElementById(`variables_${toolId}`);
+    if (!sampleSelect) return;
 
-    let sampleData = '';
-    let sampleVariables = [];
+    const selectedSample = sampleSelect.value;
 
     if (toolId === 'deskriptif') {
-      if (sampleSelect.value === 'sample1') {
+      const manualDataTextarea = document.getElementById(`manualData_${toolId}`);
+      const variablesSelect = document.getElementById(`variables_${toolId}`);
+      let sampleData = '';
+      let sampleVariables = [];
+
+      if (selectedSample === 'sample1') {
         sampleData = '120, 150, 130, 180, 140, 160, 170, 190, 155, 165';
         sampleVariables = ['Penjualan'];
-      } else if (sampleSelect.value === 'sample2') {
+      } else if (selectedSample === 'sample2') {
         sampleData = '165, 170, 168, 175, 160, 172, 169, 178, 163, 171';
         sampleVariables = ['Tinggi'];
       }
-    }
-    // Add more sample data for other tools if needed
-    // For now, other tools don't have specific sample data selectors,
-    // so we'll just fill their main textareas if they exist.
-    if (toolId === 'uji-mean') {
-        document.getElementById('sample1_tTest').value = '23, 45, 67, 34, 56';
-        document.getElementById('sample2_tTest').value = '30, 50, 70, 40, 60';
-        document.getElementById('mu0_tTest').value = '40';
+      if (manualDataTextarea) manualDataTextarea.value = sampleData;
+      if (variablesSelect) {
+          variablesSelect.innerHTML = sampleVariables.map(v => `<option value="${v}">${v}</option>`).join('');
+          if (sampleVariables.length > 0) {
+              variablesSelect.value = sampleVariables[0];
+          }
+      }
+    } else if (toolId === 'uji-mean') {
+        const sample1Textarea = document.getElementById('sample1_tTest');
+        const sample2Textarea = document.getElementById('sample2_tTest');
+        const mu0Input = document.getElementById('mu0_tTest');
+        const tTestTypeSelect = document.getElementById('tTestType');
+
+        if (selectedSample === 'sample_one_sample') {
+            sample1Textarea.value = '23, 45, 67, 34, 56, 78, 45, 67, 89, 23';
+            mu0Input.value = '50';
+            tTestTypeSelect.value = 'one-sample';
+            sample2Textarea.value = ''; // Clear sample2
+        } else if (selectedSample === 'sample_two_sample') {
+            sample1Textarea.value = '23, 45, 67, 34, 56';
+            sample2Textarea.value = '30, 50, 70, 40, 60';
+            tTestTypeSelect.value = 'two-sample';
+            mu0Input.value = '0'; // Reset mu0
+        } else if (selectedSample === 'sample_paired') {
+            sample1Textarea.value = '10, 12, 15, 11, 13';
+            sample2Textarea.value = '9, 11, 14, 10, 12';
+            tTestTypeSelect.value = 'paired';
+            mu0Input.value = '0'; // Reset mu0
+        }
+        updateTTestForm(); // Update form display based on selected type
     } else if (toolId === 'anova') {
-        document.getElementById('anovaData').value = `Kelompok1: 23, 45, 67, 34, 56
+        const anovaDataTextarea = document.getElementById('anovaData');
+        if (selectedSample === 'sample_one_way') {
+            anovaDataTextarea.value = `Kelompok1: 23, 45, 67, 34, 56
 Kelompok2: 34, 56, 78, 45, 67
 Kelompok3: 45, 67, 89, 56, 78`;
+        }
     } else if (toolId === 'korelasi') {
-        document.getElementById('varX_korelasi').value = '10, 12, 15, 18, 20';
-        document.getElementById('varY_korelasi').value = '25, 28, 30, 35, 38';
+        const varXTextarea = document.getElementById('varX_korelasi');
+        const varYTextarea = document.getElementById('varY_korelasi');
+        if (selectedSample === 'sample_pearson') {
+            varXTextarea.value = '10, 12, 15, 18, 20';
+            varYTextarea.value = '25, 28, 30, 35, 38';
+        }
     } else if (toolId === 'regresi') {
-        document.getElementById('dependentVar_regresi').value = '25, 28, 30, 35, 38';
-        document.getElementById('independentVar_regresi').value = '10, 12, 15, 18, 20';
+        const dependentVarTextarea = document.getElementById('dependentVar_regresi');
+        const independentVarTextarea = document.getElementById('independentVar_regresi');
+        if (selectedSample === 'sample_simple_linear') {
+            dependentVarTextarea.value = '25, 28, 30, 35, 38, 40, 42, 45, 48, 50';
+            independentVarTextarea.value = '10, 12, 15, 18, 20, 22, 25, 28, 30, 32';
+        }
     } else if (toolId === 'mann-whitney') {
-        document.getElementById('group1_mannwhitney').value = '10, 12, 15, 11, 13';
-        document.getElementById('group2_mannwhitney').value = '14, 16, 13, 17, 15';
+        const group1Textarea = document.getElementById('group1_mannwhitney');
+        const group2Textarea = document.getElementById('group2_mannwhitney');
+        if (selectedSample === 'sample_two_groups') {
+            group1Textarea.value = '10, 12, 15, 11, 13';
+            group2Textarea.value = '14, 16, 13, 17, 15';
+        }
     } else if (toolId === 'chi-square') {
-        document.getElementById('contingencyTable').value = '10, 20\n15, 5';
-        document.getElementById('observedFrequencies').value = '20, 30, 50';
-        document.getElementById('expectedFrequencies').value = '25, 25, 50';
+        const contingencyTableTextarea = document.getElementById('contingencyTable');
+        const observedFrequenciesTextarea = document.getElementById('observedFrequencies');
+        const expectedFrequenciesTextarea = document.getElementById('expectedFrequencies');
+        const chiSquareTypeSelect = document.getElementById('chiSquareType');
+
+        if (selectedSample === 'sample_independence') {
+            contingencyTableTextarea.value = '10, 20\n15, 5';
+            chiSquareTypeSelect.value = 'independence';
+            observedFrequenciesTextarea.value = ''; // Clear other type's data
+            expectedFrequenciesTextarea.value = '';
+        } else if (selectedSample === 'sample_goodness_of_fit') {
+            observedFrequenciesTextarea.value = '20, 30, 50';
+            expectedFrequenciesTextarea.value = '25, 25, 50';
+            chiSquareTypeSelect.value = 'goodness-of-fit';
+            contingencyTableTextarea.value = ''; // Clear other type's data
+        }
+        updateChiSquareForm(); // Update form display
     } else if (toolId === 'clustering') {
-        document.getElementById('clusteringData').value = '1.0, 1.1\n1.0, 1.2\n3.0, 3.1\n3.1, 3.0\n1.2, 1.0\n3.2, 3.2';
+        const clusteringDataTextarea = document.getElementById('clusteringData');
+        if (selectedSample === 'sample_2d') {
+            clusteringDataTextarea.value = '1.0, 1.1\n1.0, 1.2\n3.0, 3.1\n3.1, 3.0\n1.2, 1.0\n3.2, 3.2\n5.0, 5.1\n5.2, 5.0';
+            document.getElementById('numClusters').value = '3';
+        }
     } else if (toolId === 'factor-analysis') {
-        document.getElementById('factorAnalysisData').value = '10, 12, 11\n15, 14, 16\n20, 22, 21\n11, 13, 10\n16, 15, 17';
+        const factorAnalysisDataTextarea = document.getElementById('factorAnalysisData');
+        if (selectedSample === 'sample_3vars') {
+            factorAnalysisDataTextarea.value = '10, 12, 11\n15, 14, 16\n20, 22, 21\n11, 13, 10\n16, 15, 17\n21, 23, 20\n12, 14, 13\n17, 16, 18\n22, 24, 23\n13, 15, 12';
+            document.getElementById('numFactors').value = '1';
+        }
     } else if (toolId === 'uji-asumsi') {
-        document.getElementById('normalitasData').value = '23, 45, 67, 34, 56, 78, 45, 67, 89, 23';
-        document.getElementById('homogenitasData').value = 'Kelompok1: 23, 45, 67\nKelompok2: 34, 56, 78';
+        const normalitasDataTextarea = document.getElementById('normalitasData');
+        const homogenitasDataTextarea = document.getElementById('homogenitasData');
+        const assumptionTestTypeSelect = document.getElementById('assumptionTestType');
+
+        if (selectedSample === 'sample_normalitas') {
+            normalitasDataTextarea.value = '23, 45, 67, 34, 56, 78, 45, 67, 89, 23, 50, 55, 60, 65, 70';
+            assumptionTestTypeSelect.value = 'normalitas';
+            homogenitasDataTextarea.value = '';
+        } else if (selectedSample === 'sample_homogenitas') {
+            homogenitasDataTextarea.value = 'Kelompok1: 23, 45, 67, 30, 40\nKelompok2: 34, 56, 78, 45, 55\nKelompok3: 40, 60, 80, 50, 70';
+            assumptionTestTypeSelect.value = 'homogenitas';
+            normalitasDataTextarea.value = '';
+        }
+        updateAssumptionTestForm();
     } else if (toolId === 'uji-instrumen') {
-        document.getElementById('instrumentData').value = '1, 2, 3\n2, 3, 4\n3, 4, 5\n4, 5, 4\n5, 4, 3\n1, 1, 2\n2, 2, 3\n3, 3, 4\n4, 4, 5\n5, 5, 4';
-    }
-
-
-    if (manualDataTextarea) manualDataTextarea.value = sampleData;
-    if (variablesSelect) {
-        variablesSelect.innerHTML = sampleVariables.map(v => `<option value="${v}">${v}</option>`).join('');
-        if (sampleVariables.length > 0) {
-            variablesSelect.value = sampleVariables[0]; // Select the first variable by default
+        const instrumentDataTextarea = document.getElementById('instrumentData');
+        if (selectedSample === 'sample_instrument') {
+            instrumentDataTextarea.value = '1, 2, 3\n2, 3, 4\n3, 4, 5\n4, 5, 4\n5, 4, 3\n1, 1, 2\n2, 2, 3\n3, 3, 4\n4, 4, 5\n5, 5, 4\n1, 2, 2\n2, 3, 3\n3, 4, 4\n4, 5, 5\n5, 4, 4';
         }
     }
   }
@@ -2554,6 +3259,9 @@ Kelompok3: 45, 67, 89, 56, 78`;
   };
 
 
+  /**
+   * Runs descriptive statistics analysis on the input data.
+   */
   function runDescriptive() {
     const inputMethod = document.getElementById('inputMethod_deskriptif').value;
     let data = [];
@@ -2563,7 +3271,8 @@ Kelompok3: 45, 67, 89, 56, 78`;
       data = parseData('manualData_deskriptif');
       selectedVariables = ['Data'];
     } else if (inputMethod === 'sample') {
-      loadSampleData('deskriptif'); // Ensure sample data is loaded
+      // Ensure sample data is loaded before parsing
+      loadSampleData('deskriptif'); 
       data = parseData('manualData_deskriptif');
       const sampleSelect = document.getElementById('sampleData_deskriptif');
       selectedVariables = [sampleSelect.options[sampleSelect.selectedIndex].text.split(' ')[0]];
@@ -2611,6 +3320,9 @@ Kelompok3: 45, 67, 89, 56, 78`;
     `;
   }
 
+  /**
+   * Updates the t-Test form based on the selected test type (one-sample, two-sample, paired).
+   */
   function updateTTestForm() {
     const tTestType = document.getElementById('tTestType').value;
     const sample2Group = document.getElementById('sample2Group_tTest');
@@ -2625,6 +3337,9 @@ Kelompok3: 45, 67, 89, 56, 78`;
     }
   }
 
+  /**
+   * Runs the selected t-Test analysis.
+   */
   function runTTest() {
     const tTestType = document.getElementById('tTestType').value;
     const alpha = parseFloat(document.getElementById('alpha').value);
@@ -2736,6 +3451,9 @@ Kelompok3: 45, 67, 89, 56, 78`;
     document.getElementById('tTestResults').innerHTML = resultHtml;
   }
 
+  /**
+   * Runs ANOVA analysis on the input data.
+   */
   function runANOVA() {
     const anovaType = document.getElementById('anovaType').value;
     const alpha = parseFloat(document.getElementById('alpha_anova').value);
@@ -2789,6 +3507,9 @@ Kelompok3: 45, 67, 89, 56, 78`;
     document.getElementById('anovaResults').innerHTML = resultHtml;
   }
 
+  /**
+   * Runs correlation analysis on the input data.
+   */
   function runCorrelation() {
     const correlationType = document.getElementById('correlationType').value;
     const alpha = parseFloat(document.getElementById('corrAlpha').value);
@@ -2810,7 +3531,7 @@ Kelompok3: 45, 67, 89, 56, 78`;
         rValue = calculatePearsonCorrelation(varX, varY);
     } else { // Spearman (simplified simulation)
         // Real Spearman requires ranking data, then calculating Pearson on ranks.
-        rValue = (Math.random() * 2 - 1); // Simulate a value
+        rValue = (Math.random() * 2 - 1); // Simulate a value between -1 and 1
     }
     
     // Simulate p-value for correlation
@@ -2846,6 +3567,9 @@ Kelompok3: 45, 67, 89, 56, 78`;
     document.getElementById('correlationResults').innerHTML = resultHtml;
   }
 
+  /**
+   * Runs linear regression analysis on the input data.
+   */
   function runRegression() {
     const regressionType = document.getElementById('regressionType').value;
     const confLevel = parseFloat(document.getElementById('confLevel').value);
@@ -2921,6 +3645,9 @@ Kelompok3: 45, 67, 89, 56, 78`;
     document.getElementById('regressionResults').innerHTML = resultHtml;
   }
 
+  /**
+   * Runs Mann-Whitney U test on the input data.
+   */
   function runMannWhitney() {
     const group1 = parseData('group1_mannwhitney');
     const group2 = parseData('group2_mannwhitney');
@@ -2937,7 +3664,7 @@ Kelompok3: 45, 67, 89, 56, 78`;
     resultHtml += `<p>Data Kelompok 2: [${group2.join(', ')}]</p>`;
 
     // Simulate Mann-Whitney U results (requires ranking and sum of ranks)
-    const uStat = (Math.random() * 20 + 5).toFixed(2); // Simulate a U-statistic
+    const uStat = (Math.random() * 20 + 5).toFixed(2); // Simulate a U-statistik
     const pValue = Math.random().toFixed(3);
 
     resultHtml += `<p>Simulasi: U-statistik = ${uStat}, p-value = ${pValue}</p>`;
@@ -2952,12 +3679,21 @@ Kelompok3: 45, 67, 89, 56, 78`;
     document.getElementById('mannWhitneyResults').innerHTML = resultHtml;
   }
 
+  /**
+   * Updates the Chi-Square form based on the selected test type (independence, goodness-of-fit).
+   */
   function updateChiSquareForm() {
     const chiSquareType = document.getElementById('chiSquareType').value;
-    document.getElementById('contingencyTableGroup').style.display = (chiSquareType === 'independence' ? 'block' : 'none');
-    document.getElementById('goodnessOfFitGroup').style.display = (chiSquareType === 'goodness-of-fit' ? 'block' : 'none');
+    const contingencyTableGroup = document.getElementById('contingencyTableGroup');
+    const goodnessOfFitGroup = document.getElementById('goodnessOfFitGroup');
+
+    if (contingencyTableGroup) contingencyTableGroup.style.display = (chiSquareType === 'independence' ? 'block' : 'none');
+    if (goodnessOfFitGroup) goodnessOfFitGroup.style.display = (chiSquareType === 'goodness-of-fit' ? 'block' : 'none');
   }
 
+  /**
+   * Runs Chi-Square test on the input data.
+   */
   function runChiSquare() {
     const chiSquareType = document.getElementById('chiSquareType').value;
     const alpha = parseFloat(document.getElementById('alpha_chiSquare').value);
@@ -3034,6 +3770,9 @@ Kelompok3: 45, 67, 89, 56, 78`;
     document.getElementById('chiSquareResults').innerHTML = resultHtml;
   }
 
+  /**
+   * Runs K-Means clustering on the input data.
+   */
   function runClustering() {
     const dataString = document.getElementById('clusteringData').value.trim();
     const numClusters = parseInt(document.getElementById('numClusters').value);
@@ -3050,8 +3789,8 @@ Kelompok3: 45, 67, 89, 56, 78`;
       alert('Data tidak valid. Pastikan ada cukup observasi, setiap observasi memiliki fitur, dan hanya berisi angka.');
       return;
     }
-    if (numClusters < 2) {
-        alert('Jumlah kluster (K) harus minimal 2.');
+    if (numClusters < 1) { // Changed from 2 to 1, as K-means can technically run with K=1, though not very useful
+        alert('Jumlah kluster (K) harus minimal 1.');
         return;
     }
 
@@ -3076,6 +3815,9 @@ Kelompok3: 45, 67, 89, 56, 78`;
     document.getElementById('clusteringResults').innerHTML = resultHtml;
   }
 
+  /**
+   * Runs Factor Analysis on the input data.
+   */
   function runFactorAnalysis() {
     const dataString = document.getElementById('factorAnalysisData').value.trim();
     const numFactors = parseInt(document.getElementById('numFactors').value);
@@ -3124,12 +3866,21 @@ Kelompok3: 45, 67, 89, 56, 78`;
     document.getElementById('factorAnalysisResults').innerHTML = resultHtml;
   }
 
+  /**
+   * Updates the Assumption Test form based on the selected test type.
+   */
   function updateAssumptionTestForm() {
     const testType = document.getElementById('assumptionTestType').value;
-    document.getElementById('normalitasDataGroup').style.display = (testType === 'normalitas' ? 'block' : 'none');
-    document.getElementById('homogenitasDataGroup').style.display = (testType === 'homogenitas' ? 'block' : 'none');
+    const normalitasDataGroup = document.getElementById('normalitasDataGroup');
+    const homogenitasDataGroup = document.getElementById('homogenitasDataGroup');
+
+    if (normalitasDataGroup) normalitasDataGroup.style.display = (testType === 'normalitas' ? 'block' : 'none');
+    if (homogenitasDataGroup) homogenitasDataGroup.style.display = (testType === 'homogenitas' ? 'block' : 'none');
   }
 
+  /**
+   * Runs the selected Assumption Test.
+   */
   function runAssumptionTest() {
     const testType = document.getElementById('assumptionTestType').value;
     const alpha = parseFloat(document.getElementById('alpha_assumption').value);
@@ -3176,6 +3927,9 @@ Kelompok3: 45, 67, 89, 56, 78`;
     document.getElementById('assumptionTestResults').innerHTML = resultHtml;
   }
 
+  /**
+   * Runs Validity & Reliability test on the input data.
+   */
   function runInstrumentTest() {
     const dataString = document.getElementById('instrumentData').value.trim();
     const alpha = parseFloat(document.getElementById('alpha_validity').value);
@@ -3225,6 +3979,9 @@ Kelompok3: 45, 67, 89, 56, 78`;
     document.getElementById('instrumentTestResults').innerHTML = resultHtml;
   }
 
+  /**
+   * Updates the Power Analysis form based on the selected test type.
+   */
   function updatePowerAnalysisForm() {
     const testType = document.getElementById('powerTestType').value;
     const effectSizeLabel = document.getElementById('effectSizeLabel');
@@ -3249,6 +4006,9 @@ Kelompok3: 45, 67, 89, 56, 78`;
     }
   }
 
+  /**
+   * Runs Power Analysis to determine required sample size or power.
+   */
   function runPowerAnalysis() {
     const testType = document.getElementById('powerTestType').value;
     const effectSize = parseFloat(document.getElementById('effectSize').value);
@@ -3301,13 +4061,86 @@ Kelompok3: 45, 67, 89, 56, 78`;
     document.getElementById('powerAnalysisResults').innerHTML = resultHtml;
   }
 
-  // --- Bubble QA Variation ---
-  document.addEventListener('DOMContentLoaded', function() {
-    const questionsBtn = document.querySelector('.questions-btn');
-    const shapes = ['oval', 'tail-bubble', 'clip-path'];
-    const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
-    questionsBtn.classList.add(randomShape);
+  // --- Draggable Button Functionality ---
+  /**
+   * Makes an HTML element draggable.
+   * @param {HTMLElement} element - The element to make draggable.
+   */
+  function makeDraggable(element) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    let isDragging = false;
 
+    element.onmousedown = dragMouseDown;
+    element.ontouchstart = dragTouchStart;
+
+    function dragMouseDown(e) {
+      e = e || window.event;
+      e.preventDefault();
+      // get the mouse cursor position at startup:
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      document.onmouseup = closeDragElement;
+      // call a function whenever the cursor moves:
+      document.onmousemove = elementDrag;
+      isDragging = true;
+    }
+
+    function dragTouchStart(e) {
+      e = e || window.event;
+      e.preventDefault();
+      const touch = e.touches[0];
+      pos3 = touch.clientX;
+      pos4 = touch.clientY;
+      document.ontouchend = closeDragElement;
+      document.ontouchmove = elementDragTouch;
+      isDragging = true;
+    }
+
+    function elementDrag(e) {
+      e = e || window.event;
+      e.preventDefault();
+      // calculate the new cursor position:
+      pos1 = pos3 - e.clientX;
+      pos2 = pos4 - e.clientY;
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+      // set the element's new position:
+      element.style.top = (element.offsetTop - pos2) + "px";
+      element.style.left = (element.offsetLeft - pos1) + "px";
+    }
+
+    function elementDragTouch(e) {
+      e = e || window.event;
+      e.preventDefault();
+      const touch = e.touches[0];
+      pos1 = pos3 - touch.clientX;
+      pos2 = pos4 - touch.clientY;
+      pos3 = touch.clientX;
+      pos4 = touch.clientY;
+      element.style.top = (element.offsetTop - pos2) + "px";
+      element.style.left = (element.offsetLeft - pos1) + "px";
+    }
+
+    function closeDragElement() {
+      document.onmouseup = null;
+      document.onmousemove = null;
+      document.ontouchend = null;
+      document.ontouchmove = null;
+      isDragging = false;
+    }
+
+    // Prevent click event from firing if dragging occurred
+    element.addEventListener('click', function(e) {
+      if (isDragging) {
+        e.stopPropagation();
+        isDragging = false; // Reset for next potential drag
+      }
+    }, true); // Use capture phase to intercept click before it reaches the handler
+  }
+
+
+  // --- DOMContentLoaded ---
+  document.addEventListener('DOMContentLoaded', function() {
     // Load initial content and apply local storage changes
     loadInitialContent();
 
@@ -3318,6 +4151,30 @@ Kelompok3: 45, 67, 89, 56, 78`;
     if (document.getElementById('powerTestType')) {
         updatePowerAnalysisForm();
     }
+
+    // Make the help-faq-btn draggable
+    const helpFaqBtn = document.getElementById('help-faq-btn');
+    if (helpFaqBtn) {
+      makeDraggable(helpFaqBtn);
+    }
+
+    // Make the admin-mode-toggle-btn draggable
+    const adminToggleBtn = document.getElementById('admin-mode-toggle-btn');
+    if (adminToggleBtn) {
+      makeDraggable(adminToggleBtn);
+    }
+
+    // Event listener to close admin login section when clicking outside
+    document.addEventListener('click', function(event) {
+        const adminLoginSection = document.getElementById('admin-login-section');
+        const adminToggleBtn = document.getElementById('admin-mode-toggle-btn');
+
+        // Check if the click is outside the login section and the toggle button
+        if (adminLoginSection.style.display === 'flex' && !isAdminMode &&
+            !adminLoginSection.contains(event.target) && !adminToggleBtn.contains(event.target)) {
+            closeAdminLoginSection();
+        }
+    });
   });
 </script>
 
