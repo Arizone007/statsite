@@ -17,15 +17,17 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh; /* Use min-height for content flexibility */
     display: grid;
-    grid-template-columns: 1fr; /* Single column for mobile */
+    /* Default for mobile, will be overridden by media queries and JS for desktop */
+    grid-template-columns: 1fr;
     grid-template-rows: auto auto 1fr auto; /* Dynamic rows */
     grid-template-areas:
       "profile"
       "header"
       "page"
       "footer";
-    overflow-x: hidden; /* Prevent horizontal scroll */
+    /* overflow-x: hidden; Removed to allow resizable sidebar */
     font-size: 16px; /* Base font size for rem units */
+    --sidebar-width: 300px; /* Default sidebar width for larger screens */
   }
 
   /* Profile Section */
@@ -119,6 +121,19 @@
     font-size: 0.875rem; /* 14px */
     line-height: 1.5;
     display: none; /* Hidden by default on mobile */
+    position: fixed; /* Make it fixed for mobile toggle */
+    top: 0;
+    left: -100%; /* Hide off-screen */
+    width: 80%; /* Take up 80% of screen width */
+    max-width: 300px; /* Max width for larger phones */
+    height: 100%;
+    z-index: 1000;
+    transition: left 0.3s ease-in-out;
+    box-shadow: 0.25rem 0 1rem rgba(0,0,0,0.2);
+  }
+
+  .materials.open {
+    left: 0; /* Show on screen */
   }
 
   .materials-title {
@@ -407,32 +422,36 @@
     box-shadow: 0 0.25rem 0.75rem rgba(33,150,243,0.3); /* 0 4px 12px */
   }
 
-  /* Admin Mode Styles */
+  /* Admin Mode Toggle Button */
   .admin-mode-toggle {
-    position: fixed;
-    top: 1rem; /* 16px */
-    right: 1rem; /* 16px */
-    background: linear-gradient(135deg, #2196f3, #42a5f5);
-    color: white;
-    padding: 0.625rem 0.9375rem; /* 10px 15px */
-    border-radius: 0.3125rem; /* 5px */
+    position: absolute; /* Changed to absolute */
+    bottom: 0.5rem; /* 8px */
+    right: 0.5rem; /* 8px */
+    background: linear-gradient(135deg, #a7d9f7, #c2e0f2); /* Softer blue */
+    color: #333; /* Darker text for contrast */
+    padding: 0.2rem 0.5rem; /* Smaller padding */
+    border-radius: 0.2rem; /* Smaller border-radius */
     cursor: pointer;
     font-weight: bold;
     z-index: 1001;
     display: flex;
     align-items: center;
-    gap: 0.5rem; /* 8px */
+    gap: 0.2rem; /* Smaller gap */
     transition: all 0.3s ease;
-    font-size: 0.875rem; /* 14px */
+    font-size: 0.65rem; /* Smaller font size */
+    border: 1px solid rgba(0,0,0,0.1); /* Subtle border */
+    box-shadow: 0 0.1rem 0.2rem rgba(0,0,0,0.1); /* Softer shadow */
   }
 
   .admin-mode-toggle:hover {
-    transform: translateY(-0.125rem); /* -2px */
-    box-shadow: 0 0.25rem 0.75rem rgba(33,150,243,0.3); /* 0 4px 12px */
+    transform: translateY(-0.0625rem); /* -1px */
+    box-shadow: 0 0.1875rem 0.375rem rgba(0,0,0,0.15); /* Slightly more pronounced shadow */
+    background: linear-gradient(135deg, #c2e0f2, #a7d9f7); /* Invert gradient on hover */
   }
 
   .admin-mode-toggle.active {
     background: linear-gradient(135deg, #f44336, #ef5350);
+    color: white;
   }
   .admin-mode-toggle.active:hover {
     background: linear-gradient(135deg, #d32f2f, #f44336);
@@ -440,19 +459,19 @@
 
   /* Admin Login Section */
   .admin-login-section {
-    position: fixed;
-    top: 4rem; /* 64px */
-    right: 1rem; /* 16px */
+    position: absolute; /* Changed to absolute */
+    bottom: 2.5rem; /* Adjusted position */
+    right: 0.5rem; /* 8px */
     background-color: #f0f0f0;
-    padding: 0.625rem; /* 10px */
-    border-radius: 0.3125rem; /* 5px */
-    box-shadow: 0 0.125rem 0.3125rem rgba(0,0,0,0.2); /* 0 2px 5px */
+    padding: 0.5rem; /* Smaller padding */
+    border-radius: 0.25rem; /* Smaller border-radius */
+    box-shadow: 0 0.1rem 0.25rem rgba(0,0,0,0.2); /* Smaller shadow */
     z-index: 1001;
     display: none;
     flex-direction: column;
-    gap: 0.625rem; /* 10px */
+    gap: 0.5rem; /* Smaller gap */
     width: calc(100% - 2rem); /* Full width minus padding */
-    max-width: 18.75rem; /* 300px */
+    max-width: 15rem; /* Smaller max-width */
   }
 
   body.admin-active .admin-login-section {
@@ -464,28 +483,31 @@
   }
 
   .admin-login-section label {
-    margin-right: 0.3125rem; /* 5px */
+    margin-right: 0.25rem; /* Smaller margin */
     font-weight: bold;
     display: block;
-    margin-bottom: 0.3125rem; /* 5px */
+    margin-bottom: 0.25rem; /* Smaller margin */
+    font-size: 0.75rem; /* Smaller font size */
   }
 
   .admin-login-section input[type="password"] {
-    padding: 0.5rem; /* 8px */
+    padding: 0.4rem; /* Smaller padding */
     border: 0.0625rem solid #ccc; /* 1px */
-    border-radius: 0.1875rem; /* 3px */
-    width: calc(100% - 0.5rem); /* Adjust for padding */
-    margin-bottom: 0.3125rem; /* 5px */
+    border-radius: 0.15rem; /* Smaller border-radius */
+    width: calc(100% - 0.4rem); /* Adjust for padding */
+    margin-bottom: 0.25rem; /* Smaller margin */
+    font-size: 0.75rem; /* Smaller font size */
   }
 
   .admin-login-section button {
-    padding: 0.5rem 0.75rem; /* 8px 12px */
+    padding: 0.4rem 0.6rem; /* Smaller padding */
     border: none;
-    border-radius: 0.1875rem; /* 3px */
+    border-radius: 0.15rem; /* Smaller border-radius */
     background-color: #2196f3;
     color: white;
     cursor: pointer;
     width: 100%;
+    font-size: 0.75rem; /* Smaller font size */
   }
 
   .admin-login-section button:hover {
@@ -709,9 +731,45 @@
     background-color: #3f51b5;
   }
 
+  /* Resizer for sidebar */
+  .resizer {
+    width: 0.5rem; /* 8px */
+    background: #ccc;
+    cursor: ew-resize;
+    grid-area: resizer;
+    z-index: 100;
+    display: none; /* Hidden by default, shown on larger screens */
+  }
+
+  .resizer:hover {
+    background: #2196f3;
+  }
+
   /* --- Media Queries for Responsiveness --- */
 
   /* Small Tablets (e.g., portrait mode) */
+  @media (max-width: 768px) {
+    /* Mobile sidebar toggle button is removed, sidebar is fixed and toggled */
+    .materials {
+      display: block; /* Show sidebar as fixed overlay */
+    }
+    .resizer {
+      display: none; /* Hide resizer on mobile */
+    }
+    /* Adjust admin toggle and login section for mobile to not overlap sidebar toggle */
+    .admin-mode-toggle {
+      top: auto; /* Reset top */
+      bottom: 0.5rem; /* Keep at bottom right of profile */
+      right: 0.5rem;
+    }
+    .admin-login-section {
+      top: auto; /* Reset top */
+      bottom: 2.5rem; /* Position relative to profile bottom */
+      right: 0.5rem;
+      max-width: calc(100% - 1rem); /* Adjust max-width for smaller screens */
+    }
+  }
+
   @media (min-width: 481px) and (max-width: 768px) {
     body {
       grid-template-columns: 1fr;
@@ -721,10 +779,6 @@
         "header"
         "page"
         "footer";
-    }
-
-    .materials {
-      display: none; /* Still hidden on small tablets */
     }
 
     .header h1 {
@@ -752,19 +806,6 @@
       margin-bottom: 0;
     }
 
-    .admin-mode-toggle {
-      top: 1.25rem;
-      right: 1.25rem;
-      padding: 0.75rem 1rem;
-      font-size: 0.875rem;
-    }
-
-    .admin-login-section {
-      top: 5rem;
-      right: 1.25rem;
-      max-width: 25rem; /* 400px */
-    }
-
     .help-faq-btn {
       bottom: 1.875rem; /* 30px */
       right: 1.875rem; /* 30px */
@@ -786,18 +827,29 @@
   /* Medium Tablets to Laptops */
   @media (min-width: 769px) and (max-width: 1024px) {
     body {
-      grid-template-columns: 200px 1fr; /* Smaller sidebar */
+      grid-template-columns: var(--sidebar-width) 0.5rem 1fr; /* Sidebar, resizer, page */
       grid-template-rows: 7.5rem 1fr 3.75rem; /* 120px 1fr 60px */
       grid-template-areas:
-        "profile header"
-        "materials page"
-        "footer footer";
+        "profile header header"
+        "materials resizer page"
+        "footer footer footer";
     }
 
     .materials {
       display: block; /* Show sidebar */
-      border-right: 0.1875rem solid #2196f3;
+      position: relative; /* Not fixed anymore */
+      left: 0; /* Reset left position */
+      width: auto; /* Reset width */
+      height: auto; /* Reset height */
+      box-shadow: none; /* Remove shadow */
+      border-right: none; /* Resizer acts as border */
       padding: 1rem;
+      overflow-x: hidden; /* Prevent horizontal scrolling for sidebar content */
+      white-space: normal; /* Allow wrapping of content */
+    }
+
+    .resizer {
+      display: block; /* Show resizer */
     }
 
     .profile {
@@ -843,16 +895,16 @@
     }
 
     .admin-mode-toggle {
-      top: 1.25rem;
-      right: 1.25rem;
-      padding: 0.75rem 1rem;
-      font-size: 0.875rem;
+      top: auto; /* Reset top */
+      bottom: 0.5rem; /* Keep at bottom right of profile */
+      right: 0.5rem;
     }
 
     .admin-login-section {
-      top: 5rem;
-      right: 1.25rem;
-      max-width: 25rem; /* 400px */
+      top: auto; /* Reset top */
+      bottom: 2.5rem; /* Position relative to profile bottom */
+      right: 0.5rem;
+      max-width: 15rem; /* 240px */
     }
 
     .help-faq-btn {
@@ -876,16 +928,28 @@
   /* Large Laptops and Desktops */
   @media (min-width: 1025px) {
     body {
-      grid-template-columns: 300px 1fr; /* Original sidebar width */
+      grid-template-columns: var(--sidebar-width) 0.5rem 1fr; /* Sidebar, resizer, page */
       grid-template-rows: 7.5rem 1fr 3.75rem; /* 120px 1fr 60px */
       grid-template-areas:
-        "profile header"
-        "materials page"
-        "footer footer";
+        "profile header header"
+        "materials resizer page"
+        "footer footer footer";
     }
 
     .materials {
       display: block; /* Always show sidebar on large screens */
+      position: relative; /* Not fixed anymore */
+      left: 0; /* Reset left position */
+      width: auto; /* Reset width */
+      height: auto; /* Reset height */
+      box-shadow: none; /* Remove shadow */
+      overflow-x: hidden; /* Prevent horizontal scrolling for sidebar content */
+      white-space: normal; /* Allow wrapping of content */
+      border-right: none; /* Resizer acts as border */
+    }
+
+    .resizer {
+      display: block; /* Show resizer */
     }
 
     .header h1 {
@@ -919,16 +983,16 @@
     }
 
     .admin-mode-toggle {
-      top: 1.25rem; /* 20px */
-      right: 1.25rem; /* 20px */
-      padding: 0.625rem 0.9375rem; /* 10px 15px */
-      font-size: 0.875rem;
+      top: auto; /* Reset top */
+      bottom: 0.5rem; /* Keep at bottom right of profile */
+      right: 0.5rem;
     }
 
     .admin-login-section {
-      top: 4rem; /* 64px */
-      right: 1.25rem; /* 20px */
-      max-width: 25rem; /* 400px */
+      top: auto; /* Reset top */
+      bottom: 2.5rem; /* Position relative to profile bottom */
+      right: 0.5rem;
+      max-width: 15rem; /* 240px */
     }
 
     .help-faq-btn {
@@ -948,25 +1012,13 @@
 </head>
 <body>
 
-  <!-- Admin Mode Toggle Button -->
-  <button class="admin-mode-toggle" id="admin-mode-toggle-btn" onclick="toggleAdminMode()">
-    Login
-  </button>
-
-  <!-- Admin Login/Logout Section -->
-  <div class="admin-login-section" id="admin-login-section">
-    <div id="admin-login-form">
-      <div class="form-group">
-        <label for="admin-password">Password:</label>
-        <input type="password" id="admin-password" placeholder="Masukkan password"/>
-      </div>
-      <button onclick="loginAdmin()">Login</button>
-    </div>
-    <div id="admin-logout-form" style="display: none;">
-      <p>Mode Admin Aktif</p>
-      <button onclick="logoutAdmin()">Logout</button>
-    </div>
-  </div>
+  <!-- Mobile Sidebar Toggle Button (Removed as per request) -->
+  <!-- <button class="sidebar-toggle-btn" onclick="toggleSidebar()">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="white">
+      <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+    </svg>
+    Materi
+  </button> -->
 
   <!-- Profile Section -->
   <div class="profile">
@@ -976,6 +1028,26 @@
     </div>
     <input type="file" id="profile-image-upload" accept="image/*" style="display: none;" onchange="handleProfileImageUpload(event)"/>
     <button class="profile-upload-btn" onclick="document.getElementById('profile-image-upload').click()">Upload Foto</button>
+
+    <!-- Admin Mode Toggle Button - Moved inside profile section -->
+    <button class="admin-mode-toggle" id="admin-mode-toggle-btn" onclick="toggleAdminMode()">
+      Login
+    </button>
+
+    <!-- Admin Login/Logout Section - Moved inside profile section -->
+    <div class="admin-login-section" id="admin-login-section">
+      <div id="admin-login-form">
+        <div class="form-group">
+          <label for="admin-password">Password:</label>
+          <input type="password" id="admin-password" placeholder="Masukkan password"/>
+        </div>
+        <button onclick="loginAdmin()">Login</button>
+      </div>
+      <div id="admin-logout-form" style="display: none;">
+        <p>Mode Admin Aktif</p>
+        <button onclick="logoutAdmin()">Logout</button>
+      </div>
+    </div>
   </div>
 
   <!-- Header -->
@@ -985,7 +1057,7 @@
   </header>
 
   <!-- Materials Sidebar -->
-  <nav class="materials">
+  <nav class="materials" id="materials-sidebar">
     <div class="materials-title editable-content" data-editable-id="materials-sidebar-title">Materials</div>
     
     <div class="material-item" data-material-id="1" onclick="showMaterial(1)">
@@ -1037,6 +1109,7 @@
       <button class="delete-btn" onclick="deleteMaterial(7, event)">Hapus</button>
     </div>
 
+    <!-- AnalysisTools will be dynamically re-added at the end -->
     <div class="material-item" data-material-id="8" onclick="showMaterial(8)">
       <strong class="editable-content" data-editable-id="material-title-8">8. AnalysisTools</strong>
       <div class="material-subtitle editable-content" data-editable-id="material-subtitle-8">Tools analisis data statistik interaktif</div>
@@ -1048,6 +1121,9 @@
       <button class="add-material-btn" onclick="addNewMaterial()">+ Tambah Materi Baru</button>
     </div>
   </nav>
+
+  <!-- Resizer for sidebar -->
+  <div class="resizer" id="resizer"></div>
 
   <!-- Main Content Page -->
   <main class="page">
@@ -1289,7 +1365,7 @@
           <h4>Referensi</h4>
           <ol>
             <li>A. Agresti and B. Finlay, "Statistical Methods for the Social Sciences," 5th ed., Pearson, 2014.</li>
-            <li>D. S. Moore et al., "Introduction to the Practice of Statistics," 9th ed., W.H. Freeman, 2017.</li>
+            <li>D. S. Moore et et al., "Introduction to the Practice of Statistics," 9th ed., W.H. Freeman, 2017.</li>
             <li>R. Lind et al., "Statistical Techniques in Business and Economics," 17th ed., McGraw-Hill, 2018.</li>
             <li>B. Render et al., "Quantitative Analysis for Management," 13th ed., Pearson, 2018.</li>
           </ol>
@@ -2547,6 +2623,11 @@ Kelompok2: 34, 56, 78"></textarea>
    * @param {number} materialId - The ID of the material to display.
    */
   function showMaterial(materialId) {
+    // Close sidebar on mobile after selection
+    if (window.innerWidth <= 768) { // Adjust breakpoint as needed
+      // toggleSidebar(); // Removed as per request
+    }
+
     // Remove active class from all material items
     document.querySelectorAll('.material-item').forEach(item => {
       item.classList.remove('active');
@@ -2577,12 +2658,17 @@ Kelompok2: 34, 56, 78"></textarea>
    * @param {string} toolId - The ID of the analysis tool to display.
    */
   function showAnalysisTool(toolId) {
+    // Close sidebar on mobile after selection
+    if (window.innerWidth <= 768) { // Adjust breakpoint as needed
+      // toggleSidebar(); // Removed as per request
+    }
+
     // Remove active class from all material items
     document.querySelectorAll('.material-item').forEach(item => {
       item.classList.remove('active');
     });
     // Set active class for AnalysisTools sidebar item
-    const analysisToolsItem = document.querySelector('.material-item[data-material-id="8"]');
+    const analysisToolsItem = document.querySelector('.material-item[data-material-id="8"]'); // Assuming AnalysisTools is always ID 8 initially
     if (analysisToolsItem) {
       analysisToolsItem.classList.add('active');
     }
@@ -2828,14 +2914,18 @@ Kelompok2: 34, 56, 78"></textarea>
       if (materialContents[materialId]) {
         materialContents[materialId].title = newContent;
         saveToLocalStorage('materialContents', materialContents);
-        document.querySelector(`.material-item[data-material-id="${materialId}"] strong`).innerHTML = newContent;
+        // Update the sidebar item directly
+        const sidebarItem = document.querySelector(`.material-item[data-material-id="${materialId}"] strong`);
+        if (sidebarItem) sidebarItem.innerHTML = newContent;
       }
     } else if (id.startsWith('material-subtitle-')) {
       const materialId = parseInt(id.replace('material-subtitle-', ''));
       if (materialContents[materialId]) {
         materialContents[materialId].subtitle = newContent;
         saveToLocalStorage('materialContents', materialContents);
-        document.querySelector(`.material-item[data-material-id="${materialId}"] .material-subtitle`).innerHTML = newContent;
+        // Update the sidebar item directly
+        const sidebarItem = document.querySelector(`.material-item[data-material-id="${materialId}"] .material-subtitle`);
+        if (sidebarItem) sidebarItem.innerHTML = newContent;
       }
     } else if (id.startsWith('material-content-')) {
       const materialId = parseInt(id.replace('material-content-', ''));
@@ -2898,12 +2988,8 @@ Kelompok2: 34, 56, 78"></textarea>
       saveToLocalStorage('materialContents', materialContents);
     }
 
-    const sidebarItem = document.querySelector(`.material-item[data-material-id="${materialId}"]`);
-    if (sidebarItem) {
-      sidebarItem.querySelector('strong').innerHTML = materialContents[materialId].title;
-      sidebarItem.querySelector('.material-subtitle').innerHTML = materialContents[materialId].subtitle;
-    }
-
+    // Rebuild sidebar to ensure correct numbering and order
+    loadInitialContent(); // This will rebuild the sidebar and re-apply page content
     alert('Konten materi berhasil disimpan (secara lokal)!');
     showMaterial(materialId); // Reload the material to show saved content
   }
@@ -2929,7 +3015,13 @@ Kelompok2: 34, 56, 78"></textarea>
   function addNewMaterial() {
     if (!isAdminMode) return; // Only allow adding in admin mode
 
-    const newId = nextMaterialId++;
+    // Find the current AnalysisTools item
+    const analysisToolsItem = materialContents[8]; // Assuming ID 8 is always AnalysisTools
+
+    // Create a new ID for the new material
+    const newId = Object.keys(materialContents).length + 1; // Simple increment for new ID
+
+    // Create the new material object
     const newMaterial = {
       title: `${newId}. Materi Baru`,
       subtitle: "Deskripsi singkat materi baru",
@@ -2939,28 +3031,40 @@ Kelompok2: 34, 56, 78"></textarea>
         <p>Tambahkan informasi relevan di sini.</p>
       `
     };
-    materialContents[newId] = newMaterial;
+
+    // Shift existing materials (excluding AnalysisTools) to make space
+    // and re-assign IDs to maintain sequential numbering
+    const updatedMaterialContents = {};
+    let currentNewId = 1;
+    const sortedKeys = Object.keys(materialContents).map(Number).sort((a, b) => a - b);
+
+    for (const key of sortedKeys) {
+        if (key === 8) { // Skip AnalysisTools for now
+            continue;
+        }
+        // Re-number existing materials
+        updatedMaterialContents[currentNewId] = {
+            ...materialContents[key],
+            title: `${currentNewId}. ${materialContents[key].title.split('. ').slice(1).join('. ')}`
+        };
+        currentNewId++;
+    }
+
+    // Insert the new material before AnalysisTools
+    updatedMaterialContents[currentNewId] = newMaterial;
+    currentNewId++;
+
+    // Add AnalysisTools back at the end with its new number
+    updatedMaterialContents[currentNewId] = {
+        ...analysisToolsItem,
+        title: `${currentNewId}. ${analysisToolsItem.title.split('. ').slice(1).join('. ')}`
+    };
+
+    materialContents = updatedMaterialContents;
     saveToLocalStorage('materialContents', materialContents);
 
-    const materialsNav = document.querySelector('.materials');
-    const adminControls = materialsNav.querySelector('.admin-controls');
-
-    const newMaterialItem = document.createElement('div');
-    newMaterialItem.classList.add('material-item');
-    newMaterialItem.setAttribute('data-material-id', newId);
-    newMaterialItem.setAttribute('onclick', `showMaterial(${newId})`);
-    newMaterialItem.innerHTML = `
-      <strong class="editable-content" data-editable-id="material-title-${newId}">${newMaterial.title}</strong>
-      <div class="material-subtitle editable-content" data-editable-id="material-subtitle-${newId}">${newMaterial.subtitle}</div>
-      <button class="edit-btn" onclick="editMaterial(${newId}, event)">Edit</button>
-      <button class="delete-btn" onclick="deleteMaterial(${newId}, event)">Hapus</button>
-    `;
-    materialsNav.insertBefore(newMaterialItem, adminControls);
-
-    if (isAdminMode) {
-      enableAdminEditingForElement(newMaterialItem.querySelector('strong'));
-      enableAdminEditingForElement(newMaterialItem.querySelector('.material-subtitle'));
-    }
+    // Rebuild the sidebar to reflect the new order and numbering
+    loadInitialContent();
 
     alert(`Materi "${newMaterial.title}" berhasil ditambahkan!`);
     showMaterial(newId); // Display the new material
@@ -2976,9 +3080,27 @@ Kelompok2: 34, 56, 78"></textarea>
     if (!isAdminMode) return; // Only allow deleting in admin mode
 
     if (confirm(`Apakah Anda yakin ingin menghapus materi "${materialContents[materialId].title}"?`)) {
+      // Remove the material
       delete materialContents[materialId];
+
+      // Re-number remaining materials to maintain sequential order
+      const updatedMaterialContents = {};
+      let currentNewId = 1;
+      const sortedKeys = Object.keys(materialContents).map(Number).sort((a, b) => a - b);
+
+      for (const key of sortedKeys) {
+          updatedMaterialContents[currentNewId] = {
+              ...materialContents[key],
+              title: `${currentNewId}. ${materialContents[key].title.split('. ').slice(1).join('. ')}`
+          };
+          currentNewId++;
+      }
+      materialContents = updatedMaterialContents;
       saveToLocalStorage('materialContents', materialContents);
-      document.querySelector(`.material-item[data-material-id="${materialId}"]`).remove();
+
+      // Rebuild the sidebar to reflect the new order and numbering
+      loadInitialContent();
+
       alert('Materi berhasil dihapus!');
       // Show welcome page or first material after deletion
       document.getElementById('pageContent').innerHTML = initialWelcomeContent;
@@ -3004,33 +3126,33 @@ Kelompok2: 34, 56, 78"></textarea>
     const storedMaterialContents = loadFromLocalStorage('materialContents');
     if (storedMaterialContents) {
       materialContents = storedMaterialContents;
-      // Rebuild sidebar based on stored materials
-      const materialsNav = document.querySelector('.materials');
-      const adminControls = materialsNav.querySelector('.admin-controls');
-      
-      // Remove all existing material items to rebuild them
-      materialsNav.querySelectorAll('.material-item').forEach(item => item.remove());
-
-      // Sort material IDs numerically
-      const sortedMaterialIds = Object.keys(materialContents).map(Number).sort((a, b) => a - b);
-
-      sortedMaterialIds.forEach(id => {
-        const material = materialContents[id];
-        const newMaterialItem = document.createElement('div');
-        newMaterialItem.classList.add('material-item');
-        newMaterialItem.setAttribute('data-material-id', id);
-        newMaterialItem.setAttribute('onclick', `showMaterial(${id})`);
-        newMaterialItem.innerHTML = `
-          <strong class="editable-content" data-editable-id="material-title-${id}">${material.title}</strong>
-          <div class="material-subtitle editable-content" data-editable-id="material-subtitle-${id}">${material.subtitle}</div>
-          <button class="edit-btn" onclick="editMaterial(${id}, event)">Edit</button>
-          <button class="delete-btn" onclick="deleteMaterial(${id}, event)">Hapus</button>
-        `;
-        materialsNav.insertBefore(newMaterialItem, adminControls);
-      });
-      // Update nextMaterialId to ensure new materials get unique IDs
-      nextMaterialId = Math.max(...Object.keys(materialContents).map(Number)) + 1;
     }
+
+    const materialsNav = document.getElementById('materials-sidebar');
+    const adminControls = materialsNav.querySelector('.admin-controls');
+    
+    // Remove all existing material items to rebuild them
+    materialsNav.querySelectorAll('.material-item').forEach(item => item.remove());
+
+    // Sort material IDs numerically to ensure correct order
+    const sortedMaterialIds = Object.keys(materialContents).map(Number).sort((a, b) => a - b);
+
+    sortedMaterialIds.forEach(id => {
+      const material = materialContents[id];
+      const newMaterialItem = document.createElement('div');
+      newMaterialItem.classList.add('material-item');
+      newMaterialItem.setAttribute('data-material-id', id);
+      newMaterialItem.setAttribute('onclick', `showMaterial(${id})`);
+      newMaterialItem.innerHTML = `
+        <strong class="editable-content" data-editable-id="material-title-${id}">${material.title}</strong>
+        <div class="material-subtitle editable-content" data-editable-id="material-subtitle-${id}">${material.subtitle}</div>
+        <button class="edit-btn" onclick="editMaterial(${id}, event)">Edit</button>
+        <button class="delete-btn" onclick="deleteMaterial(${id}, event)">Hapus</button>
+      `;
+      materialsNav.insertBefore(newMaterialItem, adminControls);
+    });
+    // Update nextMaterialId to ensure new materials get unique IDs
+    nextMaterialId = Math.max(...Object.keys(materialContents).map(Number)) + 1;
 
     // Load other page content from local storage
     loadPageContentFromLocalStorage();
@@ -4354,6 +4476,57 @@ Kelompok3: 45, 67, 89, 56, 78`;
     }
   }
 
+  // --- Mobile Sidebar Toggle (Removed as per request) ---
+  // function toggleSidebar() {
+  //   const sidebar = document.getElementById('materials-sidebar');
+  //   sidebar.classList.toggle('open');
+  // }
+
+  // --- Resizable Sidebar Functionality ---
+  function setupResizableSidebar() {
+    const resizer = document.getElementById('resizer');
+    const sidebar = document.getElementById('materials-sidebar');
+    const body = document.body;
+
+    let x = 0;
+    let w = 0;
+
+    const minSidebarWidth = 200; // Minimum width for the sidebar
+    const maxSidebarWidth = 500; // Maximum width for the sidebar
+
+    function mouseDownHandler(e) {
+      x = e.clientX;
+      const sidebarWidth = sidebar.offsetWidth;
+      w = sidebarWidth;
+
+      document.addEventListener('mousemove', mouseMoveHandler);
+      document.addEventListener('mouseup', mouseUpHandler);
+    }
+
+    function mouseMoveHandler(e) {
+      const dx = e.clientX - x;
+      let newWidth = w + dx;
+
+      if (newWidth < minSidebarWidth) {
+        newWidth = minSidebarWidth;
+      }
+      if (newWidth > maxSidebarWidth) {
+        newWidth = maxSidebarWidth;
+      }
+
+      body.style.setProperty('--sidebar-width', `${newWidth}px`);
+    }
+
+    function mouseUpHandler() {
+      document.removeEventListener('mousemove', mouseMoveHandler);
+      document.removeEventListener('mouseup', mouseUpHandler);
+    }
+
+    if (resizer) {
+      resizer.addEventListener('mousedown', mouseDownHandler);
+    }
+  }
+
 
   // --- DOMContentLoaded ---
   document.addEventListener('DOMContentLoaded', function() {
@@ -4375,22 +4548,28 @@ Kelompok3: 45, 67, 89, 56, 78`;
       makeDraggable(helpFaqBtn);
     }
 
-    // The admin-mode-toggle-btn is no longer draggable, so remove the call to makeDraggable for it.
-    // const adminToggleBtn = document.getElementById('admin-mode-toggle-btn');
-    // if (adminToggleBtn) {
-    //   makeDraggable(adminToggleBtn);
-    // }
+    // Setup resizable sidebar
+    setupResizableSidebar();
 
     // Event listener to close admin login section when clicking outside
     document.addEventListener('click', function(event) {
         const adminLoginSection = document.getElementById('admin-login-section');
         const adminToggleBtn = document.getElementById('admin-mode-toggle-btn');
+        // const sidebar = document.getElementById('materials-sidebar'); // Removed
+        // const sidebarToggleBtn = document.querySelector('.sidebar-toggle-btn'); // Removed
 
-        // Check if the click is outside the login section and the toggle button
+
+        // Close admin login section if clicking outside
         if (adminLoginSection.style.display === 'flex' && !isAdminMode &&
             !adminLoginSection.contains(event.target) && !adminToggleBtn.contains(event.target)) {
             closeAdminLoginSection();
         }
+
+        // Close mobile sidebar if clicking outside (only if mobile sidebar is still used for some reason)
+        // if (sidebar.classList.contains('open') &&
+        //     !sidebar.contains(event.target) && !sidebarToggleBtn.contains(event.target)) {
+        //     toggleSidebar();
+        // }
     });
   });
 </script>
