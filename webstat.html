@@ -25,9 +25,8 @@
       "header"
       "page"
       "footer";
-    /* overflow-x: hidden; Removed to allow resizable sidebar */
     font-size: 16px; /* Base font size for rem units */
-    --sidebar-width: 300px; /* Default sidebar width for larger screens */
+    --sidebar-width: 250px; /* Default sidebar width for larger screens, adjusted for better initial fit */
   }
 
   /* Profile Section */
@@ -118,7 +117,7 @@
     border-right: 0.1875rem solid #2196f3; /* 3px */
     padding: 1.25rem; /* 20px */
     overflow-y: auto; /* Enable vertical scrolling */
-    max-height: calc(100vh - 10rem); /* Limit height to allow scrolling, adjust 10rem as needed */
+    max-height: 100vh; /* Full height on mobile */
     font-size: 0.875rem; /* 14px */
     line-height: 1.5;
     display: none; /* Hidden by default on mobile */
@@ -126,8 +125,8 @@
     top: 0;
     left: -100%; /* Hide off-screen */
     width: 80%; /* Take up 80% of screen width */
-    max-width: 500px; /* Max width for larger phones */
-    height: 100%; /* This will be overridden by max-height on desktop */
+    max-width: 500px; /* Max width for larger phones, adjusted */
+    height: 100%;
     z-index: 1000;
     transition: left 0.3s ease-in-out;
     box-shadow: 0.25rem 0 1rem rgba(0,0,0,0.2);
@@ -746,32 +745,165 @@
     background: #2196f3;
   }
 
+  /* Mobile Sidebar Toggle Button */
+  .sidebar-toggle-btn {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    background: linear-gradient(135deg, #00bcd4, #26c6da);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: bold;
+    z-index: 1001;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.2);
+  }
+
+  .sidebar-toggle-btn svg {
+    fill: white;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
   /* --- Media Queries for Responsiveness --- */
 
-  /* Small Tablets (e.g., portrait mode) */
-  @media (max-width: 768px) {
-    /* Mobile sidebar toggle button is removed, sidebar is fixed and toggled */
+  /* Small Phones (up to 480px) */
+  @media (max-width: 480px) {
+    body {
+      font-size: 14px; /* Smaller base font for very small screens */
+    }
+
+    .header h1 {
+      font-size: 1.25rem; /* 20px */
+    }
+
+    .header p {
+      font-size: 0.8rem; /* 12.8px */
+    }
+
+    .profile {
+      padding: 0.75rem;
+    }
+
+    .author-photo {
+      width: 4rem;
+      height: 4rem;
+      font-size: 0.65rem;
+    }
+
+    .profile-upload-btn {
+      font-size: 0.65rem;
+      padding: 0.25rem 0.5rem;
+    }
+
     .materials {
-      display: block; /* Show sidebar as fixed overlay */
-      max-height: 100vh; /* On mobile, sidebar can take full height */
+      width: 90%; /* Wider sidebar on very small screens */
+      max-width: 280px;
+      padding: 1rem;
     }
-    .resizer {
-      display: none; /* Hide resizer on mobile */
+
+    .materials-title {
+      font-size: 0.9rem;
+      padding: 0.6rem;
     }
-    /* Adjust admin toggle and login section for mobile to not overlap sidebar toggle */
+
+    .material-item {
+      padding: 0.6rem;
+      font-size: 0.8rem;
+    }
+
+    .material-subtitle {
+      font-size: 0.7rem;
+      margin-left: 0.75rem;
+    }
+
+    .page {
+      padding: 1rem;
+    }
+
+    .page-content {
+      padding: 1rem;
+      border-radius: 0.5rem;
+    }
+
+    .page-content h2 {
+      font-size: 1.1rem;
+    }
+
+    .page-content h3 {
+      font-size: 1rem;
+    }
+
+    .footer {
+      padding: 1rem;
+      font-size: 0.75rem;
+    }
+
+    .footer-left {
+      margin-bottom: 0.25rem;
+    }
+
+    .footer-item {
+      gap: 0.25rem;
+    }
+
+    .help-faq-btn {
+      bottom: 1rem;
+      right: 1rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      font-size: 1rem;
+    }
+
+    .help-faq-btn svg {
+      width: 1.2rem;
+      height: 1.2rem;
+    }
+
+    .help-faq-content {
+      width: 95%;
+      max-width: 300px;
+    }
+
+    .chatbot-input input {
+      padding: 0.4rem 0.6rem;
+      font-size: 0.8rem;
+    }
+
+    .chatbot-input button {
+      padding: 0.4rem 0.7rem;
+      font-size: 0.8rem;
+    }
+
     .admin-mode-toggle {
-      top: auto; /* Reset top */
-      bottom: 0.5rem; /* Keep at bottom right of profile */
-      right: 0.5rem;
+      font-size: 0.6rem;
+      padding: 0.15rem 0.4rem;
+      bottom: 0.3rem;
+      right: 0.3rem;
     }
+
     .admin-login-section {
-      top: auto; /* Reset top */
-      bottom: 2.5rem; /* Position relative to profile bottom */
-      right: 0.5rem;
-      max-width: calc(100% - 1rem); /* Adjust max-width for smaller screens */
+      bottom: 2rem;
+      right: 0.3rem;
+      max-width: 12rem;
+      padding: 0.4rem;
+    }
+
+    .admin-login-section label,
+    .admin-login-section input[type="password"],
+    .admin-login-section button {
+      font-size: 0.7rem;
+      padding: 0.3rem;
     }
   }
 
+  /* Medium Phones to Small Tablets (481px - 768px) */
   @media (min-width: 481px) and (max-width: 768px) {
     body {
       grid-template-columns: 1fr;
@@ -781,6 +913,21 @@
         "header"
         "page"
         "footer";
+      font-size: 15px; /* Slightly larger base font */
+    }
+
+    .sidebar-toggle-btn {
+      display: flex; /* Show toggle button on mobile */
+    }
+
+    .materials {
+      display: block; /* Show sidebar as fixed overlay */
+      max-height: 100vh;
+      width: 70%; /* Adjusted width */
+      max-width: 350px; /* Adjusted max-width */
+    }
+    .resizer {
+      display: none; /* Hide resizer on mobile */
     }
 
     .header h1 {
@@ -824,9 +971,20 @@
     .help-faq-content {
       max-width: 30rem; /* 480px */
     }
+
+    /* Admin toggle and login section adjustments */
+    .admin-mode-toggle {
+      bottom: 0.5rem;
+      right: 0.5rem;
+    }
+    .admin-login-section {
+      bottom: 2.5rem;
+      right: 0.5rem;
+      max-width: 15rem;
+    }
   }
 
-  /* Medium Tablets to Laptops */
+  /* Tablets to Laptops (769px - 1024px) */
   @media (min-width: 769px) and (max-width: 1024px) {
     body {
       grid-template-columns: var(--sidebar-width) 0.5rem 1fr; /* Sidebar, resizer, page */
@@ -835,6 +993,11 @@
         "profile header header"
         "materials resizer page"
         "footer footer footer";
+      font-size: 16px; /* Base font size */
+    }
+
+    .sidebar-toggle-btn {
+      display: none; /* Hide toggle button on larger screens */
     }
 
     .materials {
@@ -843,7 +1006,7 @@
       left: 0; /* Reset left position */
       width: auto; /* Reset width */
       height: auto; /* Reset height */
-      max-height: calc(100vh - 10rem); /* Apply max-height for scrolling */
+      max-height: calc(100vh - 7.5rem - 3.75rem); /* Adjust max-height based on header/footer */
       box-shadow: none; /* Remove shadow */
       border-right: none; /* Resizer acts as border */
       padding: 1rem;
@@ -898,16 +1061,14 @@
     }
 
     .admin-mode-toggle {
-      top: auto; /* Reset top */
-      bottom: 0.5rem; /* Keep at bottom right of profile */
+      bottom: 0.5rem;
       right: 0.5rem;
     }
 
     .admin-login-section {
-      top: auto; /* Reset top */
-      bottom: 2.5rem; /* Position relative to profile bottom */
+      bottom: 2.5rem;
       right: 0.5rem;
-      max-width: 15rem; /* 240px */
+      max-width: 15rem;
     }
 
     .help-faq-btn {
@@ -928,16 +1089,20 @@
     }
   }
 
-  /* Large Laptops and Desktops */
+  /* Large Laptops and Desktops (1025px and up) */
   @media (min-width: 1025px) {
     body {
-      /* Updated grid-template-columns to use the CSS variable */
       grid-template-columns: var(--sidebar-width) 0.5rem 1fr; /* Sidebar, resizer, page */
       grid-template-rows: 7.5rem 1fr 3.75rem; /* 120px 1fr 60px */
       grid-template-areas:
         "profile header header"
         "materials resizer page"
         "footer footer footer";
+      font-size: 16px;
+    }
+
+    .sidebar-toggle-btn {
+      display: none; /* Hide toggle button on larger screens */
     }
 
     .materials {
@@ -946,7 +1111,7 @@
       left: 0; /* Reset left position */
       width: auto; /* Reset width */
       height: auto; /* Reset height */
-      max-height: calc(100vh - 10rem); /* Apply max-height for scrolling */
+      max-height: calc(100vh - 7.5rem - 3.75rem); /* Adjust max-height based on header/footer */
       box-shadow: none; /* Remove shadow */
       overflow-x: hidden; /* Prevent horizontal scrolling for sidebar content */
       white-space: normal; /* Allow wrapping of content */
@@ -988,16 +1153,14 @@
     }
 
     .admin-mode-toggle {
-      top: auto; /* Reset top */
-      bottom: 0.5rem; /* Keep at bottom right of profile */
+      bottom: 0.5rem;
       right: 0.5rem;
     }
 
     .admin-login-section {
-      top: auto; /* Reset top */
-      bottom: 2.5rem; /* Position relative to profile bottom */
+      bottom: 2.5rem;
       right: 0.5rem;
-      max-width: 15rem; /* 240px */
+      max-width: 15rem;
     }
 
     .help-faq-btn {
@@ -1017,13 +1180,13 @@
 </head>
 <body>
 
-  <!-- Mobile Sidebar Toggle Button (Removed as per request) -->
-  <!-- <button class="sidebar-toggle-btn" onclick="toggleSidebar()">
+  <!-- Mobile Sidebar Toggle Button -->
+  <button class="sidebar-toggle-btn" onclick="toggleSidebar()">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="white">
       <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
     </svg>
     Materi
-  </button> -->
+  </button>
 
   <!-- Profile Section -->
   <div class="profile">
@@ -2630,7 +2793,7 @@ Kelompok2: 34, 56, 78"></textarea>
   function showMaterial(materialId) {
     // Close sidebar on mobile after selection
     if (window.innerWidth <= 768) { // Adjust breakpoint as needed
-      // toggleSidebar(); // Removed as per request
+      toggleSidebar(); // Re-added sidebar toggle
     }
 
     // Remove active class from all material items
@@ -2665,7 +2828,7 @@ Kelompok2: 34, 56, 78"></textarea>
   function showAnalysisTool(toolId) {
     // Close sidebar on mobile after selection
     if (window.innerWidth <= 768) { // Adjust breakpoint as needed
-      // toggleSidebar(); // Removed as per request
+      toggleSidebar(); // Re-added sidebar toggle
     }
 
     // Remove active class from all material items
@@ -4481,11 +4644,11 @@ Kelompok3: 45, 67, 89, 56, 78`;
     }
   }
 
-  // --- Mobile Sidebar Toggle (Removed as per request) ---
-  // function toggleSidebar() {
-  //   const sidebar = document.getElementById('materials-sidebar');
-  //   sidebar.classList.toggle('open');
-  // }
+  // --- Mobile Sidebar Toggle ---
+  function toggleSidebar() {
+    const sidebar = document.getElementById('materials-sidebar');
+    sidebar.classList.toggle('open');
+  }
 
   // --- Resizable Sidebar Functionality ---
   function setupResizableSidebar() {
@@ -4566,8 +4729,8 @@ Kelompok3: 45, 67, 89, 56, 78`;
     document.addEventListener('click', function(event) {
         const adminLoginSection = document.getElementById('admin-login-section');
         const adminToggleBtn = document.getElementById('admin-mode-toggle-btn');
-        // const sidebar = document.getElementById('materials-sidebar'); // Removed
-        // const sidebarToggleBtn = document.querySelector('.sidebar-toggle-btn'); // Removed
+        const sidebar = document.getElementById('materials-sidebar');
+        const sidebarToggleBtn = document.querySelector('.sidebar-toggle-btn');
 
 
         // Close admin login section if clicking outside
@@ -4576,11 +4739,11 @@ Kelompok3: 45, 67, 89, 56, 78`;
             closeAdminLoginSection();
         }
 
-        // Close mobile sidebar if clicking outside (only if mobile sidebar is still used for some reason)
-        // if (sidebar.classList.contains('open') &&
-        //     !sidebar.contains(event.target) && !sidebarToggleBtn.contains(event.target)) {
-        //     toggleSidebar();
-        // }
+        // Close mobile sidebar if clicking outside
+        if (sidebar.classList.contains('open') && window.innerWidth <= 768 &&
+            !sidebar.contains(event.target) && (sidebarToggleBtn && !sidebarToggleBtn.contains(event.target))) {
+            toggleSidebar();
+        }
     });
   });
 </script>
