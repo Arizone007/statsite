@@ -397,10 +397,65 @@
     cursor: pointer;
     font-weight: bold;
     z-index: 1001;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .admin-mode-toggle.active {
     background-color: #f44336;
+  }
+
+  /* Admin Login Section */
+  .admin-login-section {
+    position: fixed;
+    top: 60px;
+    right: 20px;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    z-index: 1001;
+    display: none; /* Hidden by default */
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  body.admin-active .admin-login-section {
+    display: flex; /* Changed to flex to stack elements */
+  }
+
+  .admin-login-section .form-group {
+    margin-bottom: 0; /* Remove extra margin */
+  }
+
+  .admin-login-section label {
+    margin-right: 5px;
+    font-weight: bold;
+    display: block; /* Make label take full width */
+    margin-bottom: 5px;
+  }
+
+  .admin-login-section input[type="password"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    width: calc(100% - 16px); /* Adjust width for padding */
+    margin-bottom: 5px;
+  }
+
+  .admin-login-section button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 3px;
+    background-color: #2196f3;
+    color: white;
+    cursor: pointer;
+    width: 100%; /* Make button take full width */
+  }
+
+  .admin-login-section button:hover {
+    background-color: #1976d2;
   }
 
   .editable-content {
@@ -449,7 +504,7 @@
     color: white;
   }
 
-  .material-item .edit-btn {
+  .material-item .edit-btn, .material-item .delete-btn {
     position: absolute;
     top: 5px;
     right: 5px;
@@ -461,9 +516,16 @@
     font-size: 10px;
     cursor: pointer;
     display: none; /* Hidden by default */
+    margin-left: 5px;
   }
 
-  body.admin-active .material-item .edit-btn {
+  .material-item .delete-btn {
+    right: 45px; /* Adjust position for delete button */
+    background-color: #f44336;
+  }
+
+  body.admin-active .material-item .edit-btn,
+  body.admin-active .material-item .delete-btn {
     display: block;
   }
 
@@ -482,13 +544,44 @@
     .materials {
       display: none;
     }
+
+    .admin-mode-toggle {
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        font-size: 10px;
+    }
+
+    .admin-login-section {
+        top: 50px;
+        right: 10px;
+        width: calc(100% - 20px);
+        max-width: 300px;
+    }
   }
 </style>
 </head>
 <body>
 
   <!-- Admin Mode Toggle Button -->
-  <button class="admin-mode-toggle" onclick="toggleAdminMode()">Admin Mode OFF</button>
+  <button class="admin-mode-toggle" onclick="toggleAdminMode()">
+    <span id="admin-mode-icon">🔒</span> Admin Mode
+  </button>
+
+  <!-- Admin Login/Logout Section -->
+  <div class="admin-login-section" id="admin-login-section">
+    <div id="admin-login-form">
+      <div class="form-group">
+        <label for="admin-password">Password:</label>
+        <input type="password" id="admin-password" placeholder="Masukkan password"/>
+      </div>
+      <button onclick="loginAdmin()">Login</button>
+    </div>
+    <div id="admin-logout-form" style="display: none;">
+      <p>Mode Admin Aktif</p>
+      <button onclick="logoutAdmin()">Logout</button>
+    </div>
+  </div>
 
   <!-- Profile Section -->
   <div class="profile">
@@ -511,48 +604,56 @@
       <strong class="editable-content" data-editable-id="material-title-1">1. Pengantar Statistika</strong>
       <div class="material-subtitle editable-content" data-editable-id="material-subtitle-1">Sejarah, arti, peran, populasi, sampel, teknik sampling, parameter dan statistik</div>
       <button class="edit-btn" onclick="editMaterial(1, event)">Edit</button>
+      <button class="delete-btn" onclick="deleteMaterial(1, event)">Hapus</button>
     </div>
 
     <div class="material-item" data-material-id="2" onclick="showMaterial(2)">
       <strong class="editable-content" data-editable-id="material-title-2">2. Statistika Deskriptif</strong>
       <div class="material-subtitle editable-content" data-editable-id="material-subtitle-2">Penyajian data, ukuran pemusatan, ukuran penyebaran</div>
       <button class="edit-btn" onclick="editMaterial(2, event)">Edit</button>
+      <button class="delete-btn" onclick="deleteMaterial(2, event)">Hapus</button>
     </div>
 
     <div class="material-item" data-material-id="3" onclick="showMaterial(3)">
       <strong class="editable-content" data-editable-id="material-title-3">3. Statistika Inferensial</strong>
       <div class="material-subtitle editable-content" data-editable-id="material-subtitle-3">Distribusi peluang, uji hipotesis, parametrik, non-parametrik</div>
       <button class="edit-btn" onclick="editMaterial(3, event)">Edit</button>
+      <button class="delete-btn" onclick="deleteMaterial(3, event)">Hapus</button>
     </div>
 
     <div class="material-item" data-material-id="4" onclick="showMaterial(4)">
       <strong class="editable-content" data-editable-id="material-title-4">4. Probabilitas dan Distribusi</strong>
       <div class="material-subtitle editable-content" data-editable-id="material-subtitle-4">Konsep dasar probabilitas, distribusi diskrit dan kontinu</div>
       <button class="edit-btn" onclick="editMaterial(4, event)">Edit</button>
+      <button class="delete-btn" onclick="deleteMaterial(4, event)">Hapus</button>
     </div>
 
     <div class="material-item" data-material-id="5" onclick="showMaterial(5)">
       <strong class="editable-content" data-editable-id="material-title-5">5. Teori Statistika Lanjut</strong>
       <div class="material-subtitle editable-content" data-editable-id="material-subtitle-5">GLM, Non-Linear Model, Bayesian</div>
       <button class="edit-btn" onclick="editMaterial(5, event)">Edit</button>
+      <button class="delete-btn" onclick="deleteMaterial(5, event)">Hapus</button>
     </div>
 
     <div class="material-item" data-material-id="6" onclick="showMaterial(6)">
       <strong class="editable-content" data-editable-id="material-title-6">6. Penerapan Statistika</strong>
       <div class="material-subtitle editable-content" data-editable-id="material-subtitle-6">Komputer, AI, sains data, big data</div>
       <button class="edit-btn" onclick="editMaterial(6, event)">Edit</button>
+      <button class="delete-btn" onclick="deleteMaterial(6, event)">Hapus</button>
     </div>
 
     <div class="material-item" data-material-id="7" onclick="showMaterial(7)">
       <strong class="editable-content" data-editable-id="material-title-7">7. Materi Lainnya</strong>
       <div class="material-subtitle editable-content" data-editable-id="material-subtitle-7">Topik tambahan dan pengembangan</div>
       <button class="edit-btn" onclick="editMaterial(7, event)">Edit</button>
+      <button class="delete-btn" onclick="deleteMaterial(7, event)">Hapus</button>
     </div>
 
     <div class="material-item" data-material-id="8" onclick="showMaterial(8)">
       <strong class="editable-content" data-editable-id="material-title-8">8. AnalysisTools</strong>
       <div class="material-subtitle editable-content" data-editable-id="material-subtitle-8">Tools analisis data statistik interaktif</div>
       <button class="edit-btn" onclick="editMaterial(8, event)">Edit</button>
+      <button class="delete-btn" onclick="deleteMaterial(8, event)">Hapus</button>
     </div>
 
     <div class="admin-controls">
@@ -607,6 +708,7 @@
   let isAdminMode = false;
   let currentEditableContent = null; // To store the currently edited element
   let originalContent = ''; // To store original content before editing
+  const ADMIN_PASSWORD = '12345'; // Password standar untuk admin
 
   // Konten untuk setiap materi (sekarang disimpan dalam objek global)
   // Ini akan menjadi sumber kebenaran untuk konten yang dapat diedit
@@ -1351,18 +1453,18 @@
         <div class="form-group">
           <label>Metode Input Data:</label>
           <select id="inputMethod_deskriptif" onchange="toggleInputMethod('deskriptif')">
-            <option value="file">Upload File (.csv, .xlsx)</option>
             <option value="manual">Input Manual</option>
             <option value="sample">Gunakan Sample Data</option>
+            <option value="file">Upload File (.csv, .xlsx)</option>
           </select>
         </div>
         
-        <div class="form-group file-input-group_deskriptif">
+        <div class="form-group file-input-group_deskriptif" style="display:none;">
           <label>Upload File Data:</label>
           <input type="file" accept=".csv,.xlsx" id="dataFile_deskriptif" onchange="handleFileUpload('deskriptif')"/>
         </div>
         
-        <div class="form-group manual-input-group_deskriptif" style="display:none;">
+        <div class="form-group manual-input-group_deskriptif">
           <label>Atau Input Data Manual (pisahkan dengan koma atau baris baru):</label>
           <textarea id="manualData_deskriptif" rows="6" placeholder="Contoh: 23, 45, 67, 34, 56, 78, 45, 67, 89, 23"></textarea>
         </div>
@@ -1379,7 +1481,7 @@
         <div class="form-group">
           <label>Pilih Variabel untuk Analisis:</label>
           <select id="variables_deskriptif" multiple size="5">
-            <option>Pilih variabel setelah upload/input data</option>
+            <option value="Data">Data</option>
           </select>
         </div>
         
@@ -1678,7 +1780,7 @@ Kelompok3: 45, 67, 89, 56, 78"></textarea>
         <h3>Pengaturan Uji Asumsi</h3>
         <div class="form-group">
           <label>Pilih Uji Asumsi:</label>
-          <select id="assumptionTestType">
+          <select id="assumptionTestType" onchange="updateAssumptionTestForm()">
             <option value="normalitas">Uji Normalitas (Shapiro-Wilk)</option>
             <option value="homogenitas">Uji Homogenitas Varians (Levene's Test)</option>
             <!-- <option value="linearitas">Uji Linearitas</option> -->
@@ -1740,16 +1842,17 @@ Kelompok2: 34, 56, 78"></textarea>
         <h3>Pengaturan Power Analysis</h3>
         <div class="form-group">
           <label>Jenis Uji:</label>
-          <select id="powerTestType">
+          <select id="powerTestType" onchange="updatePowerAnalysisForm()">
             <option value="t-test">Uji t (Two-sample)</option>
-            <!-- <option value="anova">ANOVA</option> -->
-            <!-- <option value="correlation">Korelasi</option> -->
+            <option value="anova">ANOVA (One-way)</option>
+            <option value="correlation">Korelasi Pearson</option>
+            <option value="regression">Regresi Linear Sederhana</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Ukuran Efek (Cohen's d):</label>
+          <label id="effectSizeLabel">Ukuran Efek (Cohen's d):</label>
           <input type="number" id="effectSize" value="0.5" step="0.1"/>
-          <small>0.2 (kecil), 0.5 (sedang), 0.8 (besar)</small>
+          <small id="effectSizeHint">0.2 (kecil), 0.5 (sedang), 0.8 (besar)</small>
         </div>
         <div class="form-group">
           <label>Tingkat Signifikansi (α):</label>
@@ -1770,7 +1873,7 @@ Kelompok2: 34, 56, 78"></textarea>
   };
 
   // Initial content for the welcome page
-  const initialWelcomeContent = document.getElementById('pageContent').innerHTML;
+  let initialWelcomeContent = ''; // Will be set after DOMContentLoaded
 
   // Fungsi untuk menampilkan materi
   function showMaterial(materialId) {
@@ -1815,12 +1918,16 @@ Kelompok2: 34, 56, 78"></textarea>
     if (content) {
       document.getElementById('pageContent').innerHTML = content;
       // Initialize specific tool forms if needed
-      if (toolId === 'uji-mean') {
+      if (toolId === 'deskriptif') {
+        toggleInputMethod('deskriptif'); // Initialize input method display
+      } else if (toolId === 'uji-mean') {
         updateTTestForm();
       } else if (toolId === 'chi-square') {
         updateChiSquareForm();
       } else if (toolId === 'uji-asumsi') {
         updateAssumptionTestForm();
+      } else if (toolId === 'power-analysis') {
+        updatePowerAnalysisForm(); // Initialize power analysis form
       }
     } else {
       document.getElementById('pageContent').innerHTML = `
@@ -1882,21 +1989,73 @@ Kelompok2: 34, 56, 78"></textarea>
   }
 
   // --- Admin Mode Functionality ---
-  function toggleAdminMode() {
-    isAdminMode = !isAdminMode;
-    const body = document.body;
-    const adminToggleBtn = document.querySelector('.admin-mode-toggle');
+  const LOCAL_STORAGE_PREFIX = 'webstat_';
 
-    if (isAdminMode) {
-      body.classList.add('admin-active');
-      adminToggleBtn.textContent = 'Admin Mode ON';
+  function saveToLocalStorage(key, value) {
+    localStorage.setItem(LOCAL_STORAGE_PREFIX + key, JSON.stringify(value));
+  }
+
+  function loadFromLocalStorage(key) {
+    const stored = localStorage.getItem(LOCAL_STORAGE_PREFIX + key);
+    return stored ? JSON.parse(stored) : null;
+  }
+
+  function toggleAdminMode() {
+    const adminToggleBtn = document.querySelector('.admin-mode-toggle');
+    const adminLoginSection = document.getElementById('admin-login-section');
+    const adminModeIcon = document.getElementById('admin-mode-icon');
+
+    if (!isAdminMode) { // If currently OFF, try to activate
+      adminLoginSection.style.display = 'flex'; // Show login form
       adminToggleBtn.classList.add('active');
-      enableAdminEditing();
-    } else {
-      body.classList.remove('admin-active');
-      adminToggleBtn.textContent = 'Admin Mode OFF';
+      document.body.classList.add('admin-active');
+      adminModeIcon.textContent = '🔓'; // Open lock icon
+    } else { // If currently ON, deactivate
+      logoutAdmin(); // Force logout
       adminToggleBtn.classList.remove('active');
-      disableAdminEditing();
+      document.body.classList.remove('admin-active');
+      adminLoginSection.style.display = 'none';
+      adminModeIcon.textContent = '🔒'; // Closed lock icon
+    }
+  }
+
+  function loginAdmin() {
+    const passwordInput = document.getElementById('admin-password');
+    const adminLoginSection = document.getElementById('admin-login-section');
+    const adminModeIcon = document.getElementById('admin-mode-icon');
+
+    if (passwordInput.value === ADMIN_PASSWORD) {
+      isAdminMode = true;
+      document.body.classList.add('admin-active');
+      document.getElementById('admin-login-form').style.display = 'none';
+      document.getElementById('admin-logout-form').style.display = 'block';
+      adminModeIcon.textContent = '🔓'; // Open lock icon
+      enableAdminEditing();
+      alert('Berhasil masuk mode Admin!');
+      adminLoginSection.style.display = 'none'; // Hide login section after successful login
+    } else {
+      alert('Password salah!');
+      passwordInput.value = '';
+    }
+  }
+
+  function logoutAdmin() {
+    isAdminMode = false;
+    document.body.classList.remove('admin-active');
+    document.getElementById('admin-login-form').style.display = 'block';
+    document.getElementById('admin-logout-form').style.display = 'none';
+    document.getElementById('admin-password').value = '';
+    document.getElementById('admin-mode-icon').textContent = '🔒'; // Closed lock icon
+    document.querySelector('.admin-mode-toggle').classList.remove('active');
+    disableAdminEditing();
+    alert('Berhasil keluar dari mode Admin.');
+    // Reload current page content to remove editable borders
+    const currentMaterialId = document.querySelector('.material-item.active')?.dataset.materialId;
+    if (currentMaterialId) {
+        showMaterial(parseInt(currentMaterialId));
+    } else {
+        document.getElementById('pageContent').innerHTML = initialWelcomeContent;
+        loadPageContentFromLocalStorage(); // Re-apply non-admin content
     }
   }
 
@@ -1928,8 +2087,6 @@ Kelompok2: 34, 56, 78"></textarea>
   }
 
   function handleEditBlur(event) {
-    // In a real application, you would send this content to a backend to save.
-    // For this example, we just update the internal data structure.
     const id = event.target.dataset.editableId;
     const newContent = event.target.innerHTML;
 
@@ -1937,25 +2094,27 @@ Kelompok2: 34, 56, 78"></textarea>
       const materialId = parseInt(id.replace('material-title-', ''));
       if (materialContents[materialId]) {
         materialContents[materialId].title = newContent;
-        // Update the strong tag directly
+        saveToLocalStorage('materialContents', materialContents);
         document.querySelector(`.material-item[data-material-id="${materialId}"] strong`).innerHTML = newContent;
       }
     } else if (id.startsWith('material-subtitle-')) {
       const materialId = parseInt(id.replace('material-subtitle-', ''));
       if (materialContents[materialId]) {
         materialContents[materialId].subtitle = newContent;
-        // Update the subtitle div directly
+        saveToLocalStorage('materialContents', materialContents);
         document.querySelector(`.material-item[data-material-id="${materialId}"] .material-subtitle`).innerHTML = newContent;
       }
-    } else if (id.startsWith('material-content-')) { // For main content of a material
+    } else if (id.startsWith('material-content-')) {
       const materialId = parseInt(id.replace('material-content-', ''));
       if (materialContents[materialId]) {
         materialContents[materialId].content = newContent;
+        saveToLocalStorage('materialContents', materialContents);
       }
     } else {
-      // For other general editable content on the page
-      // This is a simplified example. A real system would map IDs to specific data fields.
-      console.log(`Content with ID ${id} changed to: ${newContent}`);
+      // For other general editable content on the page (header, footer, FAQ)
+      const pageData = loadFromLocalStorage('pageData') || {};
+      pageData[id] = newContent;
+      saveToLocalStorage('pageData', pageData);
     }
     currentEditableContent = null;
     originalContent = '';
@@ -1963,10 +2122,11 @@ Kelompok2: 34, 56, 78"></textarea>
 
   function editMaterial(materialId, event) {
     event.stopPropagation(); // Prevent showMaterial from being called immediately
+    if (!isAdminMode) return; // Only allow editing in admin mode
+
     const material = materialContents[materialId];
     if (!material) return;
 
-    // Display a modal or a dedicated editing area for the material content
     const pageContentDiv = document.getElementById('pageContent');
     pageContentDiv.innerHTML = `
       <h2>Edit Materi: <span class="editable-content" data-editable-id="material-title-${materialId}">${material.title}</span></h2>
@@ -1985,8 +2145,6 @@ Kelompok2: 34, 56, 78"></textarea>
   }
 
   function saveMaterialContent(materialId) {
-    // This function would typically send the updated content to a backend.
-    // For this example, we just update the internal materialContents object.
     const titleEl = document.querySelector(`[data-editable-id="material-title-${materialId}"]`);
     const subtitleEl = document.querySelector(`[data-editable-id="material-subtitle-${materialId}"]`);
     const contentEl = document.querySelector(`[data-editable-id="material-content-${materialId}"]`);
@@ -1995,9 +2153,9 @@ Kelompok2: 34, 56, 78"></textarea>
       materialContents[materialId].title = titleEl ? titleEl.innerHTML : materialContents[materialId].title;
       materialContents[materialId].subtitle = subtitleEl ? subtitleEl.innerHTML : materialContents[materialId].subtitle;
       materialContents[materialId].content = contentEl ? contentEl.innerHTML : materialContents[materialId].content;
+      saveToLocalStorage('materialContents', materialContents);
     }
 
-    // Update sidebar item directly
     const sidebarItem = document.querySelector(`.material-item[data-material-id="${materialId}"]`);
     if (sidebarItem) {
       sidebarItem.querySelector('strong').innerHTML = materialContents[materialId].title;
@@ -2009,16 +2167,20 @@ Kelompok2: 34, 56, 78"></textarea>
   }
 
   function cancelMaterialEdit() {
-    // Simply reload the welcome page or the last viewed material
+    // Reload the welcome page or the last viewed material
     document.getElementById('pageContent').innerHTML = initialWelcomeContent;
     if (isAdminMode) {
       enableAdminEditing();
     }
+    // Re-apply saved page data if any
+    loadPageContentFromLocalStorage();
   }
 
   let nextMaterialId = 9; // Start from the next available ID
 
   function addNewMaterial() {
+    if (!isAdminMode) return; // Only allow adding in admin mode
+
     const newId = nextMaterialId++;
     const newMaterial = {
       title: `${newId}. Materi Baru`,
@@ -2030,6 +2192,7 @@ Kelompok2: 34, 56, 78"></textarea>
       `
     };
     materialContents[newId] = newMaterial;
+    saveToLocalStorage('materialContents', materialContents);
 
     const materialsNav = document.querySelector('.materials');
     const adminControls = materialsNav.querySelector('.admin-controls');
@@ -2042,28 +2205,92 @@ Kelompok2: 34, 56, 78"></textarea>
       <strong class="editable-content" data-editable-id="material-title-${newId}">${newMaterial.title}</strong>
       <div class="material-subtitle editable-content" data-editable-id="material-subtitle-${newId}">${newMaterial.subtitle}</div>
       <button class="edit-btn" onclick="editMaterial(${newId}, event)">Edit</button>
+      <button class="delete-btn" onclick="deleteMaterial(${newId}, event)">Hapus</button>
     `;
     materialsNav.insertBefore(newMaterialItem, adminControls);
 
-    // Make the new material item editable immediately
     if (isAdminMode) {
-      newMaterialItem.querySelector('strong').setAttribute('contenteditable', 'true');
-      newMaterialItem.querySelector('strong').style.border = '1px dashed #ff9800';
-      newMaterialItem.querySelector('strong').style.padding = '5px';
-      newMaterialItem.querySelector('strong').style.minHeight = '1.5em';
-      newMaterialItem.querySelector('strong').addEventListener('focus', handleEditFocus);
-      newMaterialItem.querySelector('strong').addEventListener('blur', handleEditBlur);
-
-      newMaterialItem.querySelector('.material-subtitle').setAttribute('contenteditable', 'true');
-      newMaterialItem.querySelector('.material-subtitle').style.border = '1px dashed #ff9800';
-      newMaterialItem.querySelector('.material-subtitle').style.padding = '5px';
-      newMaterialItem.querySelector('.material-subtitle').style.minHeight = '1.5em';
-      newMaterialItem.querySelector('.material-subtitle').addEventListener('focus', handleEditFocus);
-      newMaterialItem.querySelector('.material-subtitle').addEventListener('blur', handleEditBlur);
+      enableAdminEditingForElement(newMaterialItem.querySelector('strong'));
+      enableAdminEditingForElement(newMaterialItem.querySelector('.material-subtitle'));
     }
 
     alert(`Materi "${newMaterial.title}" berhasil ditambahkan!`);
     showMaterial(newId); // Display the new material
+  }
+
+  function deleteMaterial(materialId, event) {
+    event.stopPropagation(); // Prevent showMaterial from being called
+    if (!isAdminMode) return; // Only allow deleting in admin mode
+
+    if (confirm(`Apakah Anda yakin ingin menghapus materi "${materialContents[materialId].title}"?`)) {
+      delete materialContents[materialId];
+      saveToLocalStorage('materialContents', materialContents);
+      document.querySelector(`.material-item[data-material-id="${materialId}"]`).remove();
+      alert('Materi berhasil dihapus!');
+      // Show welcome page or first material after deletion
+      document.getElementById('pageContent').innerHTML = initialWelcomeContent;
+      loadPageContentFromLocalStorage();
+    }
+  }
+
+  function enableAdminEditingForElement(el) {
+    el.setAttribute('contenteditable', 'true');
+    el.style.border = '1px dashed #ff9800';
+    el.style.padding = '5px';
+    el.style.minHeight = '1.5em';
+    el.addEventListener('focus', handleEditFocus);
+    el.addEventListener('blur', handleEditBlur);
+  }
+
+  function loadInitialContent() {
+    // Load material contents from local storage
+    const storedMaterialContents = loadFromLocalStorage('materialContents');
+    if (storedMaterialContents) {
+      materialContents = storedMaterialContents;
+      // Rebuild sidebar based on stored materials
+      const materialsNav = document.querySelector('.materials');
+      const adminControls = materialsNav.querySelector('.admin-controls');
+      
+      // Remove all existing material items to rebuild them
+      materialsNav.querySelectorAll('.material-item').forEach(item => item.remove());
+
+      // Sort material IDs numerically
+      const sortedMaterialIds = Object.keys(materialContents).map(Number).sort((a, b) => a - b);
+
+      sortedMaterialIds.forEach(id => {
+        const material = materialContents[id];
+        const newMaterialItem = document.createElement('div');
+        newMaterialItem.classList.add('material-item');
+        newMaterialItem.setAttribute('data-material-id', id);
+        newMaterialItem.setAttribute('onclick', `showMaterial(${id})`);
+        newMaterialItem.innerHTML = `
+          <strong class="editable-content" data-editable-id="material-title-${id}">${material.title}</strong>
+          <div class="material-subtitle editable-content" data-editable-id="material-subtitle-${id}">${material.subtitle}</div>
+          <button class="edit-btn" onclick="editMaterial(${id}, event)">Edit</button>
+          <button class="delete-btn" onclick="deleteMaterial(${id}, event)">Hapus</button>
+        `;
+        materialsNav.insertBefore(newMaterialItem, adminControls);
+      });
+      nextMaterialId = Math.max(...Object.keys(materialContents).map(Number)) + 1;
+    }
+
+    // Load other page content from local storage
+    loadPageContentFromLocalStorage();
+
+    // Set initial welcome content after loading from storage
+    initialWelcomeContent = document.getElementById('pageContent').innerHTML;
+  }
+
+  function loadPageContentFromLocalStorage() {
+    const pageData = loadFromLocalStorage('pageData');
+    if (pageData) {
+      for (const id in pageData) {
+        const el = document.querySelector(`[data-editable-id="${id}"]`);
+        if (el) {
+          el.innerHTML = pageData[id];
+        }
+      }
+    }
   }
 
   // --- Analysis Tools Enhancements (Frontend Logic) ---
@@ -2076,7 +2303,12 @@ Kelompok2: 34, 56, 78"></textarea>
       return null;
     }
     // Handle both comma-separated and newline-separated values
-    return dataString.split(/[\n,]+/).map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+    const parsed = dataString.split(/[\n,]+/).map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
+    if (parsed.length === 0) {
+        alert('Data tidak valid. Pastikan hanya angka yang dipisahkan koma atau baris baru.');
+        return null;
+    }
+    return parsed;
   }
 
   function parseMultiGroupData(textareaId) {
@@ -2111,7 +2343,7 @@ Kelompok2: 34, 56, 78"></textarea>
     }).filter(row => row.length > 0);
 
     if (rows.length === 0 || rows.some(row => row.length !== rows[0].length)) {
-      alert('Format tabel kontingensi tidak valid. Pastikan semua baris memiliki jumlah kolom yang sama.');
+      alert('Format tabel kontingensi tidak valid. Pastikan semua baris memiliki jumlah kolom yang sama dan hanya berisi angka.');
       return null;
     }
     return rows;
@@ -2122,15 +2354,17 @@ Kelompok2: 34, 56, 78"></textarea>
     const fileInput = document.getElementById(`dataFile_${toolId}`);
     if (fileInput.files.length > 0) {
       const file = fileInput.files[0];
-      alert(`File ${file.name} diupload. Parsing file memerlukan backend atau library JS.`);
-      // In a real app, you'd use PapaParse for CSV or SheetJS for Excel
+      alert(`File "${file.name}" diupload. Fungsionalitas parsing file CSV/Excel memerlukan backend atau library JavaScript eksternal (misal: PapaParse untuk CSV, SheetJS untuk Excel) untuk membaca dan memproses data.`);
+      // In a real application, you'd use PapaParse for CSV or SheetJS for Excel
       // For now, just simulate variable loading
       const variablesSelect = document.getElementById(`variables_${toolId}`);
-      variablesSelect.innerHTML = `
-        <option value="var1">Variabel A</option>
-        <option value="var2">Variabel B</option>
-        <option value="var3">Variabel C</option>
-      `;
+      if (variablesSelect) {
+        variablesSelect.innerHTML = `
+          <option value="var1">Variabel A (Simulasi)</option>
+          <option value="var2">Variabel B (Simulasi)</option>
+          <option value="var3">Variabel C (Simulasi)</option>
+        `;
+      }
     }
   }
 
@@ -2141,7 +2375,13 @@ Kelompok2: 34, 56, 78"></textarea>
     document.querySelector(`.sample-input-group_${toolId}`).style.display = (method === 'sample' ? 'block' : 'none');
 
     if (method === 'sample') {
-      loadSampleData(toolId); // Load default sample if available
+      loadSampleData(toolId);
+    } else if (method === 'manual') {
+        // Clear sample data if switching to manual
+        const manualDataTextarea = document.getElementById(`manualData_${toolId}`);
+        if (manualDataTextarea) manualDataTextarea.value = '';
+        const variablesSelect = document.getElementById(`variables_${toolId}`);
+        if (variablesSelect) variablesSelect.innerHTML = '<option value="Data">Data</option>';
     }
   }
 
@@ -2155,60 +2395,72 @@ Kelompok2: 34, 56, 78"></textarea>
 
     if (toolId === 'deskriptif') {
       if (sampleSelect.value === 'sample1') {
-        sampleData = 'Penjualan: 120, 150, 130, 180, 140, 160, 170, 190, 155, 165';
+        sampleData = '120, 150, 130, 180, 140, 160, 170, 190, 155, 165';
         sampleVariables = ['Penjualan'];
       } else if (sampleSelect.value === 'sample2') {
-        sampleData = 'Tinggi: 165, 170, 168, 175, 160, 172, 169, 178, 163, 171';
+        sampleData = '165, 170, 168, 175, 160, 172, 169, 178, 163, 171';
         sampleVariables = ['Tinggi'];
       }
     }
     // Add more sample data for other tools if needed
+    // For now, other tools don't have specific sample data selectors,
+    // so we'll just fill their main textareas if they exist.
+    if (toolId === 'uji-mean') {
+        document.getElementById('sample1_tTest').value = '23, 45, 67, 34, 56';
+        document.getElementById('sample2_tTest').value = '30, 50, 70, 40, 60';
+        document.getElementById('mu0_tTest').value = '40';
+    } else if (toolId === 'anova') {
+        document.getElementById('anovaData').value = `Kelompok1: 23, 45, 67, 34, 56
+Kelompok2: 34, 56, 78, 45, 67
+Kelompok3: 45, 67, 89, 56, 78`;
+    } else if (toolId === 'korelasi') {
+        document.getElementById('varX_korelasi').value = '10, 12, 15, 18, 20';
+        document.getElementById('varY_korelasi').value = '25, 28, 30, 35, 38';
+    } else if (toolId === 'regresi') {
+        document.getElementById('dependentVar_regresi').value = '25, 28, 30, 35, 38';
+        document.getElementById('independentVar_regresi').value = '10, 12, 15, 18, 20';
+    } else if (toolId === 'mann-whitney') {
+        document.getElementById('group1_mannwhitney').value = '10, 12, 15, 11, 13';
+        document.getElementById('group2_mannwhitney').value = '14, 16, 13, 17, 15';
+    } else if (toolId === 'chi-square') {
+        document.getElementById('contingencyTable').value = '10, 20\n15, 5';
+        document.getElementById('observedFrequencies').value = '20, 30, 50';
+        document.getElementById('expectedFrequencies').value = '25, 25, 50';
+    } else if (toolId === 'clustering') {
+        document.getElementById('clusteringData').value = '1.0, 1.1\n1.0, 1.2\n3.0, 3.1\n3.1, 3.0\n1.2, 1.0\n3.2, 3.2';
+    } else if (toolId === 'factor-analysis') {
+        document.getElementById('factorAnalysisData').value = '10, 12, 11\n15, 14, 16\n20, 22, 21\n11, 13, 10\n16, 15, 17';
+    } else if (toolId === 'uji-asumsi') {
+        document.getElementById('normalitasData').value = '23, 45, 67, 34, 56, 78, 45, 67, 89, 23';
+        document.getElementById('homogenitasData').value = 'Kelompok1: 23, 45, 67\nKelompok2: 34, 56, 78';
+    } else if (toolId === 'uji-instrumen') {
+        document.getElementById('instrumentData').value = '1, 2, 3\n2, 3, 4\n3, 4, 5\n4, 5, 4\n5, 4, 3\n1, 1, 2\n2, 2, 3\n3, 3, 4\n4, 4, 5\n5, 5, 4';
+    }
 
-    manualDataTextarea.value = sampleData;
-    variablesSelect.innerHTML = sampleVariables.map(v => `<option value="${v}">${v}</option>`).join('');
-    if (sampleVariables.length > 0) {
-      variablesSelect.value = sampleVariables[0]; // Select the first variable by default
+
+    if (manualDataTextarea) manualDataTextarea.value = sampleData;
+    if (variablesSelect) {
+        variablesSelect.innerHTML = sampleVariables.map(v => `<option value="${v}">${v}</option>`).join('');
+        if (sampleVariables.length > 0) {
+            variablesSelect.value = sampleVariables[0]; // Select the first variable by default
+        }
     }
   }
 
   // --- Placeholder functions for running analysis (will require backend integration) ---
-  function runDescriptive() {
-    const inputMethod = document.getElementById('inputMethod_deskriptif').value;
-    let data = [];
-    let selectedVariables = [];
+  // These functions now include basic statistical calculations for demonstration.
+  // For robust, production-ready statistics, a backend (Python/R) or a comprehensive JS library is needed.
 
-    if (inputMethod === 'manual') {
-      const rawData = document.getElementById('manualData_deskriptif').value;
-      // Assuming manual data for descriptive is a single column for simplicity
-      data = rawData.split(/[\n,]+/).map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
-      selectedVariables = ['Data']; // Default variable name
-    } else if (inputMethod === 'sample') {
-      const rawData = document.getElementById('manualData_deskriptif').value; // Sample data is loaded into manual textarea
-      data = rawData.split(/[\n,]+/).map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
-      selectedVariables = [document.getElementById('sampleData_deskriptif').options[document.getElementById('sampleData_deskriptif').selectedIndex].text.split(' ')[0]];
-    } else { // file upload
-      // In a real app, data would be parsed from the uploaded file
-      alert('Fungsionalitas upload file memerlukan backend untuk parsing data.');
-      document.getElementById('descriptiveResults').innerHTML = `
-        <p style="color: red;">Error: Fungsionalitas upload file memerlukan backend untuk parsing data.</p>
-      `;
-      return;
-    }
-
-    if (data.length === 0) {
-      alert('Tidak ada data yang valid untuk dianalisis.');
-      return;
-    }
-
-    // Simulate descriptive statistics calculation
-    const n = data.length;
-    const sum = data.reduce((a, b) => a + b, 0);
-    const mean = sum / n;
-    const sortedData = [...data].sort((a, b) => a - b);
-    const median = n % 2 === 0 ? (sortedData[n / 2 - 1] + sortedData[n / 2]) / 2 : sortedData[Math.floor(n / 2)];
-    
+  // Basic statistical functions (for frontend simulation)
+  const calculateMean = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length;
+  const calculateMedian = (arr) => {
+    const sorted = [...arr].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+  };
+  const calculateMode = (arr) => {
     const counts = {};
-    data.forEach(x => { counts[x] = (counts[x] || 0) + 1; });
+    arr.forEach(x => { counts[x] = (counts[x] || 0) + 1; });
     let mode = [];
     let maxCount = 0;
     for (const key in counts) {
@@ -2219,11 +2471,127 @@ Kelompok2: 34, 56, 78"></textarea>
         mode.push(parseFloat(key));
       }
     }
-    mode = mode.join(', ');
+    return mode.join(', ');
+  };
+  const calculateVariance = (arr, mean) => arr.reduce((sum, x) => sum + Math.pow(x - mean, 2), 0) / (arr.length - 1);
+  const calculateStdDev = (arr, mean) => Math.sqrt(calculateVariance(arr, mean));
+  const calculatePearsonCorrelation = (x, y) => {
+    const n = x.length;
+    const meanX = calculateMean(x);
+    const meanY = calculateMean(y);
+    let sumXY = 0;
+    let sumX2 = 0;
+    let sumY2 = 0;
+    for (let i = 0; i < n; i++) {
+      sumXY += (x[i] - meanX) * (y[i] - meanY);
+      sumX2 += Math.pow((x[i] - meanX), 2);
+      sumY2 += Math.pow((y[i] - meanY), 2);
+    }
+    return sumXY / (Math.sqrt(sumX2) * Math.sqrt(sumY2));
+  };
+  // Simplified t-distribution critical value lookup (very rough approximation)
+  const getTCritical = (alpha, df, twoTailed = true) => {
+      // This is a highly simplified placeholder. Real t-critical values
+      // depend on alpha, df, and whether it's one-tailed or two-tailed.
+      // For a real application, use a statistical library or lookup table.
+      if (df < 1) return Infinity;
+      if (alpha === 0.05) {
+          if (twoTailed) {
+              if (df < 5) return 2.57; // Example values
+              if (df < 10) return 2.22;
+              if (df < 30) return 2.04;
+              return 1.96; // Z-approx for large df
+          } else { // one-tailed
+              if (df < 5) return 2.13;
+              if (df < 10) return 1.83;
+              if (df < 30) return 1.70;
+              return 1.645;
+          }
+      }
+      if (alpha === 0.01) {
+          if (twoTailed) {
+              if (df < 5) return 4.03;
+              if (df < 10) return 3.17;
+              if (df < 30) return 2.75;
+              return 2.576;
+          } else { // one-tailed
+              if (df < 5) return 3.36;
+              if (df < 10) return 2.76;
+              if (df < 30) return 2.46;
+              return 2.326;
+          }
+      }
+      return 1.96; // Default
+  };
 
-    const range = Math.max(...data) - Math.min(...data);
-    const variance = data.reduce((sum, x) => sum + Math.pow(x - mean, 2), 0) / (n - 1);
-    const stdDev = Math.sqrt(variance);
+  // Simplified F-distribution critical value lookup (very rough approximation)
+  const getFCritical = (alpha, df1, df2) => {
+      // This is a highly simplified placeholder. Real F-critical values
+      // depend on alpha, df1, and df2.
+      // For a real application, use a statistical library or lookup table.
+      if (df1 < 1 || df2 < 1) return Infinity;
+      if (alpha === 0.05) {
+          if (df1 === 1 && df2 > 30) return 4.00; // Approx for 1, inf
+          if (df1 === 2 && df2 > 30) return 3.15; // Approx for 2, inf
+          if (df1 === 3 && df2 > 30) return 2.68; // Approx for 3, inf
+          return 3.0; // Generic rough approx
+      }
+      if (alpha === 0.01) {
+          if (df1 === 1 && df2 > 30) return 7.08; // Approx for 1, inf
+          if (df1 === 2 && df2 > 30) return 4.82; // Approx for 2, inf
+          if (df1 === 3 && df2 > 30) return 4.02; // Approx for 3, inf
+          return 5.0; // Generic rough approx
+      }
+      return 3.0; // Default
+  };
+
+  // Simplified Z-distribution critical value lookup (very rough approximation)
+  const getZCritical = (alpha, twoTailed = true) => {
+      if (alpha === 0.05) return twoTailed ? 1.96 : 1.645;
+      if (alpha === 0.01) return twoTailed ? 2.576 : 2.326;
+      if (alpha === 0.10) return twoTailed ? 1.645 : 1.28;
+      return 1.96;
+  };
+
+
+  function runDescriptive() {
+    const inputMethod = document.getElementById('inputMethod_deskriptif').value;
+    let data = [];
+    let selectedVariables = [];
+
+    if (inputMethod === 'manual') {
+      data = parseData('manualData_deskriptif');
+      selectedVariables = ['Data'];
+    } else if (inputMethod === 'sample') {
+      loadSampleData('deskriptif'); // Ensure sample data is loaded
+      data = parseData('manualData_deskriptif');
+      const sampleSelect = document.getElementById('sampleData_deskriptif');
+      selectedVariables = [sampleSelect.options[sampleSelect.selectedIndex].text.split(' ')[0]];
+    } else { // file upload
+      alert('Fungsionalitas upload file memerlukan backend untuk parsing data.');
+      document.getElementById('descriptiveResults').innerHTML = `
+        <p style="color: red;">Error: Fungsionalitas upload file memerlukan backend untuk parsing data.</p>
+      `;
+      return;
+    }
+
+    if (!data) { // parseData already shows alert
+      return;
+    }
+    if (data.length === 0) {
+      alert('Tidak ada data yang valid untuk dianalisis.');
+      return;
+    }
+
+    const n = data.length;
+    const mean = calculateMean(data);
+    const median = calculateMedian(data);
+    const mode = calculateMode(data);
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    const range = max - min;
+    const variance = n > 1 ? calculateVariance(data, mean) : 0;
+    const stdDev = n > 1 ? calculateStdDev(data, mean) : 0;
 
     document.getElementById('descriptiveResults').innerHTML = `
       <h4>Hasil Analisis Deskriptif untuk ${selectedVariables.join(', ')}</h4>
@@ -2233,8 +2601,8 @@ Kelompok2: 34, 56, 78"></textarea>
         <tr><td>Mean</td><td>${mean.toFixed(2)}</td></tr>
         <tr><td>Median</td><td>${median.toFixed(2)}</td></tr>
         <tr><td>Modus</td><td>${mode}</td></tr>
-        <tr><td>Minimum</td><td>${Math.min(...data).toFixed(2)}</td></tr>
-        <tr><td>Maksimum</td><td>${Math.max(...data).toFixed(2)}</td></tr>
+        <tr><td>Minimum</td><td>${min.toFixed(2)}</td></tr>
+        <tr><td>Maksimum</td><td>${max.toFixed(2)}</td></tr>
         <tr><td>Range</td><td>${range.toFixed(2)}</td></tr>
         <tr><td>Varians</td><td>${variance.toFixed(2)}</td></tr>
         <tr><td>Standar Deviasi</td><td>${stdDev.toFixed(2)}</td></tr>
@@ -2265,44 +2633,103 @@ Kelompok2: 34, 56, 78"></textarea>
     let mu0 = 0;
 
     if (!sample1 || sample1.length < 2) {
-      alert('Data Sampel 1 tidak valid atau terlalu sedikit.');
+      alert('Data Sampel 1 tidak valid atau terlalu sedikit (minimal 2 observasi).');
       return;
     }
 
     let resultHtml = `<h4>Hasil Uji t (${tTestType})</h4>`;
     resultHtml += `<p>Tingkat Signifikansi (α): ${alpha}</p>`;
 
-    // This is a simplified frontend simulation. Real calculation needs backend.
+    let tStat, pValue, df;
+
     if (tTestType === 'one-sample') {
       mu0 = parseFloat(document.getElementById('mu0_tTest').value);
+      const mean1 = calculateMean(sample1);
+      const stdDev1 = calculateStdDev(sample1, mean1);
+      const n1 = sample1.length;
+      
+      tStat = (mean1 - mu0) / (stdDev1 / Math.sqrt(n1));
+      df = n1 - 1;
+      // Placeholder for p-value calculation (requires t-distribution function)
+      pValue = Math.random().toFixed(3); // Simulate p-value
+      
       resultHtml += `<p>Hipotesis Nol (H₀): μ = ${mu0}</p>`;
       resultHtml += `<p>Hipotesis Alternatif (H₁): μ ≠ ${mu0}</p>`;
       resultHtml += `<p>Data Sampel: [${sample1.join(', ')}]</p>`;
-      resultHtml += `<p>Simulasi: t-statistik = ${Math.random() * 4 - 2.toFixed(2)}, p-value = ${Math.random().toFixed(3)}</p>`;
+      resultHtml += `<p>Statistik Uji t: ${tStat.toFixed(3)}</p>`;
+      resultHtml += `<p>Derajat Kebebasan (df): ${df}</p>`;
+      resultHtml += `<p>p-value (Simulasi): ${pValue}</p>`;
+
+      if (parseFloat(pValue) < alpha) {
+        resultHtml += `<p style="color: green;">Kesimpulan: p-value (${pValue}) < α (${alpha}). Tolak H₀. Rata-rata sampel berbeda signifikan dari ${mu0}.</p>`;
+      } else {
+        resultHtml += `<p style="color: red;">Kesimpulan: p-value (${pValue}) ≥ α (${alpha}). Gagal menolak H₀. Tidak ada bukti signifikan bahwa rata-rata sampel berbeda dari ${mu0}.</p>`;
+      }
       resultHtml += `<p style="color: #4caf50;">✓ Uji t one-sample berhasil dijalankan! (Simulasi Frontend)</p>`;
+
     } else if (tTestType === 'two-sample') {
       sample2 = parseData('sample2_tTest');
       if (!sample2 || sample2.length < 2) {
-        alert('Data Sampel 2 tidak valid atau terlalu sedikit.');
+        alert('Data Sampel 2 tidak valid atau terlalu sedikit (minimal 2 observasi).');
         return;
       }
+      const mean1 = calculateMean(sample1);
+      const stdDev1 = calculateStdDev(sample1, mean1);
+      const n1 = sample1.length;
+      const mean2 = calculateMean(sample2);
+      const stdDev2 = calculateStdDev(sample2, mean2);
+      const n2 = sample2.length;
+
+      // Assuming unequal variances (Welch's t-test for simplicity in simulation)
+      const se1 = Math.pow(stdDev1, 2) / n1;
+      const se2 = Math.pow(stdDev2, 2) / n2;
+      tStat = (mean1 - mean2) / Math.sqrt(se1 + se2);
+      df = Math.pow(se1 + se2, 2) / (Math.pow(se1, 2) / (n1 - 1) + Math.pow(se2, 2) / (n2 - 1));
+      pValue = Math.random().toFixed(3); // Simulate p-value
+
       resultHtml += `<p>Hipotesis Nol (H₀): μ₁ = μ₂</p>`;
       resultHtml += `<p>Hipotesis Alternatif (H₁): μ₁ ≠ μ₂</p>`;
       resultHtml += `<p>Data Sampel 1: [${sample1.join(', ')}]</p>`;
       resultHtml += `<p>Data Sampel 2: [${sample2.join(', ')}]</p>`;
-      resultHtml += `<p>Simulasi: t-statistik = ${Math.random() * 4 - 2.toFixed(2)}, p-value = ${Math.random().toFixed(3)}</p>`;
+      resultHtml += `<p>Statistik Uji t: ${tStat.toFixed(3)}</p>`;
+      resultHtml += `<p>Derajat Kebebasan (df): ${df.toFixed(2)}</p>`;
+      resultHtml += `<p>p-value (Simulasi): ${pValue}</p>`;
+
+      if (parseFloat(pValue) < alpha) {
+        resultHtml += `<p style="color: green;">Kesimpulan: p-value (${pValue}) < α (${alpha}). Tolak H₀. Ada perbedaan signifikan antara rata-rata kedua sampel.</p>`;
+      } else {
+        resultHtml += `<p style="color: red;">Kesimpulan: p-value (${pValue}) ≥ α (${alpha}). Gagal menolak H₀. Tidak ada perbedaan signifikan antara rata-rata kedua sampel.</p>`;
+      }
       resultHtml += `<p style="color: #4caf50;">✓ Uji t two-sample berhasil dijalankan! (Simulasi Frontend)</p>`;
+
     } else if (tTestType === 'paired') {
       sample2 = parseData('sample2_tTest');
       if (!sample2 || sample2.length !== sample1.length || sample1.length < 2) {
-        alert('Data Sampel 2 tidak valid atau jumlah observasi tidak sama dengan Sampel 1.');
+        alert('Data Sampel 2 tidak valid atau jumlah observasi tidak sama dengan Sampel 1 (minimal 2 pasangan).');
         return;
       }
-      resultHtml += `<p>Hipotesis Nol (H₀): μ_d = 0</p>`;
-      resultHtml += `<p>Hipotesis Alternatif (H₁): μ_d ≠ 0</p>`;
+      const differences = sample1.map((val, i) => val - sample2[i]);
+      const meanDiff = calculateMean(differences);
+      const stdDevDiff = calculateStdDev(differences, meanDiff);
+      const nDiff = differences.length;
+
+      tStat = meanDiff / (stdDevDiff / Math.sqrt(nDiff));
+      df = nDiff - 1;
+      pValue = Math.random().toFixed(3); // Simulate p-value
+
+      resultHtml += `<p>Hipotesis Nol (H₀): μ_d = 0 (Tidak ada perbedaan rata-rata)</p>`;
+      resultHtml += `<p>Hipotesis Alternatif (H₁): μ_d ≠ 0 (Ada perbedaan rata-rata)</p>`;
       resultHtml += `<p>Data Sampel 1: [${sample1.join(', ')}]</p>`;
       resultHtml += `<p>Data Sampel 2: [${sample2.join(', ')}]</p>`;
-      resultHtml += `<p>Simulasi: t-statistik = ${Math.random() * 4 - 2.toFixed(2)}, p-value = ${Math.random().toFixed(3)}</p>`;
+      resultHtml += `<p>Statistik Uji t: ${tStat.toFixed(3)}</p>`;
+      resultHtml += `<p>Derajat Kebebasan (df): ${df}</p>`;
+      resultHtml += `<p>p-value (Simulasi): ${pValue}</p>`;
+
+      if (parseFloat(pValue) < alpha) {
+        resultHtml += `<p style="color: green;">Kesimpulan: p-value (${pValue}) < α (${alpha}). Tolak H₀. Ada perbedaan signifikan antara pasangan data.</p>`;
+      } else {
+        resultHtml += `<p style="color: red;">Kesimpulan: p-value (${pValue}) ≥ α (${alpha}). Gagal menolak H₀. Tidak ada perbedaan signifikan antara pasangan data.</p>`;
+      }
       resultHtml += `<p style="color: #4caf50;">✓ Uji t paired berhasil dijalankan! (Simulasi Frontend)</p>`;
     }
 
@@ -2332,17 +2759,27 @@ Kelompok2: 34, 56, 78"></textarea>
     groups.forEach(g => resultHtml += `<li>${g.name}: [${g.values.join(', ')}]</li>`);
     resultHtml += `</ul>`;
 
-    // Simulate ANOVA results
+    // Simulate ANOVA results (requires more complex calculations for real F-stat and p-value)
     const fStat = (Math.random() * 5 + 1).toFixed(2); // F-statistic between 1 and 6
     const pValue = Math.random().toFixed(3);
+    const df1 = groups.length - 1; // Degrees of freedom between groups
+    const totalN = groups.reduce((sum, g) => sum + g.values.length, 0);
+    const df2 = totalN - groups.length; // Degrees of freedom within groups
 
-    resultHtml += `<p>Simulasi: F-statistik = ${fStat}, p-value = ${pValue}</p>`;
+    resultHtml += `<p>Simulasi: F-statistik = ${fStat}, df1 = ${df1}, df2 = ${df2}, p-value = ${pValue}</p>`;
 
     if (parseFloat(pValue) < alpha) {
       resultHtml += `<p style="color: green;">Kesimpulan: p-value (${pValue}) < α (${alpha}). Tolak H₀. Ada perbedaan signifikan antar rata-rata kelompok.</p>`;
       if (posthoc !== 'none') {
         resultHtml += `<p>Melakukan Post-hoc Test (${posthoc})...</p>`;
-        resultHtml += `<p>Simulasi Hasil Post-hoc: Kelompok A berbeda signifikan dengan Kelompok C.</p>`;
+        // Simulate post-hoc results
+        const groupNames = groups.map(g => g.name);
+        if (groupNames.length > 1) {
+            const rand1 = Math.floor(Math.random() * groupNames.length);
+            let rand2 = Math.floor(Math.random() * groupNames.length);
+            while (rand2 === rand1) rand2 = Math.floor(Math.random() * groupNames.length);
+            resultHtml += `<p>Simulasi Hasil Post-hoc: Kelompok ${groupNames[rand1]} berbeda signifikan dengan Kelompok ${groupNames[rand2]}.</p>`;
+        }
       }
     } else {
       resultHtml += `<p style="color: red;">Kesimpulan: p-value (${pValue}) ≥ α (${alpha}). Gagal menolak H₀. Tidak ada perbedaan signifikan antar rata-rata kelompok.</p>`;
@@ -2368,24 +2805,32 @@ Kelompok2: 34, 56, 78"></textarea>
     resultHtml += `<p>Data Variabel X: [${varX.join(', ')}]</p>`;
     resultHtml += `<p>Data Variabel Y: [${varY.join(', ')}]</p>`;
 
-    // Simulate correlation results
-    const rValue = (Math.random() * 2 - 1).toFixed(3); // Correlation between -1 and 1
+    let rValue;
+    if (correlationType === 'pearson') {
+        rValue = calculatePearsonCorrelation(varX, varY);
+    } else { // Spearman (simplified simulation)
+        // Real Spearman requires ranking data, then calculating Pearson on ranks.
+        rValue = (Math.random() * 2 - 1); // Simulate a value
+    }
+    
+    // Simulate p-value for correlation
     const pValue = Math.random().toFixed(3);
 
-    resultHtml += `<p>Simulasi: Koefisien Korelasi (${correlationType}) = ${rValue}, p-value = ${pValue}</p>`;
+    resultHtml += `<p>Koefisien Korelasi (${correlationType}): ${rValue.toFixed(3)}</p>`;
+    resultHtml += `<p>p-value (Simulasi): ${pValue}</p>`;
 
     let interpretation = '';
     if (parseFloat(pValue) < alpha) {
       interpretation += `<p style="color: green;">Kesimpulan: p-value (${pValue}) < α (${alpha}). Ada hubungan signifikan antara Variabel X dan Variabel Y.</p>`;
-      if (parseFloat(rValue) > 0) {
+      if (rValue > 0) {
         interpretation += `<p>Arah hubungan: Positif. Semakin tinggi X, semakin tinggi Y.</p>`;
-      } else if (parseFloat(rValue) < 0) {
+      } else if (rValue < 0) {
         interpretation += `<p>Arah hubungan: Negatif. Semakin tinggi X, semakin rendah Y.</p>`;
       } else {
         interpretation += `<p>Arah hubungan: Tidak ada hubungan linear yang jelas.</p>`;
       }
       interpretation += `<p>Kekuatan hubungan: `;
-      const absR = Math.abs(parseFloat(rValue));
+      const absR = Math.abs(rValue);
       if (absR >= 0.8) interpretation += `Sangat Kuat.`;
       else if (absR >= 0.6) interpretation += `Kuat.`;
       else if (absR >= 0.4) interpretation += `Sedang.`;
@@ -2404,6 +2849,7 @@ Kelompok2: 34, 56, 78"></textarea>
   function runRegression() {
     const regressionType = document.getElementById('regressionType').value;
     const confLevel = parseFloat(document.getElementById('confLevel').value);
+    const alpha = 1 - (confLevel / 100);
     const includeResiduals = document.getElementById('includeResiduals').checked;
     const dependentVar = parseData('dependentVar_regresi');
     const independentVar = parseData('independentVar_regresi');
@@ -2414,35 +2860,60 @@ Kelompok2: 34, 56, 78"></textarea>
     }
 
     let resultHtml = `<h4>Hasil Analisis Regresi Linear (${regressionType})</h4>`;
-    resultHtml += `<p>Confidence Level: ${confLevel}%</p>`;
+    resultHtml += `<p>Confidence Level: ${confLevel}% (α = ${alpha.toFixed(2)})</p>`;
     resultHtml += `<p>Variabel Dependen (Y): [${dependentVar.join(', ')}]</p>`;
     resultHtml += `<p>Variabel Independen (X): [${independentVar.join(', ')}]</p>`;
 
-    // Simulate regression results (simple linear regression)
-    const intercept = (Math.random() * 10).toFixed(2);
-    const slope = (Math.random() * 2).toFixed(2);
-    const rSquared = (Math.random() * 0.8 + 0.1).toFixed(3); // R-squared between 0.1 and 0.9
+    // Simulate simple linear regression (real calculation requires more steps)
+    const n = dependentVar.length;
+    const sumX = independentVar.reduce((a, b) => a + b, 0);
+    const sumY = dependentVar.reduce((a, b) => a + b, 0);
+    const sumXY = independentVar.map((x, i) => x * dependentVar[i]).reduce((a, b) => a + b, 0);
+    const sumX2 = independentVar.map(x => x * x).reduce((a, b) => a + b, 0);
+
+    const denominator = n * sumX2 - sumX * sumX;
+    let slope = 0;
+    let intercept = 0;
+    if (denominator !== 0) {
+        slope = (n * sumXY - sumX * sumY) / denominator;
+        intercept = (sumY - slope * sumX) / n;
+    } else {
+        alert('Tidak dapat menghitung regresi: Variabel independen memiliki variasi nol.');
+        document.getElementById('regressionResults').innerHTML = `<p style="color: red;">Error: Variabel independen memiliki variasi nol.</p>`;
+        return;
+    }
+
+    const predictedY = independentVar.map(x => intercept + slope * x);
+    const residuals = dependentVar.map((y, i) => y - predictedY[i]);
+    const ssTotal = dependentVar.map(y => Math.pow(y - calculateMean(dependentVar), 2)).reduce((a, b) => a + b, 0);
+    const ssResidual = residuals.map(r => r * r).reduce((a, b) => a + b, 0);
+    const rSquared = 1 - (ssResidual / ssTotal);
+
+    // Simulate p-value for the model (requires F-test for overall model significance)
     const pValue = Math.random().toFixed(3);
 
     resultHtml += `
       <h3>Model Regresi:</h3>
-      <p>Y = ${intercept} + ${slope} * X</p>
-      <p>R-squared: ${rSquared}</p>
-      <p>p-value (signifikansi model): ${pValue}</p>
+      <p>Persamaan Regresi: Y = ${intercept.toFixed(3)} + ${slope.toFixed(3)} * X</p>
+      <p>R-squared (Koefisien Determinasi): ${rSquared.toFixed(3)}</p>
+      <p>p-value (Signifikansi Model, Simulasi): ${pValue}</p>
     `;
 
-    if (parseFloat(pValue) < (1 - confLevel / 100)) { // Compare p-value with alpha (1-confLevel)
-      resultHtml += `<p style="color: green;">Kesimpulan: Model regresi signifikan secara statistik.</p>`;
-      resultHtml += `<p>Interpretasi: Setiap peningkatan 1 unit pada X akan meningkatkan Y sebesar ${slope} unit.</p>`;
+    if (parseFloat(pValue) < alpha) {
+      resultHtml += `<p style="color: green;">Kesimpulan: Model regresi signifikan secara statistik pada tingkat kepercayaan ${confLevel}%. Variabel independen (X) memiliki pengaruh signifikan terhadap variabel dependen (Y).</p>`;
+      resultHtml += `<p>Interpretasi: Setiap peningkatan 1 unit pada X akan meningkatkan Y sebesar ${slope.toFixed(3)} unit.</p>`;
     } else {
-      resultHtml += `<p style="color: red;">Kesimpulan: Model regresi tidak signifikan secara statistik.</p>`;
+      resultHtml += `<p style="color: red;">Kesimpulan: Model regresi tidak signifikan secara statistik pada tingkat kepercayaan ${confLevel}%. Variabel independen (X) tidak memiliki pengaruh signifikan terhadap variabel dependen (Y).</p>`;
     }
 
     if (includeResiduals) {
+      const meanResidual = calculateMean(residuals);
+      const stdDevResidual = calculateStdDev(residuals, meanResidual);
       resultHtml += `
         <h3>Analisis Residual:</h3>
-        <p>Simulasi: Residual rata-rata = ${(Math.random() * 0.1).toFixed(2)}, Standar Deviasi Residual = ${(Math.random() * 5).toFixed(2)}</p>
-        <p>Visualisasi residual (plot) akan ditampilkan di backend.</p>
+        <p>Residual Rata-rata: ${meanResidual.toFixed(3)}</p>
+        <p>Standar Deviasi Residual: ${stdDevResidual.toFixed(3)}</p>
+        <p>Visualisasi residual (plot) akan ditampilkan di backend untuk pemeriksaan asumsi.</p>
       `;
     }
     resultHtml += `<p style="color: #4caf50; margin-top: 10px;">✓ Analisis regresi berhasil dijalankan! (Simulasi Frontend)</p>`;
@@ -2465,16 +2936,16 @@ Kelompok2: 34, 56, 78"></textarea>
     resultHtml += `<p>Data Kelompok 1: [${group1.join(', ')}]</p>`;
     resultHtml += `<p>Data Kelompok 2: [${group2.join(', ')}]</p>`;
 
-    // Simulate Mann-Whitney U results
-    const uStat = (Math.random() * 20).toFixed(2);
+    // Simulate Mann-Whitney U results (requires ranking and sum of ranks)
+    const uStat = (Math.random() * 20 + 5).toFixed(2); // Simulate a U-statistic
     const pValue = Math.random().toFixed(3);
 
     resultHtml += `<p>Simulasi: U-statistik = ${uStat}, p-value = ${pValue}</p>`;
 
     if (parseFloat(pValue) < alpha) {
-      resultHtml += `<p style="color: green;">Kesimpulan: p-value (${pValue}) < α (${alpha}). Ada perbedaan signifikan antara distribusi kedua kelompok.</p>`;
+      resultHtml += `<p style="color: green;">Kesimpulan: p-value (${pValue}) < α (${alpha}). Tolak H₀. Ada perbedaan signifikan antara distribusi kedua kelompok.</p>`;
     } else {
-      resultHtml += `<p style="color: red;">Kesimpulan: p-value (${pValue}) ≥ α (${alpha}). Tidak ada perbedaan signifikan antara distribusi kedua kelompok.</p>`;
+      resultHtml += `<p style="color: red;">Kesimpulan: p-value (${pValue}) ≥ α (${alpha}). Gagal menolak H₀. Tidak ada perbedaan signifikan antara distribusi kedua kelompok.</p>`;
     }
     resultHtml += `<p style="color: #4caf50; margin-top: 10px;">✓ Uji Mann-Whitney U berhasil dijalankan! (Simulasi Frontend)</p>`;
 
@@ -2493,14 +2964,19 @@ Kelompok2: 34, 56, 78"></textarea>
     let resultHtml = `<h4>Hasil Uji Chi-Square (${chiSquareType})</h4>`;
     resultHtml += `<p>Tingkat Signifikansi (α): ${alpha}</p>`;
 
-    // Simulate Chi-Square results
-    const chi2Stat = (Math.random() * 10 + 1).toFixed(2);
-    const pValue = Math.random().toFixed(3);
-    const df = Math.floor(Math.random() * 5) + 1; // Degrees of freedom
+    let chi2Stat, pValue, df;
 
     if (chiSquareType === 'independence') {
       const table = parseContingencyTable('contingencyTable');
       if (!table) return;
+      
+      const numRows = table.length;
+      const numCols = table[0].length;
+      if (numRows < 2 || numCols < 2) {
+          alert('Tabel kontingensi harus memiliki minimal 2 baris dan 2 kolom untuk uji independensi.');
+          return;
+      }
+
       resultHtml += `<p>Tabel Kontingensi:</p>`;
       resultHtml += `<table border="1" style="width:auto; border-collapse: collapse; margin-top: 10px;">`;
       table.forEach(row => {
@@ -2509,31 +2985,47 @@ Kelompok2: 34, 56, 78"></textarea>
       resultHtml += `</table>`;
       resultHtml += `<p>Hipotesis Nol (H₀): Variabel baris dan kolom independen.</p>`;
       resultHtml += `<p>Hipotesis Alternatif (H₁): Variabel baris dan kolom tidak independen.</p>`;
+
+      // Simulate Chi-Square calculation
+      df = (numRows - 1) * (numCols - 1);
+      chi2Stat = (Math.random() * 10 + 1).toFixed(2);
+      pValue = Math.random().toFixed(3);
+
     } else { // goodness-of-fit
       const observed = parseData('observedFrequencies');
       let expected = parseData('expectedFrequencies');
       if (!observed || observed.length < 2) {
-        alert('Frekuensi observasi tidak valid atau terlalu sedikit.');
+        alert('Frekuensi observasi tidak valid atau terlalu sedikit (minimal 2 kategori).');
         return;
       }
       if (expected && expected.length !== observed.length) {
         alert('Jumlah frekuensi harapan harus sama dengan frekuensi observasi.');
         return;
       }
-      if (!expected) { // If expected is not provided, assume equal distribution
+      if (!expected || expected.every(val => val === 0)) { // If expected is not provided or all zeros, assume equal distribution
         const totalObserved = observed.reduce((sum, val) => sum + val, 0);
         expected = Array(observed.length).fill(totalObserved / observed.length);
       }
+      if (expected.some(val => val <= 0)) {
+          alert('Frekuensi harapan harus lebih besar dari nol.');
+          return;
+      }
+
       resultHtml += `<p>Frekuensi Observasi: [${observed.join(', ')}]</p>`;
       resultHtml += `<p>Frekuensi Harapan: [${expected.map(e => e.toFixed(2)).join(', ')}]</p>`;
       resultHtml += `<p>Hipotesis Nol (H₀): Data sesuai dengan distribusi yang diharapkan.</p>`;
       resultHtml += `<p>Hipotesis Alternatif (H₁): Data tidak sesuai dengan distribusi yang diharapkan.</p>`;
+
+      // Simulate Chi-Square calculation
+      df = observed.length - 1;
+      chi2Stat = (Math.random() * 10 + 1).toFixed(2);
+      pValue = Math.random().toFixed(3);
     }
 
     resultHtml += `<p>Simulasi: Chi-Square Statistik = ${chi2Stat}, df = ${df}, p-value = ${pValue}</p>`;
 
     if (parseFloat(pValue) < alpha) {
-      resultHtml += `<p style="color: green;">Kesimpulan: p-value (${pValue}) < α (${alpha}). Tolak H₀. Ada hubungan signifikan (independensi) atau data tidak sesuai distribusi harapan (goodness of fit).</p>`;
+      resultHtml += `<p style="color: green;">Kesimpulan: p-value (${pValue}) < α (${alpha}). Tolak H₀. Ada hubungan signifikan (uji independensi) atau data tidak sesuai distribusi harapan (goodness of fit).</p>`;
     } else {
       resultHtml += `<p style="color: red;">Kesimpulan: p-value (${pValue}) ≥ α (${alpha}). Gagal menolak H₀. Tidak ada hubungan signifikan atau data sesuai distribusi harapan.</p>`;
     }
@@ -2552,11 +3044,15 @@ Kelompok2: 34, 56, 78"></textarea>
     }
     const data = dataString.split('\n').map(line => {
       return line.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
-    }).filter(row => row.length > 0);
+    }).filter(row => row.length > 0 && row.every(val => !isNaN(val)));
 
     if (data.length < numClusters || data.some(row => row.length === 0)) {
-      alert('Data tidak valid. Pastikan ada cukup observasi dan setiap observasi memiliki fitur.');
+      alert('Data tidak valid. Pastikan ada cukup observasi, setiap observasi memiliki fitur, dan hanya berisi angka.');
       return;
+    }
+    if (numClusters < 2) {
+        alert('Jumlah kluster (K) harus minimal 2.');
+        return;
     }
 
     let resultHtml = `<h4>Hasil K-Means Clustering</h4>`;
@@ -2590,11 +3086,15 @@ Kelompok2: 34, 56, 78"></textarea>
     }
     const data = dataString.split('\n').map(line => {
       return line.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
-    }).filter(row => row.length > 0);
+    }).filter(row => row.length > 0 && row.every(val => !isNaN(val)));
 
     if (data.length < 5 || data[0].length < 2 || numFactors >= data[0].length) {
       alert('Data tidak valid. Minimal 5 observasi, 2 variabel, dan jumlah faktor harus kurang dari jumlah variabel.');
       return;
+    }
+    if (numFactors < 1) {
+        alert('Jumlah faktor yang diekstrak harus minimal 1.');
+        return;
     }
 
     let resultHtml = `<h4>Hasil Analisis Faktor</h4>`;
@@ -2604,13 +3104,13 @@ Kelompok2: 34, 56, 78"></textarea>
     resultHtml += `</ul>`;
 
     // Simulate factor analysis results
-    const eigenvalues = Array.from({ length: data[0].length }, () => (Math.random() * 3 + 0.5).toFixed(2)).sort((a, b) => b - a);
+    const eigenvalues = Array.from({ length: data[0].length }, () => (Math.random() * 3 + 0.5)).sort((a, b) => b - a);
     const factorLoadings = Array.from({ length: data[0].length }, (_, i) => 
       Array.from({ length: numFactors }, () => (Math.random() * 1.2 - 0.6).toFixed(3))
     );
 
     resultHtml += `<h3>Eigenvalues:</h3>`;
-    resultHtml += `<p>[${eigenvalues.join(', ')}]</p>`;
+    resultHtml += `<p>[${eigenvalues.map(e => e.toFixed(2)).join(', ')}]</p>`;
     resultHtml += `<h3>Factor Loadings:</h3>`;
     resultHtml += `<table border="1" style="width:auto; border-collapse: collapse; margin-top: 10px;">`;
     resultHtml += `<tr><th>Variabel</th>${Array.from({ length: numFactors }, (_, i) => `<th>Faktor ${i + 1}</th>`).join('')}</tr>`;
@@ -2686,10 +3186,10 @@ Kelompok2: 34, 56, 78"></textarea>
     }
     const data = dataString.split('\n').map(line => {
       return line.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
-    }).filter(row => row.length > 0);
+    }).filter(row => row.length > 0 && row.every(val => !isNaN(val)));
 
     if (data.length < 10 || data[0].length < 2) {
-      alert('Data tidak valid. Minimal 10 responden dan 2 item pertanyaan.');
+      alert('Data tidak valid. Minimal 10 responden dan 2 item pertanyaan diperlukan untuk uji instrumen.');
       return;
     }
 
@@ -2712,7 +3212,7 @@ Kelompok2: 34, 56, 78"></textarea>
       resultHtml += `<tr><td>Item ${i + 1}</td><td>${r}</td><td>${p}</td><td style="color:${status === 'Valid' ? 'green' : 'red'}">${status}</td></tr>`;
     }
     resultHtml += `</table>`;
-    resultHtml += `<p>Catatan: Nilai r-tabel akan dibandingkan di backend.</p>`;
+    resultHtml += `<p>Catatan: Nilai r-tabel akan dibandingkan di backend untuk penentuan validitas yang sebenarnya.</p>`;
 
     // Simulate Reliability (e.g., Cronbach's Alpha)
     resultHtml += `<h3>Uji Reliabilitas (Simulasi):</h3>`;
@@ -2725,29 +3225,77 @@ Kelompok2: 34, 56, 78"></textarea>
     document.getElementById('instrumentTestResults').innerHTML = resultHtml;
   }
 
+  function updatePowerAnalysisForm() {
+    const testType = document.getElementById('powerTestType').value;
+    const effectSizeLabel = document.getElementById('effectSizeLabel');
+    const effectSizeHint = document.getElementById('effectSizeHint');
+
+    if (testType === 't-test') {
+        effectSizeLabel.textContent = "Ukuran Efek (Cohen's d):";
+        effectSizeHint.textContent = "0.2 (kecil), 0.5 (sedang), 0.8 (besar)";
+        document.getElementById('effectSize').value = 0.5;
+    } else if (testType === 'anova') {
+        effectSizeLabel.textContent = "Ukuran Efek (f):";
+        effectSizeHint.textContent = "0.1 (kecil), 0.25 (sedang), 0.4 (besar)";
+        document.getElementById('effectSize').value = 0.25;
+    } else if (testType === 'correlation') {
+        effectSizeLabel.textContent = "Ukuran Efek (r):";
+        effectSizeHint.textContent = "0.1 (kecil), 0.3 (sedang), 0.5 (besar)";
+        document.getElementById('effectSize').value = 0.3;
+    } else if (testType === 'regression') {
+        effectSizeLabel.textContent = "Ukuran Efek (f²):";
+        effectSizeHint.textContent = "0.02 (kecil), 0.15 (sedang), 0.35 (besar)";
+        document.getElementById('effectSize').value = 0.15;
+    }
+  }
+
   function runPowerAnalysis() {
     const testType = document.getElementById('powerTestType').value;
     const effectSize = parseFloat(document.getElementById('effectSize').value);
     const alpha = parseFloat(document.getElementById('alpha_power').value);
     const desiredPower = parseFloat(document.getElementById('desiredPower').value);
 
-    if (isNaN(effectSize) || effectSize <= 0 || isNaN(alpha) || isNaN(desiredPower) || desiredPower <= 0 || desiredPower >= 1) {
-      alert('Input tidak valid. Pastikan semua nilai numerik diisi dengan benar.');
+    if (isNaN(effectSize) || effectSize <= 0 || isNaN(alpha) || alpha <= 0 || alpha >= 1 || isNaN(desiredPower) || desiredPower <= 0 || desiredPower >= 1) {
+      alert('Input tidak valid. Pastikan semua nilai numerik diisi dengan benar dan berada dalam rentang yang sesuai (misal: alpha dan power antara 0 dan 1).');
       return;
     }
 
     let resultHtml = `<h4>Hasil Power Analysis (${testType})</h4>`;
-    resultHtml += `<p>Ukuran Efek (Cohen's d): ${effectSize}</p>`;
+    resultHtml += `<p>Ukuran Efek: ${effectSize}</p>`;
     resultHtml += `<p>Tingkat Signifikansi (α): ${alpha}</p>`;
     resultHtml += `<p>Power yang Diinginkan (1-β): ${desiredPower}</p>`;
 
-    // Simulate sample size calculation (very simplified)
-    const requiredSampleSize = Math.ceil(16 * Math.pow(effectSize, -2) * Math.pow((1 + Math.sqrt(1 - desiredPower)) / (1 + Math.sqrt(1 - alpha)), 2));
-    // This formula is a rough approximation for two-sample t-test, not precise.
+    let requiredSampleSize = 0;
+    const zAlpha = getZCritical(alpha, true); // Two-tailed for alpha
+    const zBeta = getZCritical(1 - desiredPower, false); // One-tailed for beta
 
-    resultHtml += `<h3>Ukuran Sampel yang Dibutuhkan:</h3>`;
-    resultHtml += `<p>Untuk mencapai power ${desiredPower * 100}% dengan tingkat signifikansi ${alpha * 100}% dan ukuran efek ${effectSize}, ukuran sampel minimal yang dibutuhkan per kelompok adalah sekitar <strong>${requiredSampleSize}</strong>.</p>`;
-    resultHtml += `<p>Total sampel yang dibutuhkan: <strong>${requiredSampleSize * 2}</strong> (untuk dua kelompok).</p>`;
+    if (testType === 't-test') {
+        // Formula for two-sample t-test (equal n per group)
+        requiredSampleSize = Math.ceil(2 * Math.pow((zAlpha + zBeta) / effectSize, 2));
+        resultHtml += `<h3>Ukuran Sampel yang Dibutuhkan:</h3>`;
+        resultHtml += `<p>Untuk mencapai power ${desiredPower * 100}% dengan tingkat signifikansi ${alpha * 100}% dan ukuran efek (Cohen's d) ${effectSize}, ukuran sampel minimal yang dibutuhkan per kelompok adalah sekitar <strong>${requiredSampleSize}</strong>.</p>`;
+        resultHtml += `<p>Total sampel yang dibutuhkan: <strong>${requiredSampleSize * 2}</strong> (untuk dua kelompok).</p>`;
+    } else if (testType === 'anova') {
+        // Formula for one-way ANOVA (simplified, assumes equal group sizes)
+        // This is a very rough approximation. Real ANOVA power calculation is more complex.
+        const k = 3; // Assume 3 groups for simplicity
+        requiredSampleSize = Math.ceil((zAlpha + zBeta) * (zAlpha + zBeta) / (effectSize * effectSize) + 1); // Simplified
+        resultHtml += `<h3>Ukuran Sampel yang Dibutuhkan:</h3>`;
+        resultHtml += `<p>Untuk mencapai power ${desiredPower * 100}% dengan tingkat signifikansi ${alpha * 100}% dan ukuran efek (f) ${effectSize} (dengan ${k} kelompok), ukuran sampel minimal yang dibutuhkan per kelompok adalah sekitar <strong>${requiredSampleSize}</strong>.</p>`;
+        resultHtml += `<p>Total sampel yang dibutuhkan: <strong>${requiredSampleSize * k}</strong> (untuk ${k} kelompok).</p>`;
+    } else if (testType === 'correlation') {
+        // Formula for Pearson correlation
+        requiredSampleSize = Math.ceil(Math.pow((zAlpha + zBeta) / effectSize, 2) + 3);
+        resultHtml += `<h3>Ukuran Sampel yang Dibutuhkan:</h3>`;
+        resultHtml += `<p>Untuk mencapai power ${desiredPower * 100}% dengan tingkat signifikansi ${alpha * 100}% dan ukuran efek (r) ${effectSize}, ukuran sampel minimal yang dibutuhkan adalah sekitar <strong>${requiredSampleSize}</strong>.</p>`;
+    } else if (testType === 'regression') {
+        // Formula for simple linear regression (f^2 effect size)
+        // This is a very rough approximation. Real regression power calculation is more complex.
+        requiredSampleSize = Math.ceil((zAlpha + zBeta) * (zAlpha + zBeta) / effectSize + 1); // Simplified
+        resultHtml += `<h3>Ukuran Sampel yang Dibutuhkan:</h3>`;
+        resultHtml += `<p>Untuk mencapai power ${desiredPower * 100}% dengan tingkat signifikansi ${alpha * 100}% dan ukuran efek (f²) ${effectSize}, ukuran sampel minimal yang dibutuhkan adalah sekitar <strong>${requiredSampleSize}</strong>.</p>`;
+    }
+    
     resultHtml += `<p style="color: #4caf50; margin-top: 10px;">✓ Power Analysis berhasil dijalankan! (Simulasi Frontend)</p>`;
 
     document.getElementById('powerAnalysisResults').innerHTML = resultHtml;
@@ -2760,8 +3308,16 @@ Kelompok2: 34, 56, 78"></textarea>
     const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
     questionsBtn.classList.add(randomShape);
 
-    // Initial load of welcome content
+    // Load initial content and apply local storage changes
+    loadInitialContent();
+
+    // Display welcome content by default
     document.getElementById('pageContent').innerHTML = initialWelcomeContent;
+
+    // Initialize power analysis form on load if it's the active tool
+    if (document.getElementById('powerTestType')) {
+        updatePowerAnalysisForm();
+    }
   });
 </script>
 
