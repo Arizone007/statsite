@@ -134,6 +134,7 @@
 
   .materials.open {
     left: 0; /* Show on screen */
+    display: block; /* Ensure it's displayed when open */
   }
 
   .materials-title {
@@ -466,7 +467,7 @@
     padding: 0.5rem; /* Smaller padding */
     border-radius: 0.25rem; /* Smaller border-radius */
     box-shadow: 0 0.1rem 0.25rem rgba(0,0,0,0.2); /* Smaller shadow */
-    z-index: 1001;
+    z-index: 1002; /* Increased z-index */
     display: none;
     flex-direction: column;
     gap: 0.5rem; /* Smaller gap */
@@ -765,12 +766,6 @@
     box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.2);
   }
 
-  .sidebar-toggle-btn svg {
-    fill: white;
-    width: 1.25rem;
-    height: 1.25rem;
-  }
-
   /* --- Media Queries for Responsiveness --- */
 
   /* Small Phones (up to 480px) */
@@ -843,10 +838,12 @@
     .footer {
       padding: 1rem;
       font-size: 0.75rem;
+      text-align: center; /* Center text horizontally */
     }
 
     .footer-left {
       margin-bottom: 0.25rem;
+      align-items: center; /* Center items in column layout */
     }
 
     .footer-item {
@@ -882,10 +879,10 @@
     }
 
     .admin-mode-toggle {
-      font-size: 0.6rem;
-      padding: 0.15rem 0.4rem;
       bottom: 0.3rem;
       right: 0.3rem;
+      font-size: 0.6rem;
+      padding: 0.15rem 0.4rem;
     }
 
     .admin-login-section {
@@ -947,12 +944,14 @@
       justify-content: space-between;
       padding: 1rem 1.5rem;
       font-size: 0.875rem;
+      text-align: center; /* Center text horizontally */
     }
 
     .footer-left {
       flex-direction: row;
       gap: 1rem;
       margin-bottom: 0;
+      align-items: center; /* Center items in row layout */
     }
 
     .help-faq-btn {
@@ -3187,7 +3186,10 @@ Kelompok2: 34, 56, 78"></textarea>
     const analysisToolsItem = materialContents[8]; // Assuming ID 8 is always AnalysisTools
 
     // Create a new ID for the new material
-    const newId = Object.keys(materialContents).length + 1; // Simple increment for new ID
+    // Find the maximum existing ID and add 1
+    const existingIds = Object.keys(materialContents).map(Number);
+    const newId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+
 
     // Create the new material object
     const newMaterial = {
@@ -3207,8 +3209,8 @@ Kelompok2: 34, 56, 78"></textarea>
     const sortedKeys = Object.keys(materialContents).map(Number).sort((a, b) => a - b);
 
     for (const key of sortedKeys) {
-        if (key === 8) { // Skip AnalysisTools for now
-            continue;
+        if (materialContents[key].title.includes("AnalysisTools")) { // Check if it's the AnalysisTools item
+            continue; // Skip AnalysisTools for now
         }
         // Re-number existing materials
         updatedMaterialContents[currentNewId] = {
@@ -3223,10 +3225,12 @@ Kelompok2: 34, 56, 78"></textarea>
     currentNewId++;
 
     // Add AnalysisTools back at the end with its new number
-    updatedMaterialContents[currentNewId] = {
-        ...analysisToolsItem,
-        title: `${currentNewId}. ${analysisToolsItem.title.split('. ').slice(1).join('. ')}`
-    };
+    if (analysisToolsItem) {
+        updatedMaterialContents[currentNewId] = {
+            ...analysisToolsItem,
+            title: `${currentNewId}. ${analysisToolsItem.title.split('. ').slice(1).join('. ')}`
+        };
+    }
 
     materialContents = updatedMaterialContents;
     saveToLocalStorage('materialContents', materialContents);
@@ -4264,12 +4268,21 @@ Kelompok3: 45, 67, 89, 56, 78`;
       return line.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
     }).filter(row => row.length > 0 && row.every(val => !isNaN(val)));
 
-    if (data.length < numClusters || data.some(row => row.length === 0)) {
-      alert('Data tidak valid. Pastikan ada cukup observasi, setiap observasi memiliki fitur, dan hanya berisi angka.');
-      return;
+    if (data.length === 0) {
+        alert('Tidak ada data yang valid untuk clustering.');
+        return;
     }
-    if (numClusters < 1) { // Changed from 2 to 1, as K-means can technically run with K=1, though not very useful
+    const numFeatures = data[0].length;
+    if (data.some(row => row.length !== numFeatures)) {
+        alert('Semua observasi harus memiliki jumlah fitur yang sama.');
+        return;
+    }
+    if (numClusters < 1) {
         alert('Jumlah kluster (K) harus minimal 1.');
+        return;
+    }
+    if (numClusters > data.length) {
+        alert('Jumlah kluster (K) tidak boleh lebih besar dari jumlah observasi.');
         return;
     }
 
@@ -4281,7 +4294,7 @@ Kelompok3: 45, 67, 89, 56, 78`;
 
     // Simulate clustering results
     const assignments = data.map((_, i) => Math.floor(Math.random() * numClusters) + 1);
-    const centroids = Array.from({ length: numClusters }, () => Array.from({ length: data[0].length }, () => (Math.random() * 10).toFixed(2)));
+    const centroids = Array.from({ length: numClusters }, () => Array.from({ length: numFeatures }, () => (Math.random() * 10).toFixed(2)));
 
     resultHtml += `<h3>Hasil Kluster:</h3>`;
     resultHtml += `<p>Penugasan Kluster per Observasi: [${assignments.join(', ')}]</p>`;
@@ -4309,12 +4322,25 @@ Kelompok3: 45, 67, 89, 56, 78`;
       return line.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n));
     }).filter(row => row.length > 0 && row.every(val => !isNaN(val)));
 
-    if (data.length < 5 || data[0].length < 2 || numFactors >= data[0].length) {
-      alert('Data tidak valid. Minimal 5 observasi, 2 variabel, dan jumlah faktor harus kurang dari jumlah variabel.');
+    if (data.length === 0) {
+        alert('Tidak ada data yang valid untuk analisis faktor.');
+        return;
+    }
+    const numVariables = data[0].length;
+    if (data.some(row => row.length !== numVariables)) {
+        alert('Semua observasi harus memiliki jumlah variabel yang sama.');
+        return;
+    }
+    if (data.length < 5 || numVariables < 2) {
+      alert('Data tidak valid. Minimal 5 observasi dan 2 variabel diperlukan.');
       return;
     }
     if (numFactors < 1) {
         alert('Jumlah faktor yang diekstrak harus minimal 1.');
+        return;
+    }
+    if (numFactors >= numVariables) {
+        alert('Jumlah faktor yang diekstrak harus kurang dari jumlah variabel.');
         return;
     }
 
@@ -4325,8 +4351,8 @@ Kelompok3: 45, 67, 89, 56, 78`;
     resultHtml += `</ul>`;
 
     // Simulate factor analysis results
-    const eigenvalues = Array.from({ length: data[0].length }, () => (Math.random() * 3 + 0.5)).sort((a, b) => b - a);
-    const factorLoadings = Array.from({ length: data[0].length }, (_, i) => 
+    const eigenvalues = Array.from({ length: numVariables }, () => (Math.random() * 3 + 0.5)).sort((a, b) => b - a);
+    const factorLoadings = Array.from({ length: numVariables }, (_, i) => 
       Array.from({ length: numFactors }, () => (Math.random() * 1.2 - 0.6).toFixed(3))
     );
 
@@ -4548,6 +4574,7 @@ Kelompok3: 45, 67, 89, 56, 78`;
   function makeDraggable(element) {
     let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
     let isDragging = false;
+    let startX = 0, startY = 0; // To track initial touch/mouse position
 
     element.onmousedown = dragMouseDown;
     element.ontouchstart = dragTouchStart;
@@ -4558,21 +4585,25 @@ Kelompok3: 45, 67, 89, 56, 78`;
       // get the mouse cursor position at startup:
       pos3 = e.clientX;
       pos4 = e.clientY;
+      startX = e.clientX;
+      startY = e.clientY;
       document.onmouseup = closeDragElement;
       // call a function whenever the cursor moves:
       document.onmousemove = elementDrag;
-      isDragging = true;
+      isDragging = false; // Reset dragging state
     }
 
     function dragTouchStart(e) {
       e = e || window.event;
-      e.preventDefault();
+      // e.preventDefault(); // Prevent default scrolling behavior, but might break click
       const touch = e.touches[0];
       pos3 = touch.clientX;
       pos4 = touch.clientY;
+      startX = touch.clientX;
+      startY = touch.clientY;
       document.ontouchend = closeDragElement;
       document.ontouchmove = elementDragTouch;
-      isDragging = true;
+      isDragging = false; // Reset dragging state
     }
 
     function elementDrag(e) {
@@ -4586,11 +4617,16 @@ Kelompok3: 45, 67, 89, 56, 78`;
       // set the element's new position:
       element.style.top = (element.offsetTop - pos2) + "px";
       element.style.left = (element.offsetLeft - pos1) + "px";
+
+      // If moved more than a few pixels, consider it dragging
+      if (Math.abs(e.clientX - startX) > 5 || Math.abs(e.clientY - startY) > 5) {
+          isDragging = true;
+      }
     }
 
     function elementDragTouch(e) {
       e = e || window.event;
-      e.preventDefault();
+      // e.preventDefault(); // Prevent default scrolling behavior, but might break click
       const touch = e.touches[0];
       pos1 = pos3 - touch.clientX;
       pos2 = pos4 - touch.clientY;
@@ -4598,6 +4634,11 @@ Kelompok3: 45, 67, 89, 56, 78`;
       pos4 = touch.clientY;
       element.style.top = (element.offsetTop - pos2) + "px";
       element.style.left = (element.offsetLeft - pos1) + "px";
+
+      // If moved more than a few pixels, consider it dragging
+      if (Math.abs(touch.clientX - startX) > 5 || Math.abs(touch.clientY - startY) > 5) {
+          isDragging = true;
+      }
     }
 
     function closeDragElement() {
@@ -4605,13 +4646,13 @@ Kelompok3: 45, 67, 89, 56, 78`;
       document.onmousemove = null;
       document.ontouchend = null;
       document.ontouchmove = null;
-      isDragging = false;
+      // No need to reset isDragging here, it's handled by the click listener
     }
 
     // Prevent click event from firing if dragging occurred
     element.addEventListener('click', function(e) {
       if (isDragging) {
-        e.stopPropagation();
+        e.stopPropagation(); // Stop the click event if it was a drag
         isDragging = false; // Reset for next potential drag
       }
     }, true); // Use capture phase to intercept click before it reaches the handler
