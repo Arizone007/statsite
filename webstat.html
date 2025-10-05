@@ -257,7 +257,7 @@
   .footer {
     grid-area: footer;
     background: linear-gradient(135deg, #1976d2, #2196f3);
-    color: white;
+    color: cyan;
     padding: 1.25rem; /* 20px */
     display: flex;
     flex-direction: column; /* Stack vertically on mobile */
@@ -791,12 +791,13 @@
 
     .header h1 {
       font-size: 1.25rem; /* 20px */
-	  text-align: center;
+	  text-align: center
+	  
     }
 
     .header p {
       font-size: 0.8rem; /* 12.8px */
-	  text-align: center;
+	  text-align: center
     }
 
     .profile {
@@ -951,12 +952,12 @@
 
     .header h1 {
       font-size: 1.75rem; /* 28px */
-	  text-align: center;
+	  text-align: center
     }
 
     .header p {
       font-size: 1rem; /* 16px */
-	  text-align: center;
+	  text-align: center
     }
 
     .page-content {
@@ -5455,29 +5456,20 @@ Kelompok3: 45, 67, 89, 56, 78`;
   /**
    * Toggles the mobile sidebar visibility.
    */
-function toggleSidebar() {
-const sidebar = document.getElementById('materials-sidebar');
-const isMobile = window.innerWidth <= 768; // Deteksi mobile
-  if (isMobile) {
+  function toggleSidebar() {
+    const sidebar = document.getElementById('materials-sidebar');
     sidebar.classList.toggle('open');
-    let overlay = document.getElementById('sidebar-overlay');
-    if (!overlay) { // Buat overlay jika belum ada
-      overlay = document.createElement('div');
-      overlay.id = 'sidebar-overlay';
-      overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none;';
-      overlay.onclick = toggleSidebar; // Tutup saat klik overlay
-      document.body.appendChild(overlay);
-    }
+
+    // Tambahkan logika ini untuk memastikan display properti diatur dengan benar
     if (sidebar.classList.contains('open')) {
-      overlay.style.display = 'block'; // Tampilkan overlay
+      sidebar.style.display = 'block';
     } else {
-      overlay.style.display = 'none'; // Sembunyikan
+      // Hanya sembunyikan jika lebar layar <= 768px (mobile/tablet)
+      if (window.innerWidth <= 768) {
+        sidebar.style.display = 'none';
+      }
     }
-  } else {
-    // Di desktop, jangan toggle (sudah visible)
-    return;
   }
-}
 
   /**
    * Handles sidebar resizing on desktop (drag to resize).
@@ -5529,18 +5521,6 @@ const isMobile = window.innerWidth <= 768; // Deteksi mobile
     }
   }
 
-  function handleResize() {
-    const sidebar = document.getElementById('materials-sidebar');
-    const overlay = document.getElementById('sidebar-overlay');
-    const isMobile = window.innerWidth <= 768;
-	
-    if (!isMobile) {
-      // Tutup sidebar & overlay saat switch ke desktop
-      if (sidebar) sidebar.classList.remove('open');
-      if (overlay) overlay.style.display = 'none';
-    }
-  }
-
   // --- Initialization and Event Listeners ---
 
   /**
@@ -5574,7 +5554,7 @@ const isMobile = window.innerWidth <= 768; // Deteksi mobile
       }
     });
 
-    // Handle window resize for responsive layout
+	// Handle window resize for responsive layout
     window.addEventListener('resize', function() {
       const sidebar = document.getElementById('materials-sidebar');
       if (window.innerWidth > 768) {
@@ -5582,11 +5562,15 @@ const isMobile = window.innerWidth <= 768; // Deteksi mobile
         sidebar.style.left = '0';
         sidebar.style.position = 'relative';
         sidebar.style.width = 'auto';
+        sidebar.style.display = 'block'; // Pastikan terlihat di desktop
       } else {
         sidebar.style.position = 'fixed';
         sidebar.style.width = '80%';
         if (!sidebar.classList.contains('open')) {
           sidebar.style.left = '-100%';
+          sidebar.style.display = 'none'; // Sembunyikan jika tidak terbuka di mobile
+        } else {
+          sidebar.style.display = 'block'; // Pastikan terlihat jika terbuka di mobile
         }
       }
     });
