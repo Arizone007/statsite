@@ -1369,6 +1369,7 @@
     </div>
   </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   let isAdminMode = false;
   let currentEditableContent = null; // To store the currently edited element
@@ -2160,10 +2161,25 @@
             <option value="Data">Data</option>
           </select>
         </div>
+
+        <div class="form-group">
+          <label>Pilih Jenis Grafik:</label>
+          <select id="chartType_deskriptif">
+            <option value="none">Tidak Ada</option>
+            <option value="bar">Bar Chart</option>
+            <option value="histogram">Histogram</option>
+            <option value="line">Line Chart</option>
+            <option value="pie">Pie Chart</option>
+            <option value="boxplot">Box Plot</option>
+            <option value="stemleaf">Stem-and-Leaf Plot</option>
+            <option value="scatterplot">Scatter Plot (membutuhkan 2 variabel)</option>
+          </select>
+        </div>
         
         <button class="btn-primary" onclick="runDescriptive()">Analisis Deskriptif</button>
         
         <div id="descriptiveResults" style="margin-top: 20px;"></div>
+        <div id="descriptiveCharts" style="margin-top: 20px;"></div>
       </div>
     `,
     
@@ -3800,7 +3816,7 @@ Kelompok3: 45, 67, 89, 56, 78`;
     const variance = n > 1 ? calculateVariance(data, mean) : 0;
     const stdDev = n > 1 ? calculateStdDev(data, mean) : 0;
 
-    document.getElementById('descriptiveResults').innerHTML = `
+    let resultsHtml = `
       <h4>Hasil Analisis Deskriptif untuk ${selectedVariables.join(', ')}</h4>
       <table border="1" style="width:100%; border-collapse: collapse; margin-top: 10px;">
         <tr><th>Statistik</th><th>Nilai</th></tr>
@@ -3816,7 +3832,356 @@ Kelompok3: 45, 67, 89, 56, 78`;
       </table>
       <p style="color: #4caf50;">✓ Analisis deskriptif berhasil dijalankan! (Simulasi Frontend)</p>
     `;
+    document.getElementById('descriptiveResults').innerHTML = resultsHtml;
+
+    // Generate charts
+    const chartType = document.getElementById('chartType_deskriptif').value;
+    generateDescriptiveChart(data, selectedVariables[0], chartType);
   }
+
+  let descriptiveChartInstance = null; // To store the Chart.js instance
+
+  function generateDescriptiveChart(data, variableName, chartType) {
+    const chartContainer = document.getElementById('descriptiveCharts');
+    chartContainer.innerHTML = ''; // Clear previous charts
+
+    if (chartType === 'none') {
+      return;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.id = 'descriptiveChartCanvas';
+    chartContainer.appendChild(canvas);
+
+    if (descriptiveChartInstance) {
+      descriptiveChartInstance.destroy(); // Destroy existing chart instance
+    }
+
+    const ctx = canvas.getContext('2d');
+    let chartConfig = {};
+    let chartExplanation = '';
+
+    // Helper for frequency distribution
+    const getFrequencyDistribution = (data, bins = 5) => {
+      const sortedData = [...data].sort((a, b) => a - b);
+      const minVal = sortedData[0];
+      const maxVal = sortedData[sortedData.length - 1];
+      const range = maxVal - minVal;
+      const binWidth = range / bins;
+
+      const labels = [];
+      const counts = Array(bins).fill(0);
+
+      for (let i = 0; i < bins; i++) {
+        const lowerBound = minVal + i * binWidth;
+        const upperBound = minVal + (i + 1) * binWidth;
+        labels.push(`${lowerBound.toFixed(1)}-${upperBound.toFixed(1)}`);
+      }
+
+      sortedData.forEach(val => {
+        let binIndex = Math.floor((val - minVal) / binWidth);
+        if (binIndex >= bins) binIndex = bins - 1; // Handle max value falling into last bin
+        counts[binIndex]++;
+      });
+      return { labels, counts };
+    };
+
+    switch (chartType) {
+      case 'bar':
+        // For bar chart, we need categorical data or grouped numerical data
+        // For simplicity, let's group numerical data into categories
+        const barDist = getFrequencyDistribution(data);
+        chartConfig = {
+          type: 'bar',
+          data: {
+            labels: barDist.labels,
+            datasets: [{
+              label: `Frekuensi ${variableName}`,
+              data: barDist.counts,
+              backgroundColor: 'rgba(75, 192, 192, 0.6)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Frekuensi'
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: variableName
+                }
+              }
+            }
+          }
+        };
+        chartExplanation = `<strong>Bar Chart:</strong> Grafik batang ini menunjukkan frekuensi atau jumlah data dalam kategori yang berbeda. Setiap batang mewakili satu kategori, dan tinggi batang menunjukkan frekuensi data dalam kategori tersebut. Ini berguna untuk membandingkan nilai antar kategori.`;
+        break;
+
+      case 'histogram':
+        const histDist = getFrequencyDistribution(data, 10); // More bins for histogram
+        chartConfig = {
+          type: 'bar', // Chart.js uses 'bar' type for histograms
+          data: {
+            labels: histDist.labels,
+            datasets: [{
+              label: `Distribusi ${variableName}`,
+              data: histDist.counts,
+              backgroundColor: 'rgba(153, 102, 255, 0.6)',
+              borderColor: 'rgba(153, 102, 255, 1)',
+              borderWidth: 1,
+              barPercentage: 1.0, // Make bars touch for histogram
+              categoryPercentage: 1.0
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+                title: {
+                  display: true,
+                  text: 'Frekuensi'
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Interval Nilai'
+                }
+              }
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: `Histogram dari ${variableName}`
+              }
+            }
+          }
+        };
+        chartExplanation = `<strong>Histogram:</strong> Histogram menunjukkan distribusi frekuensi data numerik. Data dibagi menjadi "bin" (interval), dan tinggi setiap batang menunjukkan berapa banyak titik data yang jatuh ke dalam bin tersebut. Ini membantu memahami bentuk distribusi data (misalnya, normal, miring).`;
+        break;
+
+      case 'line':
+        chartConfig = {
+          type: 'line',
+          data: {
+            labels: Array.from({ length: data.length }, (_, i) => i + 1), // Index as labels
+            datasets: [{
+              label: variableName,
+              data: data,
+              borderColor: 'rgba(255, 99, 132, 1)',
+              backgroundColor: 'rgba(255, 99, 132, 0.2)',
+              borderWidth: 2,
+              fill: false,
+              tension: 0.1
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: false,
+                title: {
+                  display: true,
+                  text: 'Nilai'
+                }
+              },
+              x: {
+                title: {
+                  display: true,
+                  text: 'Urutan Observasi'
+                }
+              }
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: `Line Chart dari ${variableName}`
+              }
+            }
+          }
+        };
+        chartExplanation = `<strong>Line Chart:</strong> Grafik garis ini menampilkan nilai data secara berurutan. Ini sangat berguna untuk melihat tren, pola, atau perubahan data dari waktu ke waktu atau sepanjang urutan observasi.`;
+        break;
+
+      case 'pie':
+        // For pie chart, we need categorical data. Group numerical data into a few bins.
+        const pieDist = getFrequencyDistribution(data, 5); // Group into 5 categories
+        const backgroundColors = [
+          'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)',
+          'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'
+        ];
+        chartConfig = {
+          type: 'pie',
+          data: {
+            labels: pieDist.labels,
+            datasets: [{
+              label: `Proporsi ${variableName}`,
+              data: pieDist.counts,
+              backgroundColor: backgroundColors.slice(0, pieDist.labels.length),
+              borderColor: '#fff',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: `Pie Chart dari ${variableName}`
+              }
+            }
+          }
+        };
+        chartExplanation = `<strong>Pie Chart:</strong> Grafik lingkaran ini menunjukkan proporsi setiap kategori terhadap keseluruhan. Setiap "irisan" mewakili satu kategori, dan ukuran irisan sebanding dengan persentase data dalam kategori tersebut. Cocok untuk data kategorikal.`;
+        break;
+
+      case 'boxplot':
+        const sortedData = [...data].sort((a, b) => a - b);
+        const q1 = calculateMedian(sortedData.slice(0, Math.floor(sortedData.length / 2)));
+        const q3 = calculateMedian(sortedData.slice(Math.ceil(sortedData.length / 2)));
+        const median = calculateMedian(sortedData);
+        const min = sortedData[0];
+        const max = sortedData[sortedData.length - 1];
+
+        chartConfig = {
+          type: 'boxplot', // Requires Chart.js Box Plot plugin or custom implementation
+          data: {
+            labels: [variableName],
+            datasets: [{
+              label: 'Distribusi Data',
+              backgroundColor: 'rgba(255, 159, 64, 0.6)',
+              borderColor: 'rgba(255, 159, 64, 1)',
+              borderWidth: 1,
+              outlierColor: '#999999',
+              padding: 10,
+              itemRadius: 0,
+              data: [data] // Chart.js boxplot plugin expects array of arrays
+            }]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              title: {
+                display: true,
+                text: `Box Plot dari ${variableName}`
+              }
+            }
+          }
+        };
+        chartExplanation = `<strong>Box Plot:</strong> Box plot (atau diagram kotak-garis) menampilkan ringkasan lima angka dari distribusi data: nilai minimum, kuartil pertama (Q1), median (Q2), kuartil ketiga (Q3), dan nilai maksimum. Ini sangat baik untuk mengidentifikasi pencilan (outlier) dan membandingkan distribusi antar kelompok.`;
+        break;
+
+      case 'stemleaf':
+        // Stem-and-Leaf is text-based, not a Chart.js graph
+        const stemLeafData = generateStemAndLeaf(data);
+        chartContainer.innerHTML = `
+          <h3>Stem-and-Leaf Plot dari ${variableName}</h3>
+          <pre style="background-color: #f8f8f8; padding: 10px; border: 1px solid #ddd; overflow-x: auto;">${stemLeafData}</pre>
+          <p><strong>Stem-and-Leaf Plot:</strong> Plot ini menyajikan data numerik dengan memisahkan setiap nilai data menjadi "batang" (stem) dan "daun" (leaf). Batang biasanya terdiri dari digit pertama atau beberapa digit pertama, sedangkan daun adalah digit terakhir. Ini mempertahankan nilai data asli dan menunjukkan bentuk distribusi.</p>
+        `;
+        return; // Exit as it's not a Chart.js chart
+
+      case 'scatterplot':
+        // Scatter plot requires two variables. For descriptive, we can plot data vs index.
+        const scatterData = data.map((val, i) => ({ x: i + 1, y: val }));
+        chartConfig = {
+          type: 'scatter',
+          data: {
+            datasets: [{
+              label: `${variableName} vs Urutan`,
+              data: scatterData,
+              backgroundColor: 'rgba(54, 162, 235, 0.6)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              pointRadius: 5
+            }]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                type: 'linear',
+                position: 'bottom',
+                title: {
+                  display: true,
+                  text: 'Urutan Observasi'
+                }
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: variableName
+                }
+              }
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: `Scatter Plot dari ${variableName} terhadap Urutan`
+              }
+            }
+          }
+        };
+        chartExplanation = `<strong>Scatter Plot:</strong> Plot sebar ini menampilkan hubungan antara dua variabel numerik. Setiap titik mewakili sepasang nilai dari kedua variabel. Dalam konteks statistik deskriptif satu variabel, ini dapat digunakan untuk memvisualisasikan nilai data terhadap indeks observasi, membantu mengidentifikasi pola atau pencilan.`;
+        break;
+
+      default:
+        chartContainer.innerHTML = `<p>Jenis grafik '${chartType}' tidak didukung atau sedang dalam pengembangan.</p>`;
+        return;
+    }
+
+    descriptiveChartInstance = new Chart(ctx, chartConfig);
+    chartContainer.innerHTML += `<p>${chartExplanation}</p>`;
+  }
+
+  function generateStemAndLeaf(data) {
+    const sortedData = [...data].sort((a, b) => a - b);
+    const stems = {};
+
+    sortedData.forEach(num => {
+      const numStr = num.toString();
+      let stem, leaf;
+
+      if (numStr.includes('.')) {
+        // Handle decimals: e.g., 12.3 -> stem 12, leaf 3
+        const parts = numStr.split('.');
+        stem = parts[0];
+        leaf = parts[1][0] || '0'; // Take first decimal digit as leaf
+      } else {
+        // Handle integers: e.g., 123 -> stem 12, leaf 3
+        if (numStr.length > 1) {
+          stem = numStr.substring(0, numStr.length - 1);
+          leaf = numStr.substring(numStr.length - 1);
+        } else {
+          stem = '0'; // For single-digit numbers
+          leaf = numStr;
+        }
+      }
+
+      if (!stems[stem]) {
+        stems[stem] = [];
+      }
+      stems[stem].push(leaf);
+    });
+
+    let stemLeafOutput = '';
+    const sortedStems = Object.keys(stems).sort((a, b) => parseFloat(a) - parseFloat(b));
+
+    sortedStems.forEach(stem => {
+      stemLeafOutput += `${stem} | ${stems[stem].sort().join(' ')}\n`;
+    });
+
+    return stemLeafOutput;
+  }
+
 
   /**
    * Updates the t-Test form based on the selected test type (one-sample, two-sample, paired).
@@ -4083,8 +4448,8 @@ Kelompok3: 45, 67, 89, 56, 78`;
 
     let resultHtml = `<h4>Hasil Analisis Regresi Linear (${regressionType})</h4>`;
     resultHtml += `<p>Confidence Level: ${confLevel}% (α = ${alpha.toFixed(2)})</p>`;
-    resultHtml += `<p>Variabel Dependen (Y): [${dependentVar.join(', ')}]</p>`;
-    resultHtml += `<p>Variabel Independen (X): [${independentVar.join(', ')}]</p>`;
+    resultHtml += `<p>Data Variabel Dependen (Y): [${dependentVar.join(', ')}]</p>`;
+    resultHtml += `<p>Data Variabel Independen (X): [${independentVar.join(', ')}]</p>`;
 
     // Simulate simple linear regression (real calculation requires more steps)
     const n = dependentVar.length;
@@ -4691,118 +5056,3 @@ Kelompok3: 45, 67, 89, 56, 78`;
     if (file) {
       const reader = new FileReader();
       reader.onload = function(e) {
-        const imageDataUrl = e.target.result;
-        saveToLocalStorage('profileImage', imageDataUrl);
-        loadProfileImage(); // Update the displayed image
-        alert('Foto profil berhasil diunggah dan disimpan!');
-      };
-      reader.readAsDataURL(file);
-    }
-  }
-
-  // --- Mobile Sidebar Toggle ---
-  function toggleSidebar() {
-    const sidebar = document.getElementById('materials-sidebar');
-    sidebar.classList.toggle('open');
-  }
-
-  // --- Resizable Sidebar Functionality ---
-  function setupResizableSidebar() {
-    const resizer = document.getElementById('resizer');
-    const sidebar = document.getElementById('materials-sidebar');
-    const body = document.body;
-
-    let x = 0;
-    let w = 0;
-
-    const minSidebarWidth = 200; // Minimum width for the sidebar
-    const maxSidebarWidth = 500; // Maximum width for the sidebar
-
-    function mouseDownHandler(e) {
-      x = e.clientX;
-      // Get the current computed width of the sidebar
-      w = sidebar.offsetWidth;
-
-      document.addEventListener('mousemove', mouseMoveHandler);
-      document.addEventListener('mouseup', mouseUpHandler);
-    }
-
-    function mouseMoveHandler(e) {
-      const dx = e.clientX - x;
-      let newWidth = w + dx;
-
-      if (newWidth < minSidebarWidth) {
-        newWidth = minSidebarWidth;
-      }
-      if (newWidth > maxSidebarWidth) {
-        newWidth = maxSidebarWidth;
-      }
-
-      // Update the CSS variable for sidebar width
-      body.style.setProperty('--sidebar-width', `${newWidth}px`);
-      // Explicitly update grid-template-columns to reflect the new width
-      // This ensures the grid layout adjusts correctly
-      if (window.innerWidth >= 769) { // Apply only for desktop layouts
-        body.style.gridTemplateColumns = `var(--sidebar-width) 0.5rem 1fr`;
-      }
-    }
-
-    function mouseUpHandler() {
-      document.removeEventListener('mousemove', mouseMoveHandler);
-      document.removeEventListener('mouseup', mouseUpHandler);
-    }
-
-    if (resizer) {
-      resizer.addEventListener('mousedown', mouseDownHandler);
-    }
-  }
-
-
-  // --- DOMContentLoaded ---
-  document.addEventListener('DOMContentLoaded', function() {
-    // Load initial content and apply local storage changes
-    loadInitialContent();
-    loadProfileImage(); // Load profile image on startup
-
-    // Display welcome content by default
-    document.getElementById('pageContent').innerHTML = initialWelcomeContent;
-
-    // Initialize power analysis form on load if it's the active tool
-    if (document.getElementById('powerTestType')) {
-        updatePowerAnalysisForm();
-    }
-
-    // Make the help-faq-btn draggable
-    const helpFaqBtn = document.getElementById('help-faq-btn');
-    if (helpFaqBtn) {
-      makeDraggable(helpFaqBtn);
-    }
-
-    // Setup resizable sidebar
-    setupResizableSidebar();
-
-    // Event listener to close admin login section when clicking outside
-    document.addEventListener('click', function(event) {
-        const adminLoginSection = document.getElementById('admin-login-section');
-        const adminToggleBtn = document.getElementById('admin-mode-toggle-btn');
-        const sidebar = document.getElementById('materials-sidebar');
-        const sidebarToggleBtn = document.querySelector('.sidebar-toggle-btn');
-
-
-        // Close admin login section if clicking outside
-        if (adminLoginSection.style.display === 'flex' && !isAdminMode &&
-            !adminLoginSection.contains(event.target) && !adminToggleBtn.contains(event.target)) {
-            closeAdminLoginSection();
-        }
-
-        // Close mobile sidebar if clicking outside
-        if (sidebar.classList.contains('open') && window.innerWidth <= 768 &&
-            !sidebar.contains(event.target) && (sidebarToggleBtn && !sidebarToggleBtn.contains(event.target))) {
-            toggleSidebar();
-        }
-    });
-  });
-</script>
-
-</body>
-</html>
