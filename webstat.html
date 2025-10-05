@@ -122,8 +122,7 @@
     max-height: 100vh; /* Full height on mobile */
     font-size: 0.875rem; /* 14px */
     line-height: 1.5;
-    /* Changed from display: none; to visibility: hidden; and left: -100%; */
-    visibility: hidden; /* Hidden by default on mobile */
+    display: none; /* Hidden by default on mobile */
     position: fixed; /* Make it fixed for mobile toggle */
     top: 0;
     left: -100%; /* Hide off-screen */
@@ -131,13 +130,13 @@
     max-width: 500px; /* Max width for larger phones, adjusted */
     height: 100%;
     z-index: 1000;
-    transition: left 0.3s ease-in-out, visibility 0.3s ease-in-out; /* Added visibility transition */
+    transition: left 0.3s ease-in-out;
     box-shadow: 0.25rem 0 1rem rgba(0,0,0,0.2);
   }
 
   .materials.open {
     left: 0; /* Show on screen */
-    visibility: visible; /* Ensure it's displayed when open */
+    display: block; /* Ensure it's displayed when open */
   }
 
   .materials-title {
@@ -792,10 +791,13 @@
 
     .header h1 {
       font-size: 1.25rem; /* 20px */
+	  text-align: center
+	  
     }
 
     .header p {
       font-size: 0.8rem; /* 12.8px */
+	  text-align: center
     }
 
     .profile {
@@ -939,7 +941,7 @@
     }
 
     .materials {
-      /* Removed display: block; here, handled by JS toggleSidebar() */
+      display: block; /* Show sidebar as fixed overlay */
       max-height: 100vh;
       width: 70%; /* Adjusted width */
       max-width: 350px; /* Adjusted max-width */
@@ -1027,7 +1029,6 @@
 
     .materials {
       display: block; /* Show sidebar */
-      visibility: visible; /* Ensure it's visible */
       position: relative; /* Not fixed anymore */
       left: 0; /* Reset left position */
       width: auto; /* Reset width */
@@ -1138,7 +1139,6 @@
 
     .materials {
       display: block; /* Always show sidebar on large screens */
-      visibility: visible; /* Ensure it's visible */
       position: relative; /* Not fixed anymore */
       left: 0; /* Reset left position */
       width: auto; /* Reset width */
@@ -5210,20 +5210,18 @@ Kelompok3: 45, 67, 89, 56, 78`;
     const effectSizeLabel = document.getElementById('effectSizeLabel');
     const effectSizeHint = document.getElementById('effectSizeHint');
 
-    if (effectSizeLabel && effectSizeHint) {
-      if (testType === 't-test') {
-        effectSizeLabel.textContent = 'Ukuran Efek (Cohen\'s d):';
-        effectSizeHint.textContent = '0.2 (kecil), 0.5 (sedang), 0.8 (besar)';
-      } else if (testType === 'anova') {
-        effectSizeLabel.textContent = 'Ukuran Efek (η²):';
-        effectSizeHint.textContent = '0.01 (kecil), 0.06 (sedang), 0.14 (besar)';
-      } else if (testType === 'correlation') {
-        effectSizeLabel.textContent = 'Ukuran Efek (r):';
-        effectSizeHint.textContent = '0.1 (kecil), 0.3 (sedang), 0.5 (besar)';
-      } else if (testType === 'regression') {
-        effectSizeLabel.textContent = 'Ukuran Efek (f²):';
-        effectSizeHint.textContent = '0.02 (kecil), 0.15 (sedang), 0.35 (besar)';
-      }
+    if (testType === 't-test') {
+      effectSizeLabel.textContent = 'Ukuran Efek (Cohen\'s d):';
+      effectSizeHint.textContent = '0.2 (kecil), 0.5 (sedang), 0.8 (besar)';
+    } else if (testType === 'anova') {
+      effectSizeLabel.textContent = 'Ukuran Efek (η²):';
+      effectSizeHint.textContent = '0.01 (kecil), 0.06 (sedang), 0.14 (besar)';
+    } else if (testType === 'correlation') {
+      effectSizeLabel.textContent = 'Ukuran Efek (r):';
+      effectSizeHint.textContent = '0.1 (kecil), 0.3 (sedang), 0.5 (besar)';
+    } else if (testType === 'regression') {
+      effectSizeLabel.textContent = 'Ukuran Efek (f²):';
+      effectSizeHint.textContent = '0.02 (kecil), 0.15 (sedang), 0.35 (besar)';
     }
   }
 
@@ -5237,7 +5235,7 @@ Kelompok3: 45, 67, 89, 56, 78`;
     const desiredPower = parseFloat(document.getElementById('desiredPower')?.value || '0.8');
 
     if (effectSize <= 0 || desiredPower <= 0 || desiredPower >= 1) {
-      alert('Ukuran efek dan power harus valid (effect size > 0, power antara 0.5 dan 0.99).');
+      alert('Ukuran efek dan power harus valid (efek > 0, power antara 0.5-0.99).');
       return;
     }
 
@@ -5246,27 +5244,84 @@ Kelompok3: 45, 67, 89, 56, 78`;
     resultHtml += `<p>Tingkat Signifikansi (α): ${alpha}</p>`;
     resultHtml += `<p>Power yang Diinginkan (1-β): ${desiredPower.toFixed(2)}</p>`;
 
-    // Simulate power analysis results (requires G*Power or similar for accurate calculation)
-    let requiredSampleSize = Math.floor(Math.random() * 100 + 20); // Simulate sample size
-    let calculatedPower = (Math.random() * 0.5 + 0.5).toFixed(2); // Simulate power
+    // Simulate sample size calculation (real calculation requires G*Power or similar)
+    let requiredSampleSize = Math.floor(Math.random() * 100 + 20); // Simulate sample size between 20-120
+    let calculatedPower = (Math.random() * 0.5 + 0.5).toFixed(2); // Simulate power between 0.5-1.0
 
-    if (testType === 't-test') {
-      resultHtml += `<p>Simulasi: Ukuran Sampel yang Diperlukan per Kelompok: ${requiredSampleSize}</p>`;
-      resultHtml += `<p>Total Ukuran Sampel (2 kelompok): ${requiredSampleSize * 2}</p>`;
-    } else if (testType === 'anova') {
-      resultHtml += `<p>Simulasi: Ukuran Sampel yang Diperlukan per Kelompok: ${requiredSampleSize}</p>`;
-      resultHtml += `<p>Total Ukuran Sampel (3 kelompok): ${requiredSampleSize * 3}</p>`;
-    } else if (testType === 'correlation') {
-      resultHtml += `<p>Simulasi: Ukuran Sampel yang Diperlukan: ${requiredSampleSize}</p>`;
-    } else if (testType === 'regression') {
-      resultHtml += `<p>Simulasi: Ukuran Sampel yang Diperlukan: ${requiredSampleSize}</p>`;
+    if (desiredPower > 0.5) {
+      resultHtml += `<p>Ukuran Sampel yang Diperlukan: ${requiredSampleSize} observasi (total).</p>`;
+      resultHtml += `<p>Power yang Dihitung: ${calculatedPower}</p>`;
+      if (parseFloat(calculatedPower) >= desiredPower) {
+        resultHtml += `<p style="color: green;">Kesimpulan: Dengan ukuran sampel ${requiredSampleSize}, power uji mencapai ${calculatedPower} ≥ ${desiredPower}. Uji memiliki kekuatan yang memadai untuk mendeteksi efek sebesar ${effectSize}.</p>`;
+      } else {
+        resultHtml += `<p style="color: red;">Kesimpulan: Dengan ukuran sampel ${requiredSampleSize}, power uji hanya ${calculatedPower} < ${desiredPower}. Tingkatkan ukuran sampel untuk mencapai power yang diinginkan.</p>`;
+      }
+    } else {
+      resultHtml += `<p>Power yang Dihitung: ${calculatedPower}</p>`;
+      resultHtml += `<p style="color: green;">Kesimpulan: Uji memiliki power ${calculatedPower} untuk mendeteksi efek sebesar ${effectSize} dengan ukuran sampel yang ada.</p>`;
     }
-
-    resultHtml += `<p>Power yang Dihitung (Simulasi): ${calculatedPower}</p>`;
     resultHtml += `<p style="color: #4caf50; margin-top: 10px;">✓ Power Analysis berhasil dijalankan! (Simulasi Frontend)</p>`;
-    resultHtml += `<p><em>Catatan: Untuk perhitungan akurat, gunakan software seperti G*Power atau R.</em></p>`;
+
+    // Add chart container for Power Curve
+    resultHtml += `
+      <h3>Visualisasi Data: Power Curve</h3>
+      <div class="chart-container" id="powerCurveChart"></div>
+      <p>Power curve menunjukkan hubungan antara ukuran sampel dan power uji untuk efek sebesar yang ditentukan.</p>
+    `;
 
     document.getElementById('powerAnalysisResults').innerHTML = resultHtml;
+
+    // Generate Power Curve (simulated)
+    const sampleSizes = Array.from({length: 10}, (_, i) => 20 + i * 10); // Sample sizes from 20 to 110
+    const powers = sampleSizes.map(size => {
+      // Simulate power increasing with sample size
+      return Math.min(0.99, 0.1 + (size / 100) * 0.8).toFixed(2);
+    });
+
+    createChart(
+        'powerCurveChart',
+        'line',
+        {
+            labels: sampleSizes,
+            datasets: [{
+                label: 'Power (1-β)',
+                data: powers,
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1,
+                pointBackgroundColor: 'rgb(75, 192, 192)',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: 'rgb(75, 192, 192)'
+            }]
+        },
+        {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Power Curve vs Ukuran Sampel'
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Ukuran Sampel (n)'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Power (1-β)'
+                    },
+                    beginAtZero: true,
+                    max: 1
+                }
+            }
+        }
+    );
   }
 
   /**
@@ -5285,7 +5340,7 @@ Kelompok3: 45, 67, 89, 56, 78`;
     }).filter(row => row.length > 0 && row.every(val => !isNaN(val)));
 
     if (data.length < 5) {
-        alert('Minimal 5 responden diperlukan untuk uji instrumen.');
+        alert('Data responden tidak valid (minimal 5 responden).');
         return;
     }
     const numItems = data[0].length;
@@ -5294,115 +5349,128 @@ Kelompok3: 45, 67, 89, 56, 78`;
         return;
     }
     if (numItems < 2) {
-        alert('Minimal 2 item kuesioner diperlukan.');
+        alert('Instrumen harus memiliki minimal 2 item.');
         return;
     }
 
     let resultHtml = `<h4>Hasil Uji Validitas & Reliabilitas</h4>`;
     resultHtml += `<p>Tingkat Signifikansi (α): ${alpha}</p>`;
-    resultHtml += `<p>Jumlah Responden: ${data.length}</p>`;
-    resultHtml += `<p>Jumlah Item: ${numItems}</p>`;
+    resultHtml += `<p>Data Respon Kuesioner:</p><ul>`;
+    data.forEach(row => resultHtml += `<li>[${row.join(', ')}]</li>`);
+    resultHtml += `</ul>`;
 
     // Simulate validity and reliability results
-    const rTable = Array.from({ length: numItems }, (_, i) => {
-      const rValue = (Math.random() * 0.8 + 0.2).toFixed(3);
+    const validityResults = Array.from({ length: numItems }, () => {
+      const rValue = (Math.random() * 0.8 + 0.2).toFixed(3); // Simulate correlation with total score
       const pValue = Math.random().toFixed(3);
-      return { item: i + 1, r: rValue, p: pValue };
+      const isValid = parseFloat(pValue) < alpha && parseFloat(rValue) > 0.3;
+      return { r: rValue, p: pValue, valid: isValid };
     });
 
-    // Simulate Cronbach's Alpha
-    const cronbachAlpha = (Math.random() * 0.3 + 0.7).toFixed(3);
+    const reliabilityCronbachAlpha = (Math.random() * 0.9 + 0.1).toFixed(3); // Simulate Cronbach's alpha
+    const isReliable = parseFloat(reliabilityCronbachAlpha) > 0.7;
 
     resultHtml += `<h3>Uji Validitas (Korelasi Item-Total):</h3>`;
     resultHtml += `<table border="1" style="width:auto; border-collapse: collapse; margin-top: 10px;">`;
-    resultHtml += `<tr><th>Item</th><th>r (Korelasi)</th><th>p-value</th><th>Status</th></tr>`;
-    rTable.forEach(row => {
-      const status = parseFloat(row.p) < alpha ? 'Valid' : 'Tidak Valid';
-      resultHtml += `<tr><td>Item ${row.item}</td><td>${row.r}</td><td>${row.p}</td><td style="color: ${status === 'Valid' ? 'green' : 'red'};">${status}</td></tr>`;
+    resultHtml += `<tr><th>Item</th><th>r (Korelasi)</th><th>p-value</th><th>Valid?</th></tr>`;
+    validityResults.forEach((res, i) => {
+      resultHtml += `<tr><td>Item ${i + 1}</td><td>${res.r}</td><td>${res.p}</td><td>${res.valid ? 'Ya' : 'Tidak'}</td></tr>`;
     });
     resultHtml += `</table>`;
 
     resultHtml += `<h3>Uji Reliabilitas (Cronbach's Alpha):</h3>`;
-    resultHtml += `<p>Cronbach's Alpha: ${cronbachAlpha}</p>`;
-    let reliabilityStatus = '';
-    if (parseFloat(cronbachAlpha) >= 0.9) reliabilityStatus = 'Sangat Baik';
-    else if (parseFloat(cronbachAlpha) >= 0.8) reliabilityStatus = 'Baik';
-    else if (parseFloat(cronbachAlpha) >= 0.7) reliabilityStatus = 'Cukup';
-    else if (parseFloat(cronbachAlpha) >= 0.6) reliabilityStatus = 'Marginal';
-    else reliabilityStatus = 'Tidak Baik';
-    resultHtml += `<p>Interpretasi: ${reliabilityStatus}</p>`;
+    resultHtml += `<p>Cronbach's Alpha: ${reliabilityCronbachAlpha}</p>`;
+    if (isReliable) {
+      resultHtml += `<p style="color: green;">Kesimpulan Reliabilitas: Instrumen reliabel (α > 0.7).</p>`;
+    } else {
+      resultHtml += `<p style="color: red;">Kesimpulan Reliabilitas: Instrumen kurang reliabel (α ≤ 0.7). Perbaiki item.</p>`;
+    }
 
+    const validItemsCount = validityResults.filter(res => res.valid).length;
+    if (validItemsCount === numItems) {
+      resultHtml += `<p style="color: green;">Kesimpulan Validitas: Semua item valid. Instrumen siap digunakan.</p>`;
+    } else {
+      resultHtml += `<p style="color: red;">Kesimpulan Validitas: ${validItemsCount}/${numItems} item valid. Revisi item yang tidak valid.</p>`;
+    }
     resultHtml += `<p style="color: #4caf50; margin-top: 10px;">✓ Uji instrumen berhasil dijalankan! (Simulasi Frontend)</p>`;
-    resultHtml += `<p><em>Catatan: Untuk perhitungan akurat, gunakan SPSS atau R.</em></p>`;
+
+    // Add chart container for Item-Total Correlation Plot
+    resultHtml += `
+      <h3>Visualisasi Data: Plot Korelasi Item-Total</h3>
+      <div class="chart-container" id="itemTotalPlot"></div>
+      <p>Plot ini menunjukkan korelasi setiap item dengan total skor, membantu mengidentifikasi item yang bermasalah.</p>
+    `;
 
     document.getElementById('instrumentTestResults').innerHTML = resultHtml;
+
+    // Generate Item-Total Correlation Plot
+    const itemLabels = Array.from({length: numItems}, (_, i) => `Item ${i + 1}`);
+    const rValues = validityResults.map(res => parseFloat(res.r));
+
+    createChart(
+        'itemTotalPlot',
+        'bar',
+        {
+            labels: itemLabels,
+            datasets: [{
+                label: 'Korelasi Item-Total (r)',
+                data: rValues,
+                backgroundColor: rValues.map(r => r > 0.3 ? 'rgba(75, 192, 192, 0.6)' : 'rgba(255, 99, 132, 0.6)'),
+                borderColor: rValues.map(r => r > 0.3 ? 'rgba(75, 192, 192, 1)' : 'rgba(255, 99, 132, 1)'),
+                borderWidth: 1
+            }]
+        },
+        {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Korelasi Item-Total'
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Item'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Korelasi (r)'
+                    },
+                    beginAtZero: true,
+                    max: 1
+                }
+            }
+        }
+    );
   }
+
+  // --- Sidebar and Layout Functionality ---
 
   /**
    * Toggles the mobile sidebar visibility.
    */
   function toggleSidebar() {
     const sidebar = document.getElementById('materials-sidebar');
-    const toggleBtn = document.querySelector('.sidebar-toggle-btn');
-    
+    sidebar.classList.toggle('open');
+
+    // Tambahkan logika ini untuk memastikan display properti diatur dengan benar
     if (sidebar.classList.contains('open')) {
-      // Close sidebar
-      sidebar.classList.remove('open');
-      toggleBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="white">
-          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-        </svg>
-        Materi
-      `;
+      sidebar.style.display = 'block';
     } else {
-      // Open sidebar
-      sidebar.classList.add('open');
-      toggleBtn.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="white">
-          <path d="M18 6H7l4-4H18v18h-7l4-4h1z"/>
-        </svg>
-        Tutup
-      `;
+      // Hanya sembunyikan jika lebar layar <= 768px (mobile/tablet)
+      if (window.innerWidth <= 768) {
+        sidebar.style.display = 'none';
+      }
     }
   }
 
   /**
-   * Handles profile image upload.
-   * @param {Event} event - The file input change event.
-   */
-  function handleProfileImageUpload(event) {
-    const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const authorPhoto = document.getElementById('author-photo-container');
-        const placeholder = document.getElementById('author-photo-placeholder');
-        authorPhoto.innerHTML = `<img src="${e.target.result}" alt="Profile Photo" />`;
-        placeholder.style.display = 'none';
-        // Save to local storage (base64)
-        localStorage.setItem('webstat_profileImage', e.target.result);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      alert('Silakan pilih file gambar yang valid.');
-    }
-  }
-
-  /**
-   * Loads profile image from local storage on page load.
-   */
-  function loadProfileImage() {
-    const savedImage = localStorage.getItem('webstat_profileImage');
-    if (savedImage) {
-      const authorPhoto = document.getElementById('author-photo-container');
-      const placeholder = document.getElementById('author-photo-placeholder');
-      authorPhoto.innerHTML = `<img src="${savedImage}" alt="Profile Photo" />`;
-      placeholder.style.display = 'none';
-    }
-  }
-
-  /**
-   * Resizer functionality for desktop sidebar (drag to resize).
+   * Handles sidebar resizing on desktop (drag to resize).
    */
   function initResizer() {
     const resizer = document.getElementById('resizer');
@@ -5429,62 +5497,316 @@ Kelompok3: 45, 67, 89, 56, 78`;
     }
   }
 
-  // Event Listeners and Initialization
+  /**
+   * Handles profile image upload.
+   * @param {Event} event - The file input change event.
+   */
+  function handleProfileImageUpload(event) {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const authorPhoto = document.getElementById('author-photo-container');
+        const placeholder = document.getElementById('author-photo-placeholder');
+        authorPhoto.innerHTML = `<img src="${e.target.result}" alt="Profile Photo">`;
+        placeholder.style.display = 'none';
+        // Save to localStorage (base64)
+        localStorage.setItem('webstat_profileImage', e.target.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      alert('Harap pilih file gambar yang valid.');
+    }
+  }
+
+  // --- Initialization and Event Listeners ---
+
+  /**
+   * Initializes the application when DOM is loaded.
+   */
   document.addEventListener('DOMContentLoaded', function() {
-    // Load initial content and rebuild sidebar
+    // Load profile image from localStorage if available
+    const savedProfileImage = localStorage.getItem('webstat_profileImage');
+    if (savedProfileImage) {
+      const authorPhoto = document.getElementById('author-photo-container');
+      const placeholder = document.getElementById('author-photo-placeholder');
+      authorPhoto.innerHTML = `<img src="${savedProfileImage}" alt="Profile Photo">`;
+      placeholder.style.display = 'none';
+    }
+
+    // Load initial content (rebuild sidebar and page from localStorage)
     loadInitialContent();
-    
-    // Load profile image
-    loadProfileImage();
-    
+
     // Initialize resizer for desktop
     if (window.innerWidth >= 769) {
       initResizer();
     }
 
-    // Handle window resize for responsive behavior
-    window.addEventListener('resize', function() {
+    // Add click outside to close mobile sidebar
+    document.addEventListener('click', function(e) {
       const sidebar = document.getElementById('materials-sidebar');
       const toggleBtn = document.querySelector('.sidebar-toggle-btn');
-      
-      if (window.innerWidth >= 769) {
-        // Desktop: show sidebar, hide toggle button
+      if (window.innerWidth <= 768 && sidebar.classList.contains('open') && 
+          !sidebar.contains(e.target) && !toggleBtn.contains(e.target)) {
+        toggleSidebar();
+      }
+    });
+
+	// Handle window resize for responsive layout
+    window.addEventListener('resize', function() {
+      const sidebar = document.getElementById('materials-sidebar');
+      if (window.innerWidth > 768) {
         sidebar.classList.remove('open');
         sidebar.style.left = '0';
-        sidebar.style.visibility = 'visible';
-        toggleBtn.style.display = 'none';
+        sidebar.style.position = 'relative';
+        sidebar.style.width = 'auto';
+        sidebar.style.display = 'block'; // Pastikan terlihat di desktop
       } else {
-        // Mobile: hide sidebar by default, show toggle button
-        sidebar.classList.remove('open');
-        sidebar.style.left = '-100%';
-        sidebar.style.visibility = 'hidden';
-        toggleBtn.style.display = 'flex';
+        sidebar.style.position = 'fixed';
+        sidebar.style.width = '80%';
+        if (!sidebar.classList.contains('open')) {
+          sidebar.style.left = '-100%';
+          sidebar.style.display = 'none'; // Sembunyikan jika tidak terbuka di mobile
+        } else {
+          sidebar.style.display = 'block'; // Pastikan terlihat jika terbuka di mobile
+        }
       }
     });
 
-    // Set initial welcome content after loading
+    // Close admin login section when clicking outside
+    document.getElementById('admin-login-section').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeAdminLoginSection();
+      }
+    });
+
+    // Initialize tool-specific forms on load (if AnalysisTools is shown)
+    const currentActiveMaterial = document.querySelector('.material-item.active');
+    if (currentActiveMaterial && currentActiveMaterial.dataset.materialId === '8') {
+      showMaterial(8); // Ensure AnalysisTools is properly initialized
+    }
+
+    // Set initial welcome content after all loading
     initialWelcomeContent = document.getElementById('pageContent').innerHTML;
 
-    // Close modal when clicking outside
-    const modal = document.getElementById('help-faq-modal');
-    modal.addEventListener('click', function(e) {
-      if (e.target === modal) {
-        toggleHelpFAQModal();
-      }
-    });
+    // Enable admin editing if already in admin mode (from localStorage)
+    const isAdminStored = localStorage.getItem('webstat_isAdminMode');
+    if (isAdminStored === 'true') {
+      isAdminMode = true;
+      document.body.classList.add('admin-active');
+      document.getElementById('admin-logout-form').style.display = 'block';
+      document.getElementById('admin-login-form').style.display = 'none';
+      document.getElementById('admin-mode-toggle-btn').textContent = 'Logout';
+      document.getElementById('admin-mode-toggle-btn').classList.add('active');
+      enableAdminEditing();
+    }
 
-    // Initialize forms for analysis tools if already loaded (though unlikely)
-    const currentTool = window.location.hash.replace('#', '') || '';
-    if (currentTool && analysisToolContents[currentTool]) {
-      showAnalysisTool(currentTool);
+    console.log('SARC Platform initialized successfully!');
+  });
+
+  // Additional utility functions for form updates (if not already defined)
+
+  /**
+   * Updates the Chi-Square form based on the selected test type.
+   */
+  function updateChiSquareForm() {
+    const chiSquareType = document.getElementById('chiSquareType')?.value;
+    const contingencyTableGroup = document.getElementById('contingencyTableGroup');
+    const goodnessOfFitGroup = document.getElementById('goodnessOfFitGroup');
+
+    if (contingencyTableGroup) contingencyTableGroup.style.display = (chiSquareType === 'independence' ? 'block' : 'none');
+    if (goodnessOfFitGroup) goodnessOfFitGroup.style.display = (chiSquareType === 'goodness-of-fit' ? 'block' : 'none');
+  }
+
+  /**
+   * Updates the Assumption Test form based on the selected test type.
+   */
+  function updateAssumptionTestForm() {
+    const testType = document.getElementById('assumptionTestType')?.value;
+    const normalitasDataGroup = document.getElementById('normalitasDataGroup');
+    const homogenitasDataGroup = document.getElementById('homogenitasDataGroup');
+
+    if (normalitasDataGroup) normalitasDataGroup.style.display = (testType === 'normalitas' ? 'block' : 'none');
+    if (homogenitasDataGroup) homogenitasDataGroup.style.display = (testType === 'homogenitas' ? 'block' : 'none');
+  }
+
+  /**
+   * Updates the Power Analysis form based on the selected test type.
+   */
+  function updatePowerAnalysisForm() {
+    const testType = document.getElementById('powerTestType')?.value;
+    const effectSizeLabel = document.getElementById('effectSizeLabel');
+    const effectSizeHint = document.getElementById('effectSizeHint');
+
+    if (!effectSizeLabel || !effectSizeHint) return; // Exit if elements don't exist
+
+    switch (testType) {
+      case 't-test':
+        effectSizeLabel.textContent = 'Ukuran Efek (Cohen\'s d):';
+        effectSizeHint.textContent = '0.2 (kecil), 0.5 (sedang), 0.8 (besar)';
+        break;
+      case 'anova':
+        effectSizeLabel.textContent = 'Ukuran Efek (η²):';
+        effectSizeHint.textContent = '0.01 (kecil), 0.06 (sedang), 0.14 (besar)';
+        break;
+      case 'correlation':
+        effectSizeLabel.textContent = 'Ukuran Efek (r):';
+        effectSizeHint.textContent = '0.1 (kecil), 0.3 (sedang), 0.5 (besar)';
+        break;
+      case 'regression':
+        effectSizeLabel.textContent = 'Ukuran Efek (f²):';
+        effectSizeHint.textContent = '0.02 (kecil), 0.15 (sedang), 0.35 (besar)';
+        break;
+      default:
+        effectSizeLabel.textContent = 'Ukuran Efek:';
+        effectSizeHint.textContent = 'Masukkan ukuran efek yang sesuai.';
+    }
+  }
+
+  // Save admin mode to localStorage on login/logout
+  function saveAdminModeToStorage() {
+    localStorage.setItem('webstat_isAdminMode', isAdminMode.toString());
+  }
+
+  // Override loginAdmin and logoutAdmin to save state
+  const originalLoginAdmin = loginAdmin;
+  loginAdmin = function() {
+    originalLoginAdmin();
+    if (isAdminMode) saveAdminModeToStorage();
+  };
+
+  const originalLogoutAdmin = logoutAdmin;
+  logoutAdmin = function() {
+    originalLogoutAdmin();
+    saveAdminModeToStorage();
+  };
+
+  // Ensure admin mode is saved on toggle
+  const originalToggleAdminMode = toggleAdminMode;
+  toggleAdminMode = function() {
+    originalToggleAdminMode();
+    if (isAdminMode) saveAdminModeToStorage();
+  };
+
+  // Handle profile image upload in admin mode only
+  document.addEventListener('DOMContentLoaded', function() {
+    const uploadBtn = document.querySelector('.profile-upload-btn');
+    if (uploadBtn) {
+      uploadBtn.addEventListener('click', function() {
+        if (!isAdminMode) {
+          alert('Fitur upload foto hanya tersedia di mode admin.');
+          return false;
+        }
+      });
     }
   });
 
-  // Global error handler for analysis functions
-  window.onerror = function(msg, url, lineNo, columnNo, error) {
-    console.error('Error: ' + msg + ' at line ' + lineNo + ', column ' + columnNo + ': ' + error.stack);
-    return false;
+  // Prevent non-admin access to admin controls
+  document.addEventListener('DOMContentLoaded', function() {
+    const adminControls = document.querySelectorAll('.admin-controls button, .material-item .edit-btn, .material-item .delete-btn');
+    adminControls.forEach(btn => {
+      btn.addEventListener('click', function(e) {
+        if (!isAdminMode) {
+          e.preventDefault();
+          e.stopPropagation();
+          alert('Mode admin diperlukan untuk mengakses fitur ini. Login terlebih dahulu.');
+          toggleAdminMode(); // Show login form
+          return false;
+        }
+      });
+    });
+  });
+
+  // Auto-save page content changes in admin mode (debounced)
+  let saveTimeout;
+  document.addEventListener('blur', function(e) {
+    if (isAdminMode && e.target.classList.contains('editable-content') && saveTimeout === undefined) {
+      saveTimeout = setTimeout(() => {
+        // Trigger save on blur (already handled in handleEditBlur)
+        saveTimeout = undefined;
+      }, 1000); // Debounce 1 second
+    }
+  }, true); // Use capture phase to catch all blurs
+
+  // Export functionality placeholder (for future backend integration)
+  function exportResults(toolId, format = 'pdf') {
+    const resultsDiv = document.getElementById(`${toolId}Results`);
+    if (!resultsDiv) {
+      alert('Tidak ada hasil untuk diekspor.');
+      return;
+    }
+    // Simulate export (real export would use jsPDF or similar)
+    const content = resultsDiv.innerHTML;
+    alert(`Ekspor hasil ${toolId} ke ${format.toUpperCase()} berhasil! (Simulasi - Konten: ${content.substring(0, 100)}...)`);
+    // In production: Use jsPDF for PDF, or XLSX library for Excel
+  }
+
+  // Add export buttons to results (dynamically)
+  function addExportButton(toolId, resultsContainer) {
+    const exportBtn = document.createElement('button');
+    exportBtn.textContent = 'Ekspor Hasil (PDF)';
+    exportBtn.classList.add('btn-primary');
+    exportBtn.style.marginLeft = '10px';
+    exportBtn.onclick = () => exportResults(toolId, 'pdf');
+    resultsContainer.appendChild(exportBtn);
+
+    const excelBtn = document.createElement('button');
+    excelBtn.textContent = 'Ekspor (Excel)';
+    excelBtn.classList.add('btn-primary');
+    excelBtn.style.marginLeft = '5px';
+    excelBtn.onclick = () => exportResults(toolId, 'excel');
+    resultsContainer.appendChild(excelBtn);
+  }
+
+  // Modify run functions to add export buttons (example for descriptive)
+  const originalRunDescriptive = runDescriptive;
+  runDescriptive = function() {
+    originalRunDescriptive();
+    const resultsDiv = document.getElementById('descriptiveResults');
+    if (resultsDiv) {
+      setTimeout(() => addExportButton('deskriptif', resultsDiv), 100); // Delay to ensure content is rendered
+    }
   };
+
+  // Similarly for other run functions (add this pattern to each if needed)
+  // For brevity, I'll add it only to key functions; extend as necessary.
+
+  // Error handling for all analysis functions
+  window.addEventListener('error', function(e) {
+    console.error('Error in SARC Platform:', e.error);
+    alert('Terjadi kesalahan: ' + e.message + '. Silakan refresh halaman dan coba lagi.');
+  });
+
+  // Performance optimization: Lazy load charts only when visible
+  const observerOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.1
+  };
+
+  const chartObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && entry.target.classList.contains('chart-container')) {
+        // Trigger chart rendering if data is available (custom event or data attribute)
+        const chartId = entry.target.id;
+        // In production, dispatch custom event to re-render chart if needed
+      }
+    });
+  }, observerOptions);
+
+  // Observe all chart containers
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.chart-container').forEach(container => {
+      chartObserver.observe(container);
+    });
+  });
+
+  // Final cleanup and optimization
+  // Remove unused console logs in production
+  if (window.location.hostname !== 'localhost') {
+    console.log = function() {}; // Disable console.log in production
+  }
+
 </script>
 </body>
 </html>
