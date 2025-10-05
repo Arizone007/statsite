@@ -1341,12 +1341,12 @@
   <div class="help-faq-modal" id="help-faq-modal">
     <div class="help-faq-content">
       <div class="help-faq-header">
-        <span>Bantuan & FAQ</span>
+        <span>Bantuan & ChatAI</span>
         <button class="close-btn" onclick="toggleHelpFAQModal()">×</button>
       </div>
       <div class="help-faq-body">
         <h3>Pertanyaan Umum (FAQ)</h3>
-        <p>Di sini Anda dapat menemukan jawaban atas pertanyaan yang sering diajukan. Jika Anda tidak menemukan jawaban, silakan gunakan chatbot di bawah ini.</p>
+        <p>Di sini Anda dapat menemukan jawaban atas pertanyaan yang sering diajukan. Jika Anda tidak menemukan jawaban, silakan gunakan ChatAI di bawah ini.</p>
         <ul>
           <li><strong>Apa itu Statistika?</strong> Statistika adalah ilmu yang berkaitan dengan pengumpulan, pengorganisasian, analisis, interpretasi, dan presentasi data.</li>
           <li><strong>Bagaimana cara menggunakan Analysis Tools?</strong> Pilih tool yang Anda inginkan dari menu, masukkan data, dan klik 'Analisis'.</li>
@@ -1355,13 +1355,13 @@
 
         <div class="chatbot-container-modal">
           <div class="chatbot-header">
-            <span>Statistika Chatbot</span>
+            <span>ChatAI untuk Analisis Data</span>
           </div>
           <div class="chatbot-messages" id="chatbot-messages">
-            <div class="chatbot-message bot">Halo! Saya Chatbot Statistika. Ada yang bisa saya bantu?</div>
+            <div class="chatbot-message bot">Halo! Saya ChatAI SARC, asisten Anda untuk analisis data statistik. Ada yang bisa saya bantu?</div>
           </div>
           <div class="chatbot-input">
-            <input type="text" id="chatbot-input-field" placeholder="Ketik pesan Anda..." onkeypress="handleChatInput(event)"/>
+            <input type="text" id="chatbot-input-field" placeholder="Ketik pertanyaan Anda tentang analisis data..." onkeypress="handleChatInput(event)"/>
             <button onclick="sendChatMessage()">Kirim</button>
           </div>
         </div>
@@ -2867,7 +2867,7 @@ Kelompok2: 34, 56, 78"></textarea>
   }
 
   /**
-   * Toggles the visibility of the Help & FAQ modal.
+   * Toggles the visibility of the Help & ChatAI modal.
    */
   function toggleHelpFAQModal() {
     const modal = document.getElementById('help-faq-modal');
@@ -2880,7 +2880,7 @@ Kelompok2: 34, 56, 78"></textarea>
   }
 
   /**
-   * Sends a message to the chatbot and displays the response.
+   * Sends a message to the ChatAI and displays the response.
    */
   function sendChatMessage() {
     const inputField = document.getElementById('chatbot-input-field');
@@ -2898,19 +2898,19 @@ Kelompok2: 34, 56, 78"></textarea>
     inputField.value = ''; // Clear input
     messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to bottom
 
-    // Get bot response
+    // Get AI response
     setTimeout(() => {
-      const botResponse = getBotResponse(message);
+      const aiResponse = getAIResponse(message);
       const botMessageDiv = document.createElement('div');
       botMessageDiv.classList.add('chatbot-message', 'bot');
-      botMessageDiv.innerHTML = botResponse; // Use innerHTML for potential links/formatting
+      botMessageDiv.innerHTML = aiResponse; // Use innerHTML for potential links/formatting
       messagesContainer.appendChild(botMessageDiv);
       messagesContainer.scrollTop = messagesContainer.scrollHeight; // Scroll to bottom
     }, 500);
   }
 
   /**
-   * Handles Enter key press in the chatbot input field.
+   * Handles Enter key press in the ChatAI input field.
    * @param {KeyboardEvent} event - The keyboard event.
    */
   function handleChatInput(event) {
@@ -2920,37 +2920,52 @@ Kelompok2: 34, 56, 78"></textarea>
   }
 
   /**
-   * Provides a simulated response from the chatbot based on user input.
+   * Provides an automated AI response for data analysis questions.
+   * If the AI cannot answer, it directs to CS Admin.
    * @param {string} userMessage - The user's message.
-   * @returns {string} The chatbot's response.
+   * @returns {string} The AI's response.
    */
-  function getBotResponse(userMessage) {
+  function getAIResponse(userMessage) {
     const lowerCaseMessage = userMessage.toLowerCase();
 
+    // AI for Data Analysis responses
     if (lowerCaseMessage.includes('halo') || lowerCaseMessage.includes('hai')) {
-      return 'Halo! Ada yang bisa saya bantu terkait statistika?';
+      return 'Halo! Saya ChatAI SARC, asisten Anda untuk analisis data statistik. Ada yang bisa saya bantu?';
     } else if (lowerCaseMessage.includes('apa itu statistika')) {
       return 'Statistika adalah ilmu yang berkaitan dengan pengumpulan, pengorganisasian, analisis, interpretasi, dan presentasi data. Anda bisa membaca lebih lanjut di materi <a href="#" onclick="showMaterial(1); toggleHelpFAQModal();">Pengantar Statistika</a>.';
-    } else if (lowerCaseMessage.includes('tools analisis')) {
-      return 'Kami memiliki berbagai tools analisis statistik interaktif. Anda bisa melihatnya di menu <a href="#" onclick="showMaterial(8); toggleHelpFAQModal();">AnalysisTools</a>.';
+    } else if (lowerCaseMessage.includes('tools analisis') || lowerCaseMessage.includes('alat analisis')) {
+      return 'Kami memiliki berbagai tools analisis statistik interaktif. Anda bisa melihatnya di menu <a href="#" onclick="showMaterial(8); toggleHelpFAQModal();">AnalysisTools</a>. Beberapa tool yang tersedia antara lain Statistik Deskriptif, Uji t, ANOVA, Korelasi, dan Regresi Linear.';
     } else if (lowerCaseMessage.includes('uji t') || lowerCaseMessage.includes('t-test')) {
-      return 'Uji t digunakan untuk membandingkan rata-rata satu atau dua kelompok. Anda bisa mencobanya di <a href="#" onclick="showAnalysisTool(\'uji-mean\'); toggleHelpFAQModal();">Tool Uji t</a>.';
+      return 'Uji t digunakan untuk membandingkan rata-rata satu atau dua kelompok. Anda bisa mencobanya di <a href="#" onclick="showAnalysisTool(\'uji-mean\'); toggleHelpFAQModal();">Tool Uji t</a>. Ada tiga jenis utama: One-sample, Independent Two-sample, dan Paired t-test.';
     } else if (lowerCaseMessage.includes('anova')) {
-      return 'ANOVA (Analysis of Variance) digunakan untuk membandingkan rata-rata tiga atau lebih kelompok. Coba di <a href="#" onclick="showAnalysisTool(\'anova\'); toggleHelpFAQModal();">Tool ANOVA</a>.';
+      return 'ANOVA (Analysis of Variance) digunakan untuk membandingkan rata-rata tiga atau lebih kelompok. Coba di <a href="#" onclick="showAnalysisTool(\'anova\'); toggleHelpFAQModal();">Tool ANOVA</a>. Ini sangat berguna untuk desain eksperimen dengan banyak grup.';
     } else if (lowerCaseMessage.includes('korelasi')) {
-      return 'Analisis korelasi mengukur kekuatan dan arah hubungan antara dua variabel. Anda bisa menggunakannya di <a href="#" onclick="showAnalysisTool(\'korelasi\'); toggleHelpFAQModal();">Tool Analisis Korelasi</a>.';
+      return 'Analisis korelasi mengukur kekuatan dan arah hubungan linear antara dua variabel. Anda bisa menggunakannya di <a href="#" onclick="showAnalysisTool(\'korelasi\'); toggleHelpFAQModal();">Tool Analisis Korelasi</a>. Koefisien korelasi Pearson adalah yang paling umum.';
     } else if (lowerCaseMessage.includes('regresi')) {
-      return 'Regresi linear memodelkan hubungan antara variabel dependen dan independen. Coba di <a href="#" onclick="showAnalysisTool(\'regresi\'); toggleHelpFAQModal();">Tool Analisis Regresi Linear</a>.';
+      return 'Regresi linear memodelkan hubungan antara variabel dependen dan satu atau lebih variabel independen. Coba di <a href="#" onclick="showAnalysisTool(\'regresi\'); toggleHelpFAQModal();">Tool Analisis Regresi Linear</a> untuk memprediksi nilai variabel dependen.';
     } else if (lowerCaseMessage.includes('statistik deskriptif')) {
-      return 'Statistik deskriptif meringkas dan menggambarkan data. Anda bisa mencobanya di <a href="#" onclick="showAnalysisTool(\'deskriptif\'); toggleHelpFAQModal();">Tool Statistik Deskriptif</a>.';
+      return 'Statistik deskriptif meringkas dan menggambarkan karakteristik utama dari suatu set data, seperti mean, median, modus, dan standar deviasi. Anda bisa mencobanya di <a href="#" onclick="showAnalysisTool(\'deskriptif\'); toggleHelpFAQModal();">Tool Statistik Deskriptif</a>.';
     } else if (lowerCaseMessage.includes('uji asumsi')) {
-      return 'Uji asumsi klasik meliputi normalitas, homogenitas, dan linearitas. Anda bisa mengujinya di <a href="#" onclick="showAnalysisTool(\'uji-asumsi\'); toggleHelpFAQModal();">Tool Uji Asumsi Klasik</a>.';
-    } else if (lowerCaseMessage.includes('kontak') || lowerCaseMessage.includes('bantuan')) {
-      return 'Anda bisa menghubungi kami melalui email: konsultasi@statistika.ac.id atau telepon: (021) 1234-5678.';
+      return 'Uji asumsi klasik adalah prasyarat untuk banyak uji statistik parametrik, meliputi normalitas, homogenitas varians, dan linearitas. Anda bisa mengujinya di <a href="#" onclick="showAnalysisTool(\'uji-asumsi\'); toggleHelpFAQModal();">Tool Uji Asumsi Klasik</a>.';
+    } else if (lowerCaseMessage.includes('uji validitas') || lowerCaseMessage.includes('uji reliabilitas')) {
+      return 'Uji validitas dan reliabilitas digunakan untuk menilai kualitas instrumen penelitian (misalnya kuesioner). Validitas mengukur apakah instrumen mengukur apa yang seharusnya diukur, sedangkan reliabilitas mengukur konsistensi. Anda bisa mencobanya di <a href="#" onclick="showAnalysisTool(\'uji-instrumen\'); toggleHelpFAQModal();">Tool Uji Validitas & Reliabilitas</a>.';
+    } else if (lowerCaseMessage.includes('power analysis') || lowerCaseMessage.includes('ukuran sampel')) {
+      return 'Power analysis membantu menentukan ukuran sampel yang diperlukan untuk mendeteksi efek dengan probabilitas tertentu, atau untuk mengevaluasi kekuatan uji statistik yang sudah ada. Anda bisa menggunakan <a href="#" onclick="showAnalysisTool(\'power-analysis\'); toggleHelpFAQModal();">Tool Power Analysis</a>.';
+    } else if (lowerCaseMessage.includes('clustering') || lowerCaseMessage.includes('klastering')) {
+      return 'Clustering adalah teknik unsupervised learning untuk mengelompokkan titik data ke dalam grup (cluster) berdasarkan kesamaan. K-Means adalah algoritma clustering yang populer. Anda bisa mencobanya di <a href="#" onclick="showAnalysisTool(\'clustering\'); toggleHelpFAQModal();">Tool Clustering</a>.';
+    } else if (lowerCaseMessage.includes('factor analysis') || lowerCaseMessage.includes('analisis faktor')) {
+      return 'Analisis faktor adalah metode statistik untuk mengurangi dimensi data dengan mengidentifikasi faktor-faktor laten yang mendasari variabel-variabel yang diamati. Anda bisa mencobanya di <a href="#" onclick="showAnalysisTool(\'factor-analysis\'); toggleHelpFAQModal();">Tool Factor Analysis</a>.';
+    } else if (lowerCaseMessage.includes('referensi')) {
+      return 'Setiap materi memiliki bagian referensi di akhir kontennya. Anda bisa menavigasi ke materi yang relevan untuk melihat daftar referensi.';
+    } else if (lowerCaseMessage.includes('download materi')) {
+      return 'Saat ini fitur unduh materi belum tersedia. Namun, Anda bisa menyalin teks materi langsung dari halaman.';
+    } else if (lowerCaseMessage.includes('kontak') || lowerCaseMessage.includes('admin') || lowerCaseMessage.includes('bantuan lebih lanjut')) {
+      return 'Untuk pertanyaan yang tidak dapat saya jawab atau bantuan lebih lanjut, silakan hubungi Customer Service Admin kami melalui email: <a href="mailto:konsultasi@statistika.ac.id">konsultasi@statistika.ac.id</a> atau telepon: (021) 1234-5678.';
     } else if (lowerCaseMessage.includes('terima kasih')) {
-      return 'Sama-sama! Senang bisa membantu.';
+      return 'Sama-sama! Senang bisa membantu Anda dalam perjalanan analisis data statistik.';
     } else {
-      return 'Maaf, saya tidak mengerti pertanyaan Anda. Bisakah Anda bertanya dengan cara lain atau memilih topik dari menu?';
+      // Default response for questions AI cannot answer, directs to CS Admin
+      return 'Maaf, saya belum bisa menjawab pertanyaan Anda secara spesifik. Untuk bantuan lebih lanjut atau pertanyaan yang lebih kompleks, silakan hubungi Customer Service Admin kami melalui email: <a href="mailto:konsultasi@statistika.ac.id">konsultasi@statistika.ac.id</a> atau telepon: (021) 1234-5678.';
     }
   }
 
@@ -3799,7 +3814,7 @@ Kelompok3: 45, 67, 89, 56, 78`;
         <tr><td>Varians</td><td>${variance.toFixed(2)}</td></tr>
         <tr><td>Standar Deviasi</td><td>${stdDev.toFixed(2)}</td></tr>
       </table>
-      <p style="color: #4caf50; margin-top: 10px;">✓ Analisis deskriptif berhasil dijalankan! (Simulasi Frontend)</p>
+      <p style="color: #4caf50;">✓ Analisis deskriptif berhasil dijalankan! (Simulasi Frontend)</p>
     `;
   }
 
