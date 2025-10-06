@@ -257,7 +257,7 @@
   .footer {
     grid-area: footer;
     background: linear-gradient(135deg, #1976d2, #2196f3);
-    color: cyan;
+    color: white;
     padding: 1.25rem; /* 20px */
     display: flex;
     flex-direction: column; /* Stack vertically on mobile */
@@ -1215,6 +1215,31 @@
       height: 400px;
     }
   }
+  
+  /* TAMBAHKAN KODE HOVER DI SINI */
+       .footer-item span:hover {
+         background-color: rgba(255, 255, 255, 0.2);
+         color: #FFFFFF;
+         padding: 4px 8px;
+         border-radius: 4px;
+         transition: all 0.3s ease;
+         cursor: pointer;
+       }
+       .footer .editable-content:hover {
+         background-color: rgba(255, 255, 255, 0.2);
+         color: #FFFFFF;
+         padding: 4px 8px;
+         border-radius: 4px;
+         transition: all 0.3s ease;
+         cursor: pointer;
+       }
+       .footer-item:hover {
+         background-color: rgba(0, 0, 0, 0.1);
+         border-radius: 6px;
+         padding: 2px;
+         transition: background-color 0.3s ease;
+       }
+  
 </style>
 </head>
 <body>
@@ -1356,18 +1381,18 @@
     <div class="footer-left">
       <div class="footer-item">
         <strong>📍</strong>
-        <span class="editable-content" data-editable-id="footer-address">Jl. Statistika No. 123, Jakarta 12345</span>
+        <span class="editable-content" data-editable-id="footer-address">Jl. H.A.M. Rifaddin No. 279, Samarinda 75131</span>
       </div>
       <div class="footer-item">
         <strong>📞</strong>
-        <span class="editable-content" data-editable-id="footer-phone">(021) 1234-5678</span>
+        <span class="editable-content" data-editable-id="footer-phone">((0541) 7270222</span>
       </div>
       <div class="footer-item">
         <strong>✉️</strong>
         <span class="editable-content" data-editable-id="footer-email">konsultasi@statistika.ac.id</span>
       </div>
     </div>
-    <div class="editable-content" data-editable-id="footer-copyright">© 2024 Statistical Analysis and Research Consulting (SARC)</div>
+    <div class="editable-content" data-editable-id="footer-copyright">© 2025 Statistical Analysis and Research Consulting (SARC)</div>
   </footer>
 
   <!-- Help & FAQ Button (Draggable) -->
