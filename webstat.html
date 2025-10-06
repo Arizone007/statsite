@@ -5548,35 +5548,169 @@ Kelompok3: 45, 67, 89, 56, 78`;
   }
 
   /**
-   * Handles profile image upload.
+   * Handles profile image upload and displays the image.
    * @param {Event} event - The file input change event.
    */
   function handleProfileImageUpload(event) {
-    const file = event.target.files[0];
-    if (file && file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const authorPhoto = document.getElementById('author-photo-container');
-        const placeholder = document.getElementById('author-photo-placeholder');
-        authorPhoto.innerHTML = `<img src="${e.target.result}" alt="Profile Photo">`;
-        placeholder.style.display = 'none';
-        // Save to localStorage (base64)
+    const fileInput = event.target;
+    const file = fileInput.files[0];
+    if (!file) {
+      console.log('No file selected for upload.');
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('File harus berupa gambar (JPG, PNG, GIF, dll.).');
+      fileInput.value = ''; // Clear the input
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Ukuran file terlalu besar. Maksimal 5MB.');
+      fileInput.value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const authorPhotoContainer = document.getElementById('author-photo-container');
+      if (!authorPhotoContainer) {
+        console.error('Error: Container #author-photo-container not found.');
+        alert('Error: Elemen container foto profil tidak ditemukan. Refresh halaman dan coba lagi.');
+        return;
+      }
+
+      const placeholder = document.getElementById('author-photo-placeholder');
+      const existingImg = authorPhotoContainer.querySelector('img');
+
+      try {
+        if (existingImg) {
+          // If image already exists, update src
+          existingImg.src = e.target.result;
+          console.log('Updated existing profile image.');
+        } else {
+          // Create new img element
+          const newImg = document.createElement('img');
+          newImg.src = e.target.result;
+          newImg.alt = 'Foto Profil';
+          newImg.style.width = '100%';
+          newImg.style.height = '100%';
+          newImg.style.objectFit = 'cover';
+          authorPhotoContainer.appendChild(newImg);
+          console.log('Created new profile image element.');
+        }
+
+        // Hide placeholder if it exists (with null check)
+        if (placeholder) {
+          placeholder.style.display = 'none';
+          console.log('Hid placeholder.');
+        } else {
+          console.warn('Placeholder #author-photo-placeholder not found, but upload continues.');
+        }
+
+        // Save to localStorage (base64 string)
         localStorage.setItem('webstat_profileImage', e.target.result);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      alert('Harap pilih file gambar yang valid.');
+        alert('Foto profil berhasil diunggah!');
+        console.log('Profile image uploaded and saved successfully.');
+
+      } catch (error) {
+        console.error('Error during image processing:', error);
+        alert('Error saat memproses gambar: ' + error.message + '. Refresh halaman dan coba lagi.');
+      }
+    };
+
+    reader.onerror = function() {
+      console.error('Error reading file.');
+      alert('Error membaca file. Pastikan file tidak rusak.');
+      fileInput.value = '';
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  /**
+   * Loads the profile image from localStorage on page load.
+   */
+  function loadProfileImage() {
+    const savedImage = localStorage.getItem('webstat_profileImage');
+    if (!savedImage) {
+      console.log('No saved profile image found.');
+      return;
+    }
+
+    const authorPhotoContainer = document.getElementById('author-photo-container');
+    if (!authorPhotoContainer) {
+      console.error('Error: Container #author-photo-container not found during load.');
+      return;
+    }
+
+    const placeholder = document.getElementById('author-photo-placeholder');
+    const existingImg = authorPhotoContainer.querySelector('img');
+
+    try {
+      if (existingImg) {
+        existingImg.src = savedImage;
+        console.log('Loaded existing profile image from storage.');
+      } else {
+        const newImg = document.createElement('img');
+        newImg.src = savedImage;
+        newImg.alt = 'Foto Profil';
+        newImg.style.width = '100%';
+        newImg.style.height = '100%';
+        newImg.style.objectFit = 'cover';
+        authorPhotoContainer.appendChild(newImg);
+        console.log('Created and loaded new profile image from storage.');
+      }
+
+      // Hide placeholder if it exists (with null check)
+      if (placeholder) {
+        placeholder.style.display = 'none';
+        console.log('Hid placeholder on load.');
+      } else {
+        console.warn('Placeholder #author-photo-placeholder not found during load, but image loaded.');
+      }
+
+    } catch (error) {
+      console.error('Error loading profile image:', error);
+      // Fallback: Hapus data rusak dari localStorage
+      localStorage.removeItem('webstat_profileImage');
     }
   }
 
   // --- Initialization and Event Listeners ---
 
+   /**
+    * Inisialisasi dukungan tombol Enter untuk login admin.
+    * Fungsi ini menambahkan event listener pada input password.
+    */
+   function initAdminLoginEnter() {
+     const passwordInput = document.getElementById('admin-password');
+     if (!passwordInput) {
+       console.warn('Input #admin-password tidak ditemukan. Dukungan Enter dilewati.');
+       return;
+     }
+
+     passwordInput.addEventListener('keydown', function(event) {
+       if (event.key === 'Enter' || event.keyCode === 13) {
+         event.preventDefault(); // Cegah aksi default seperti newline
+         loginAdmin(); // Panggil fungsi login admin yang sudah ada
+       }
+     });
+
+     console.log('Dukungan tombol Enter untuk login admin diinisialisasi.');
+   }
+     
   /**
    * Initializes the application when DOM is loaded.
    */
   document.addEventListener('DOMContentLoaded', function() {
-    // Load profile image from localStorage if available
-    const savedProfileImage = localStorage.getItem('webstat_profileImage');
+    // Load profile image AFTER DOM is ready
+    loadProfileImage();
+	initAdminLoginEnter();
+	// Load profile image from localStorage if available
+	const savedProfileImage = localStorage.getItem('webstat_profileImage');
     if (savedProfileImage) {
       const authorPhoto = document.getElementById('author-photo-container');
       const placeholder = document.getElementById('author-photo-placeholder');
