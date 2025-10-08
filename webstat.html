@@ -2206,77 +2206,76 @@
     }
   };
 
-// Konten untuk analysis tools (sekarang disimpan dalam objek global)
-let analysisToolContents = {
-  'deskriptif': `
-    <h2>Tool Analisis Statistik Deskriptif</h2>
-    <p>Analisis komprehensif karakteristik data Anda dengan berbagai ukuran pemusatan, penyebaran, dan visualisasi grafik.</p>
+  // Konten untuk analysis tools (sekarang disimpan dalam objek global)
+  let analysisToolContents = {
+    'deskriptif': `
+      <h2>Tool Analisis Statistik Deskriptif</h2>
+      <p>Analisis komprehensif karakteristik data Anda dengan berbagai ukuran pemusatan, penyebaran, dan visualisasi grafik.</p>
+  
+      <div class="analysis-form">
+        <h3>Input Data</h3>
+        <div class="form-group">
+          <label>Metode Input Data:</label>
+          <select id="inputMethod_deskriptif" onchange="toggleInputMethod('deskriptif')">
+            <option value="manual">Input Manual</option>
+            <option value="sample">Gunakan Sample Data</option>
+            <option value="file">Upload File (.csv, .xlsx)</option>
+          </select>
+        </div>
+    
+        <div class="form-group file-input-group_deskriptif" style="display:none;">
+          <label>Upload File Data:</label>
+          <input type="file" accept=".csv,.xlsx" id="dataFile_deskriptif" onchange="handleFileUpload('deskriptif')"/>
+        </div>
+    
+        <div class="form-group manual-input-group_deskriptif">
+          <label>Atau Input Data Manual (pisahkan dengan koma atau baris baru):</label>
+          <textarea id="manualData_deskriptif" rows="6" placeholder="Contoh: 23, 45, 67, 34, 56, 78, 45, 67, 89, 23"></textarea>
+        </div>
 
-    <div class="analysis-form">
-      <h3>Input Data</h3>
-      <div class="form-group">
-        <label>Metode Input Data:</label>
-        <select id="inputMethod_deskriptif" onchange="toggleInputMethod('deskriptif')">
-          <option value="manual">Input Manual</option>
-          <option value="sample">Gunakan Sample Data</option>
-          <option value="file">Upload File (.csv, .xlsx)</option>
-        </select>
+        <div class="form-group sample-input-group_deskriptif" style="display:none;">
+          <label>Pilih Sample Data:</label>
+          <select id="sampleData_deskriptif" onchange="loadSampleData('deskriptif')">
+            <option value="">-- Pilih Sample --</option>
+            <option value="sample1">Sample Data 1 (Penjualan)</option>
+            <option value="sample2">Sample Data 2 (Tinggi Badan)</option>
+          </select>
+        </div>
+    
+        <div class="form-group">
+          <label>Pilih Variabel untuk Analisis:</label>
+          <select id="variables_deskriptif" multiple size="5">
+            <option value="Data">Data</option>
+          </select>
+        </div>
+
+        <!-- Tambahan Baru: Dropdown untuk Jenis Grafik -->
+        <div class="form-group">
+          <label>Pilih Jenis Visualisasi Grafik:</label>
+          <select id="chartType_deskriptif">
+            <option value="histogram">Histogram</option>
+            <option value="line">Line Chart</option>
+            <option value="pie">Pie Chart</option>
+            <option value="bar">Bar Chart</option>
+            <option value="ogive">Ogive (Kumulatif)</option>
+            <option value="boxplot">Box Plot</option>
+            <option value="stemleaf">Stem-and-Leaf Plot</option>
+          </select>
+          <small>Pilih grafik untuk visualisasi distribusi data.</small>
+        </div>
+    
+        <button class="btn-primary" onclick="runDescriptive()">Analisis Deskriptif</button>
+    
+        <div id="descriptiveResults" style="margin-top: 20px;"></div>
+    
+        <!-- Container untuk Grafik (Tambahan Baru) -->
+        <div id="descriptiveChartContainer" style="margin-top: 20px; display: none;">
+          <h4 id="chartTitle">Visualisasi Grafik</h4>
+          <div class="chart-container" id="descriptiveChart"></div>
+        </div>
       </div>
-
-      <div class="form-group file-input-group_deskriptif" style="display:none;">
-        <label>Upload File Data:</label>
-        <input type="file" accept=".csv,.xlsx" id="dataFile_deskriptif" onchange="handleFileUpload('deskriptif')"/>
-      </div>
-
-      <div class="form-group manual-input-group_deskriptif">
-        <label>Atau Input Data Manual (pisahkan dengan koma atau baris baru):</label>
-        <textarea id="manualData_deskriptif" rows="6" placeholder="Contoh: 23, 45, 67, 34, 56, 78, 45, 67, 89, 23"></textarea>
-      </div>
-
-      <div class="form-group sample-input-group_deskriptif" style="display:none;">
-        <label>Pilih Sample Data:</label>
-        <select id="sampleData_deskriptif" onchange="loadSampleData('deskriptif')">
-          <option value="">-- Pilih Sample --</option>
-          <option value="sample1">Sample Data 1 (Penjualan)</option>
-          <option value="sample2">Sample Data 2 (Tinggi Badan)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Pilih Variabel untuk Analisis:</label>
-        <select id="variables_deskriptif" multiple size="5">
-          <option value="Data">Data</option>
-        </select>
-      </div>
-
-      <!-- **TOMTOM: Analisis Deskriptif (Dropdown Dipindah ke Bawah Ini)** -->
-      <button class="btn-primary" onclick="runDescriptive()">Analisis Deskriptif</button>
-
-      <!-- **PEMINDAHAN BARU: Wrapper untuk Dropdown, Awalnya Hidden dan Disabled** -->
-      <div id="chartSelectorContainer_deskriptif" class="form-group" style="margin-top: 15px; display: none;">
-        <label>Pilih Jenis Visualisasi Grafik:</label>
-        <select id="chartType_deskriptif" disabled>
-          <option value="histogram">Histogram (Default)</option>
-          <option value="line">Line Chart</option>
-          <option value="pie">Pie Chart</option>
-          <option value="bar">Bar Chart</option>
-          <option value="ogive">Ogive (Kumulatif)</option>
-          <option value="boxplot">Box Plot</option>
-          <option value="stemleaf">Stem-and-Leaf Plot</option>
-        </select>
-        <small>Pilih grafik untuk update visualisasi secara langsung setelah analisis.</small>
-      </div>
-
-      <div id="descriptiveResults" style="margin-top: 20px;"></div>
-
-      <!-- Container untuk Grafik (Tambahan Baru) -->
-      <div id="descriptiveChartContainer" style="margin-top: 20px; display: none;">
-        <h4 id="chartTitle">Visualisasi Grafik</h4>
-        <div class="chart-container" id="descriptiveChart"></div>
-      </div>
-    </div>
-  `,
-      
+    `,
+    
     'uji-mean': `
       <h2>Tool Uji t (t-Test)</h2>
       <p>Uji hipotesis untuk rata-rata populasi dengan berbagai variasi uji t.</p>
@@ -2891,8 +2890,6 @@ Kelompok2: 34, 56, 78"></textarea>
       </div>
     `
   };
-  
-  let currentDescriptiveData = [];
 
   // Initial content for the welcome page
   let initialWelcomeContent = ''; // Will be set after DOMContentLoaded
@@ -3859,15 +3856,6 @@ Kelompok3: 45, 67, 89, 56, 78`;
   };
   const calculateVariance = (arr, mean) => arr.reduce((sum, x) => sum + Math.pow(x - mean, 2), 0) / (arr.length - 1);
   const calculateStdDev = (arr, mean) => Math.sqrt(calculateVariance(arr, mean));
-  function calculateCustomQuartile(data, quartile) {
-  const sorted = [...data].sort((a, b) => a - b);
-  const n = sorted.length;
-  const index = (n + 1) * (quartile / 4) - 1;
-  if (index % 1 === 0) return sorted[Math.floor(index)];
-  const lower = Math.floor(index);
-  const upper = Math.ceil(index);
-  return sorted[lower] + (sorted[upper] - sorted[lower]) * (index - lower);
-}
   const calculatePearsonCorrelation = (x, y) => {
     const n = x.length;
     const meanX = calculateMean(x);
@@ -3890,129 +3878,70 @@ Kelompok3: 45, 67, 89, 56, 78`;
       return 1.96;
   };
 
-// **FUNGSI PERBAIKAN: runDescriptive (Ganti Seluruh Fungsi Lama dengan Ini)**
-/**
- * Runs descriptive statistics analysis and renders initial results.
- * Integrasi dengan input method (manual, sample, file).
- */
-function runDescriptive() {
-  // Ambil input dari textarea manual (atau dari file/sample jika dimuat ke sana)
-  const manualInput = document.getElementById('manualData_deskriptif');
-  const resultsContainer = document.getElementById('descriptiveResults');
-  const chartContainer = document.getElementById('descriptiveChartContainer');
-  const chartSelectorContainer = document.getElementById('chartSelectorContainer_deskriptif');
-  const chartTypeSelect = document.getElementById('chartType_deskriptif');
-  const variablesSelect = document.getElementById('variables_deskriptif');
-  
-  if (!manualInput || !resultsContainer || !chartContainer) {
-    console.error('Elements for descriptive analysis not found.');
-    alert('Elemen input tidak ditemukan. Refresh halaman.');
-    return;
-  }
 
-  let inputText = manualInput.value.trim();
+  /**
+   * Runs descriptive statistics analysis on the input data with dynamic chart rendering.
+   */
+  function runDescriptive() {
+    const inputMethod = document.getElementById('inputMethod_deskriptif').value;
+    const chartType = document.getElementById('chartType_deskriptif')?.value || 'histogram'; // Default to histogram
+    let data = [];
+    let selectedVariables = [];
 
-  // **INTEGRASI DENGAN INPUT METHOD**: Jika sample atau file, asumsikan data sudah dimuat ke textarea
-  const inputMethod = document.getElementById('inputMethod_deskriptif')?.value;
-  if (inputMethod === 'sample') {
-    inputText = manualInput.value.trim();
-    if (!inputText) {
-      alert('Pilih sample data terlebih dahulu.');
+    if (inputMethod === 'manual') {
+      data = parseData('manualData_deskriptif');
+      selectedVariables = ['Data'];
+    } else if (inputMethod === 'sample') {
+      loadSampleData('deskriptif'); 
+      data = parseData('manualData_deskriptif');
+      const sampleSelect = document.getElementById('sampleData_deskriptif');
+      selectedVariables = [sampleSelect.options[sampleSelect.selectedIndex].text.split(' ')[0]];
+    } else { // file upload
+      alert('Fungsionalitas upload file memerlukan backend untuk parsing data.');
+      document.getElementById('descriptiveResults').innerHTML = `
+        <p style="color: red;">Error: Fungsionalitas upload file memerlukan backend untuk parsing data.</p>
+      `;
       return;
     }
-  } else if (inputMethod === 'file') {
-    inputText = manualInput.value.trim(); // Fallback; sesuaikan jika handleFileUpload isi variabel lain
-    if (!inputText) {
-      alert('Upload file dan proses data terlebih dahulu.');
+
+    if (!data || data.length === 0) {
+      alert('Data tidak valid. Pastikan hanya angka yang dipisahkan koma atau baris baru.');
       return;
     }
-  }
 
-  if (!inputText) {
-    alert('Silakan masukkan data numerik terlebih dahulu (manual, sample, atau file).');
-    return;
-  }
+    // Hitung statistik deskriptif dasar (sama seperti sebelumnya)
+    const n = data.length;
+    const mean = calculateMean(data);
+    const median = calculateMedian(data);
+    const mode = calculateMode(data);
+    const min = Math.min(...data);
+    const max = Math.max(...data);
+    const range = max - min;
+    const variance = n > 1 ? calculateVariance(data, mean) : 0;
+    const stdDev = n > 1 ? calculateStdDev(data, mean) : 0;
 
-  // Parse data (pisah koma atau baris baru)
-  const data = inputText.split(/[\s,\n\r]+/).map(val => parseFloat(val.trim())).filter(val => !isNaN(val));
-  if (data.length < 1) {
-    alert('Data tidak valid. Pastikan input berupa angka.');
-    return;
-  }
-
-  // Ambil variabel terpilih (asumsi single untuk deskriptif)
-  const selectedVariable = Array.from(variablesSelect?.selectedOptions || []).map(opt => opt.value)[0] || 'Data';
-
-  // Simpan data untuk update grafik nanti
-  currentDescriptiveData = data;
-
-  // **GUNAKAN FUNGSI ASLI: Hitung mean dulu untuk variance dan stddev**
-  const mean = calculateMean(data);
-  const median = calculateMedian(data);
-  const mode = calculateMode(data); // Sudah return string
-  const stdDev = calculateStdDev(data, mean);
-  const variance = calculateVariance(data, mean);
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const rangeVal = max - min;
-  const q1 = calculateQuartile ? calculateQuartile(data, 1) : calculateCustomQuartile(data, 1); // Gunakan jika ada, atau fallback
-  const q3 = calculateQuartile ? calculateQuartile(data, 3) : calculateCustomQuartile(data, 3);
-
-  // Tampilkan tabel hasil
-  const resultsHtml = `
-    <h4>Hasil Statistik Deskriptif untuk Variabel: ${selectedVariable}</h4>
-    <table class="results-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-      <thead><tr><th>Statistik</th><th>Nilai</th></tr></thead>
-      <tbody>
-        <tr><td>Jumlah Observasi (n)</td><td>${data.length}</td></tr>
-        <tr><td>Rata-rata (Mean)</td><td>${mean.toFixed(4)}</td></tr>
-        <tr><td>Median</td><td>${median.toFixed(4)}</td></tr>
+    let resultHtml = `
+      <h4>Hasil Analisis Deskriptif untuk ${selectedVariables.join(', ')}</h4>
+      <table border="1" style="width:100%; border-collapse: collapse; margin-top: 10px;">
+        <tr><th>Statistik</th><th>Nilai</th></tr>
+        <tr><td>Jumlah Observasi (n)</td><td>${n}</td></tr>
+        <tr><td>Mean</td><td>${mean.toFixed(2)}</td></tr>
+        <tr><td>Median</td><td>${median.toFixed(2)}</td></tr>
         <tr><td>Modus</td><td>${mode}</td></tr>
-        <tr><td>Standar Deviasi</td><td>${stdDev.toFixed(4)}</td></tr>
-        <tr><td>Varians</td><td>${variance.toFixed(4)}</td></tr>
-        <tr><td>Minimum</td><td>${min.toFixed(4)}</td></tr>
-        <tr><td>Maksimum</td><td>${max.toFixed(4)}</td></tr>
-        <tr><td>Range</td><td>${rangeVal.toFixed(4)}</td></tr>
-        <tr><td>Kuartil Q1 (25%)</td><td>${q1.toFixed(4)}</td></tr>
-        <tr><td>Kuartil Q3 (75%)</td><td>${q3.toFixed(4)}</td></tr>
-      </tbody>
-    </table>
-    <p style="font-size: 12px; color: #666;"><small>Data asli: ${data.join(', ')}</small></p>
-  `;
-  resultsContainer.innerHTML = resultsHtml;
-  resultsContainer.style.display = 'block';
+        <tr><td>Minimum</td><td>${min.toFixed(2)}</td></tr>
+        <tr><td>Maksimum</td><td>${max.toFixed(2)}</td></tr>
+        <tr><td>Range</td><td>${range.toFixed(2)}</td></tr>
+        <tr><td>Varians</td><td>${variance.toFixed(2)}</td></tr>
+        <tr><td>Standar Deviasi</td><td>${stdDev.toFixed(2)}</td></tr>
+      </table>
+      <p style="color: #4caf50;">✓ Analisis deskriptif berhasil dijalankan!</p>
+    `;
 
-  // Enable dan tampilkan dropdown selector
-  if (chartSelectorContainer) {
-    chartSelectorContainer.style.display = 'block';
+    document.getElementById('descriptiveResults').innerHTML = resultHtml;
+
+    // Render grafik dinamis berdasarkan pilihan
+    renderDescriptiveChart(data, chartType);
   }
-  if (chartTypeSelect) {
-    chartTypeSelect.disabled = false;
-    chartTypeSelect.value = 'histogram'; // Default
-  }
-
-  // Render grafik default (Histogram)
-  renderDescriptiveChart(data, 'histogram');
-
-  console.log('Analisis deskriptif selesai untuk variabel:', selectedVariable);
-}
-
-// **EVENT LISTENER BARU: Update Grafik Saat Dropdown Berubah (Tambahkan Ini Setelah Fungsi runDescriptive)**
-document.addEventListener('DOMContentLoaded', function() {
-  const chartTypeSelect = document.getElementById('chartType_deskriptif');
-  if (chartTypeSelect) {
-    chartTypeSelect.addEventListener('change', function() {
-      if (currentDescriptiveData.length > 0) {
-        const selectedType = this.value;
-        renderDescriptiveChart(currentDescriptiveData, selectedType);
-        console.log(`Grafik deskriptif diupdate ke: ${selectedType}`);
-      } else {
-        alert('Lakukan analisis deskriptif terlebih dahulu untuk melihat grafik.');
-        this.value = 'histogram'; // Reset ke default
-      }
-    });
-  }
-});
 
 // **FUNGSI BARU: Helper untuk menghitung bins frekuensi (untuk Histogram, Pie, Bar, Ogive)**
 /**
