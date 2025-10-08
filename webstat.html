@@ -4274,7 +4274,12 @@ function generateOgive(data) {
   };
 }
 
-// **FUNGSI PERBAIKAN: Generate Box Plot**
+// **FUNGSI PERBAIKAN: Generate Box Plot (Versi Baru dengan Bentuk Beraturan)**
+/**
+ * Generates Chart.js config for Box Plot simulation.
+ * @param {number[]} data - Input data array.
+ * @returns {object|null} Chart config or null if data insufficient.
+ */
 function generateBoxPlot(data) {
   const sorted = [...data].sort((a, b) => a - b);
   const n = sorted.length;
@@ -4283,6 +4288,7 @@ function generateBoxPlot(data) {
     return null;
   }
 
+  // Hitung quartiles dan median (asumsi calculateMedian sudah ada; jika tidak, gunakan yang di bawah)
   const q1Index = Math.floor((n + 1) / 4);
   const q3Index = Math.floor(3 * (n + 1) / 4);
   const q1 = sorted.slice(0, q1Index).length > 0 ? calculateMedian(sorted.slice(0, q1Index)) : sorted[0];
@@ -4293,60 +4299,171 @@ function generateBoxPlot(data) {
   const lowerFence = q1 - 1.5 * iqr;
   const upperFence = q3 + 1.5 * iqr;
 
+  // Whiskers: min/max non-outlier (gunakan Math.max/min dengan filter)
   const lowerWhisker = Math.max(...sorted.filter(x => x >= lowerFence));
   const upperWhisker = Math.min(...sorted.filter(x => x <= upperFence));
   const outliers = sorted.filter(x => x < lowerFence || x > upperFence);
 
-  const boxLineData = [
-    { x: 1, y: q1 },
-    { x: 1, y: q3 },
-    { x: 0.5, y: lowerWhisker },
-    { x: 1, y: lowerWhisker },
-    { x: 1.5, y: upperWhisker },
-    { x: 1, y: upperWhisker }
+  // Koordinat untuk kotak (lebar: 0.8-1.2 untuk simetri)
+  const left = 0.8;
+  const right = 1.2;
+  const center = 1.0;
+
+  // Dataset 1: Garis horizontal Q1 (bawah kotak)
+  const q1Line = [
+    { x: left, y: q1 },
+    { x: right, y: q1 }
   ];
 
-  const medianPoint = [{ x: 1, y: median }];
-  const outlierPoints = outliers.map(out => ({ x: 1, y: out }));
+  // Dataset 2: Garis horizontal Q3 (atas kotak)
+  const q3Line = [
+    { x: left, y: q3 },
+    { x: right, y: q3 }
+  ];
+
+  // Dataset 3: Garis vertikal sisi kotak (kiri dan kanan)
+  const boxSides = [
+    { x: left, y: q1 }, { x: left, y: q3 },  // Kiri
+    { x: right, y: q3 }, { x: right, y: q1 } // Kanan (tutup loop jika perlu)
+  ];
+
+  // Dataset 4: Garis horizontal median (di tengah kotak)
+  const medianLine = [
+    { x: left, y: median },
+    { x: right, y: median }
+  ];
+
+  // Dataset 5: Whisker bawah (vertikal dari Q1 ke lowerWhisker)
+  const lowerWhiskerLine = [
+    { x: center, y: q1 },
+    { x: center, y: lowerWhisker }
+  ];
+
+  // Dataset 6: Whisker atas (vertikal dari Q3 ke upperWhisker)
+  const upperWhiskerLine = [
+    { x: center, y: q3 },
+    { x: center, y: upperWhisker }
+  ];
+
+  // Dataset 7: Titik outliers (jika ada)
+  const outlierPoints = outliers.map(out => ({ x: center, y: out }));
+
+  // Dataset 8: Titik Q1 dan Q3 (opsional, untuk highlight)
+  const quartilePoints = [
+    { x: center, y: q1 },
+    { x: center, y: q3 }
+  ];
 
   return {
-    type: 'scatter',
+    type: 'scatter', // Base type untuk semua line/scatter
     data: {
       datasets: [
+        // Kotak: Garis horizontal Q1 dan Q3
         {
-          label: 'Box & Whiskers',
-          data: boxLineData,
+          label: 'Q1 (25th Percentile)',
+          data: q1Line,
           type: 'line',
           borderColor: 'rgb(75, 192, 192)',
           backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderWidth: 3,
           fill: false,
           showLine: true,
           pointRadius: 0,
           tension: 0
         },
         {
-          label: 'Median',
-          data: medianPoint,
-          backgroundColor: 'rgb(255, 99, 132)',
-          borderColor: 'rgb(255, 99, 132)',
-          pointRadius: 8,
-          pointStyle: 'rect'
+          label: 'Q3 (75th Percentile)',
+          data: q3Line,
+          type: 'line',
+          borderColor: 'rgb(75, 192, 192)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderWidth: 3,
+          fill: false,
+          showLine: true,
+          pointRadius: 0,
+          tension: 0
         },
+        // Sisi vertikal kotak (garis pendek)
+        {
+          label: 'Box Sides',
+          data: boxSides,
+          type: 'line',
+          borderColor: 'rgb(75, 192, 192)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderWidth: 2,
+          fill: false,
+          showLine: true,
+          pointRadius: 0,
+          tension: 0
+        },
+        // Median line
+        {
+          label: 'Median (50th Percentile)',
+          data: medianLine,
+          type: 'line',
+          borderColor: 'rgb(255, 99, 132)',
+          backgroundColor: 'rgba(255, 99, 132, 0.2)',
+          borderWidth: 3,
+          fill: false,
+          showLine: true,
+          pointRadius: 0,
+          tension: 0
+        },
+        // Lower whisker
+        {
+          label: 'Lower Whisker',
+          data: lowerWhiskerLine,
+          type: 'line',
+          borderColor: 'rgb(54, 162, 235)',
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderWidth: 2,
+          fill: false,
+          showLine: true,
+          pointRadius: 3, // Titik kecil di ujung
+          tension: 0
+        },
+        // Upper whisker
+        {
+          label: 'Upper Whisker',
+          data: upperWhiskerLine,
+          type: 'line',
+          borderColor: 'rgb(54, 162, 235)',
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderWidth: 2,
+          fill: false,
+          showLine: true,
+          pointRadius: 3,
+          tension: 0
+        },
+        // Outliers (jika ada)
         ...(outliers.length > 0 ? [{
           label: 'Outliers',
           data: outlierPoints,
+          type: 'scatter',
           backgroundColor: 'rgba(255, 99, 132, 0.8)',
           borderColor: 'rgba(255, 99, 132, 1)',
-          pointRadius: 5
-        }] : [])
+          pointRadius: 6,
+          pointStyle: 'circle',
+          showLine: false
+        }] : []),
+        // Highlight Q1 dan Q3 (opsional)
+        {
+          label: 'Quartiles',
+          data: quartilePoints,
+          type: 'scatter',
+          backgroundColor: 'rgb(75, 192, 192)',
+          borderColor: 'rgb(75, 192, 192)',
+          pointRadius: 0, // Sembunyikan jika tidak perlu
+          showLine: false
+        }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        title: { display: true, text: 'Box Plot (Simulasi)' },
-        legend: { display: true }
+        title: { display: true, text: 'Box Plot: Ringkasan Distribusi' },
+        legend: { display: true, position: 'bottom' }
       },
       scales: {
         x: {
@@ -4354,16 +4471,41 @@ function generateBoxPlot(data) {
           position: 'bottom',
           min: 0.5,
           max: 1.5,
-          ticks: { display: false },
-          grid: { display: false }
+          ticks: { 
+            display: false, // Hilangkan ticks x untuk clean look
+            stepSize: 0.1
+          },
+          grid: { display: false } // No grid x
         },
         y: {
-          title: { display: true, text: 'Nilai' },
-          beginAtZero: false
+          title: { display: true, text: 'Nilai Data' },
+          beginAtZero: false, // Mulai dari min data jika negatif
+          grid: { color: 'rgba(0,0,0,0.1)' }
         }
+      },
+      interaction: {
+        intersect: false,
+        mode: 'point'
       }
     }
   };
+}
+
+// **Fungsi calculateMedian (Helper Sederhana)**
+/**
+ * Menghitung median dari array numerik.
+ * @param {number[]} arr - Array data.
+ * @returns {number} Median value.
+ */
+function calculateMedian(arr) {
+  if (!arr || arr.length === 0) return 0;
+  const sorted = [...arr].sort((a, b) => a - b);
+  const mid = Math.floor(sorted.length / 2);
+  if (sorted.length % 2 === 0) {
+    return (sorted[mid - 1] + sorted[mid]) / 2;
+  } else {
+    return sorted[mid];
+  }
 }
 
 // **FUNGSI PERBAIKAN: Render Stem-and-Leaf Plot**
