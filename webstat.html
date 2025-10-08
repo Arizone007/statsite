@@ -4491,23 +4491,6 @@ function generateBoxPlot(data) {
   };
 }
 
-// **Fungsi calculateMedian (Helper Sederhana)**
-/**
- * Menghitung median dari array numerik.
- * @param {number[]} arr - Array data.
- * @returns {number} Median value.
- */
-function calculateMedian(arr) {
-  if (!arr || arr.length === 0) return 0;
-  const sorted = [...arr].sort((a, b) => a - b);
-  const mid = Math.floor(sorted.length / 2);
-  if (sorted.length % 2 === 0) {
-    return (sorted[mid - 1] + sorted[mid]) / 2;
-  } else {
-    return sorted[mid];
-  }
-}
-
 // **FUNGSI PERBAIKAN: Render Stem-and-Leaf Plot**
 function renderStemLeaf(data) {
   if (!data || data.length < 2) {
