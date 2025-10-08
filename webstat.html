@@ -4401,7 +4401,7 @@ function generateBoxPlot(data) {
         },
         // Median line
         {
-          label: 'Median (50th Percentile)',
+          label: 'Q2 (50th Percentile)',
           data: medianLine,
           type: 'line',
           borderColor: 'rgb(255, 99, 132)',
@@ -4414,7 +4414,7 @@ function generateBoxPlot(data) {
         },
         // Lower whisker
         {
-          label: 'Min',
+          label: 'Lower whisker',
           data: lowerWhiskerLine,
           type: 'line',
           borderColor: 'rgb(54, 162, 235)',
@@ -4427,7 +4427,7 @@ function generateBoxPlot(data) {
         },
         // Upper whisker
         {
-          label: 'Max',
+          label: 'Upper whisker',
           data: upperWhiskerLine,
           type: 'line',
           borderColor: 'rgb(54, 162, 235)',
@@ -4456,7 +4456,7 @@ function generateBoxPlot(data) {
           type: 'scatter',
           backgroundColor: 'rgb(75, 192, 192)',
           borderColor: 'rgb(75, 192, 192)',
-          pointRadius: 0, // Sembunyikan jika tidak perlu
+          pointRadius: 6, // Sembunyikan jika tidak perlu
           showLine: false
         }
       ]
