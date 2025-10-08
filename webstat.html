@@ -2873,43 +2873,43 @@ Kelompok2: 34, 56, 78"></textarea>
   // Initial content for the welcome page
   let initialWelcomeContent = ''; // Will be set after DOMContentLoaded
 
-  /**
-   * Displays the content of a selected material.
-   * @param {number} materialId - The ID of the material to display.
-   */
-  function showMaterial(materialId) {
-    // Close sidebar on mobile after selection
-    if (window.innerWidth <= 768) { // Adjust breakpoint as needed
-      toggleSidebar(); // Re-added sidebar toggle
-    }
-
-    // Remove active class from all material items
-    document.querySelectorAll('.material-item').forEach(item => {
-      item.classList.remove('active');
-    });
-    
-    // Add active class to the clicked item
-    const clickedItem = document.querySelector(`.material-item[data-material-id="${materialId}"]`);
-    if (clickedItem) {
-      clickedItem.classList.add('active');
-    }
-    
-    // Display material content
-    const pageContentDiv = document.getElementById('pageContent');
-    const material = materialContents[materialId];
-
-    if (material) {
-      pageContentDiv.innerHTML = material.content;
-    } else {
-      pageContentDiv.innerHTML = '<p>Materi sedang dalam pengembangan atau tidak ditemukan.</p>';
-    }
-
-    // Re-enable editable content if in admin mode
-    if (isAdminMode) {
-      enableAdminEditing();
-    }
-    destroyChart(); // Destroy any chart when switching material
+/**
+ * Displays the content of a selected material (dengan force close sidebar di mobile).
+ * @param {number} materialId - The ID of the material to display.
+ */
+function showMaterial(materialId) {
+  // Force close sidebar on mobile after selection (perbaikan: bukan toggle, tapi remove explicit)
+  if (window.innerWidth <= 768) {
+    const sidebar = document.getElementById('materials-sidebar');
+    sidebar.classList.remove('open');
+    sidebar.style.display = 'none';
+    sidebar.style.left = '-100%';
   }
+  // Remove active class from all material items
+  document.querySelectorAll('.material-item').forEach(item => {
+    item.classList.remove('active');
+  });
+  
+  // Add active class to the clicked item
+  const clickedItem = document.querySelector(`.material-item[data-material-id="${materialId}"]`);
+  if (clickedItem) {
+    clickedItem.classList.add('active');
+  }
+  
+  // Display material content
+  const pageContentDiv = document.getElementById('pageContent');
+  const material = materialContents[materialId];
+  if (material) {
+    pageContentDiv.innerHTML = material.content;
+  } else {
+    pageContentDiv.innerHTML = '<p>Materi sedang dalam pengembangan atau tidak ditemukan.</p>';
+  }
+  // Re-enable editable content if in admin mode
+  if (isAdminMode) {
+    enableAdminEditing();
+  }
+  destroyChart(); // Destroy any chart when switching material
+}
 
   /**
    * Displays the content of a selected analysis tool.
@@ -5505,19 +5505,25 @@ Kelompok3: 45, 67, 89, 56, 78`;
    * Toggles the mobile sidebar visibility.
    */
   function toggleSidebar() {
-    const sidebar = document.getElementById('materials-sidebar');
-    sidebar.classList.toggle('open');
-
-    // Tambahkan logika ini untuk memastikan display properti diatur dengan benar
-    if (sidebar.classList.contains('open')) {
-      sidebar.style.display = 'block';
+  const sidebar = document.getElementById('materials-sidebar');
+  const isOpen = sidebar.classList.contains('open');
+  if (isOpen) {
+    // Close sidebar
+    sidebar.classList.remove('open');
+    if (window.innerWidth <= 768) {
+      sidebar.style.display = 'none';
+      sidebar.style.left = '-100%'; // Explicit reset untuk mobile
     } else {
-      // Hanya sembunyikan jika lebar layar <= 768px (mobile/tablet)
-      if (window.innerWidth <= 768) {
-        sidebar.style.display = 'none';
-      }
+      sidebar.style.display = 'block'; // Desktop: Selalu visible
+      sidebar.style.left = '0';
     }
+  } else {
+    // Open sidebar
+    sidebar.classList.add('open');
+    sidebar.style.display = 'block';
+    sidebar.style.left = '0';
   }
+}
 
   /**
    * Handles sidebar resizing on desktop (drag to resize).
@@ -5736,26 +5742,33 @@ Kelompok3: 45, 67, 89, 56, 78`;
       }
     });
 
-	// Handle window resize for responsive layout
-    window.addEventListener('resize', function() {
-      const sidebar = document.getElementById('materials-sidebar');
-      if (window.innerWidth > 768) {
-        sidebar.classList.remove('open');
-        sidebar.style.left = '0';
-        sidebar.style.position = 'relative';
-        sidebar.style.width = 'auto';
-        sidebar.style.display = 'block'; // Pastikan terlihat di desktop
+  // Handle window resize for responsive layout (perbaikan: lebih robust)
+  window.addEventListener('resize', function() {
+    const sidebar = document.getElementById('materials-sidebar');
+    const isMobile = window.innerWidth <= 768;
+    if (isMobile) {
+      // Mobile: Hide if not open
+      if (!sidebar.classList.contains('open')) {
+        sidebar.style.display = 'none';
+        sidebar.style.left = '-100%';
       } else {
-        sidebar.style.position = 'fixed';
-        sidebar.style.width = '80%';
-        if (!sidebar.classList.contains('open')) {
-          sidebar.style.left = '-100%';
-          sidebar.style.display = 'none'; // Sembunyikan jika tidak terbuka di mobile
-        } else {
-          sidebar.style.display = 'block'; // Pastikan terlihat jika terbuka di mobile
-        }
+        sidebar.style.display = 'block';
+        sidebar.style.left = '0';
       }
-    });
+      // Hide toggle button? No, show it on mobile
+      const toggleBtn = document.querySelector('.sidebar-toggle-btn');
+      if (toggleBtn) toggleBtn.style.display = 'flex';
+    } else {
+      // Desktop: Always show sidebar, no fixed positioning
+      sidebar.style.display = 'block';
+      sidebar.style.left = '0';
+      sidebar.style.position = 'relative';
+      sidebar.style.width = 'auto';
+      sidebar.classList.remove('open'); // Remove open class on desktop
+      const toggleBtn = document.querySelector('.sidebar-toggle-btn');
+      if (toggleBtn) toggleBtn.style.display = 'none';
+    }
+  });
 
     // Close admin login section when clicking outside
     document.getElementById('admin-login-section').addEventListener('click', function(e) {
