@@ -4290,6 +4290,7 @@ function generateBoxPlot(data) {
 
   // Hitung quartiles dan median (asumsi calculateMedian sudah ada; jika tidak, gunakan yang di bawah)
   const q1Index = Math.floor((n + 1) / 4);
+  const q2Index = Math.floor(1 * (n + 1) / 2);
   const q3Index = Math.floor(3 * (n + 1) / 4);
   const q1 = sorted.slice(0, q1Index).length > 0 ? calculateMedian(sorted.slice(0, q1Index)) : sorted[0];
   const median = calculateMedian(sorted);
@@ -4337,13 +4338,13 @@ function generateBoxPlot(data) {
   // Dataset 5: Whisker bawah (vertikal dari Q1 ke lowerWhisker)
   const lowerWhiskerLine = [
     { x: center, y: q1 },
-    /*{ x: center, y: lowerWhisker }*/
+    { x: center, y: lowerWhisker }
   ];
 
   // Dataset 6: Whisker atas (vertikal dari Q3 ke upperWhisker)
   const upperWhiskerLine = [
     { x: center, y: q3 },
-    /*{ x: center, y: upperWhisker }*/
+    { x: center, y: upperWhisker }
   ];
 
   // Dataset 7: Titik outliers (jika ada)
