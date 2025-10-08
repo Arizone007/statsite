@@ -3955,8 +3955,8 @@ function runDescriptive() {
   const min = Math.min(...data);
   const max = Math.max(...data);
   const rangeVal = max - min;
-  const q1 = calculateQuartile ? calculateQuartile(data, 1) : calculateCustomQuartile(data, 1); // Gunakan jika ada, atau fallback
-  const q3 = calculateQuartile ? calculateQuartile(data, 3) : calculateCustomQuartile(data, 3);
+  const q1 = calculateCustomQuartile(data, 1); // calculateQuartile ? calculateQuartile(data, 1) : 
+  const q3 = calculateCustomQuartile(data, 3); // calculateQuartile ? calculateQuartile(data, 3) :
 
   // Tampilkan tabel hasil
   const resultsHtml = `
