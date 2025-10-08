@@ -4292,7 +4292,7 @@ function generateBoxPlot(data) {
   const q1Index = Math.floor((n + 1) / 4);
   const q3Index = Math.floor(3 * (n + 1) / 4);
   const q1 = sorted.slice(0, q1Index).length > 0 ? calculateMedian(sorted.slice(0, q1Index)) : sorted[0];
-  const median = calculateMedian(sorted);
+  const q2 = median = calculateMedian(sorted);
   const q3 = sorted.slice(q3Index).length > 0 ? calculateMedian(sorted.slice(q3Index)) : sorted[n - 1];
 
   const iqr = q3 - q1;
@@ -4351,6 +4351,7 @@ function generateBoxPlot(data) {
   // Dataset 8: Titik Q1 dan Q3 (opsional, untuk highlight)
   const quartilePoints = [
     { x: center, y: q1 },
+	{ x: center, y: q2 },
     { x: center, y: q3 }
   ];
 
@@ -4411,7 +4412,7 @@ function generateBoxPlot(data) {
         },
         // Lower whisker
         {
-          label: 'Lower Whisker',
+          label: 'Min',
           data: lowerWhiskerLine,
           type: 'line',
           borderColor: 'rgb(54, 162, 235)',
@@ -4424,7 +4425,7 @@ function generateBoxPlot(data) {
         },
         // Upper whisker
         {
-          label: 'Upper Whisker',
+          label: 'Max',
           data: upperWhiskerLine,
           type: 'line',
           borderColor: 'rgb(54, 162, 235)',
