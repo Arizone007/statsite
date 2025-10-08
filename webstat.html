@@ -2252,24 +2252,27 @@ let analysisToolContents = {
       <!-- **TOMTOM: Analisis Deskriptif (Dropdown Dipindah ke Bawah Ini)** -->
       <button class="btn-primary" onclick="runDescriptive()">Analisis Deskriptif</button>
 
+      <!-- **PEMINDAHAN BARU: Wrapper untuk Dropdown, Awalnya Hidden dan Disabled** -->
+      <div id="chartSelectorContainer_deskriptif" class="form-group" style="margin-top: 15px; display: none;">
+        <label>Pilih Jenis Visualisasi Grafik:</label>
+        <select id="chartType_deskriptif" disabled>
+          <option value="histogram">Histogram (Default)</option>
+          <option value="line">Line Chart</option>
+          <option value="pie">Pie Chart</option>
+          <option value="bar">Bar Chart</option>
+          <option value="ogive">Ogive (Kumulatif)</option>
+          <option value="boxplot">Box Plot</option>
+          <option value="stemleaf">Stem-and-Leaf Plot</option>
+        </select>
+        <small>Pilih grafik untuk update visualisasi secara langsung setelah analisis.</small>
+      </div>
+
+      <div id="descriptiveResults" style="margin-top: 20px;"></div>
+
+      <!-- Container untuk Grafik (Tambahan Baru) -->
       <div id="descriptiveChartContainer" style="margin-top: 20px; display: none;">
         <h4 id="chartTitle">Visualisasi Grafik</h4>
         <div class="chart-container" id="descriptiveChart"></div>
-  
-        <!-- **PERBAIKAN: Dropdown Dipindah ke Bawah Grafik untuk Visibilitas** -->
-        <div id="chartSelectorContainer_deskriptif" class="form-group" style="margin-top: 15px; display: none;">
-          <label>Pilih Jenis Visualisasi Grafik:</label>
-          <select id="chartType_deskriptif" disabled>
-            <option value="histogram">Histogram (Default)</option>
-            <option value="line">Line Chart</option>
-            <option value="pie">Pie Chart</option>
-            <option value="bar">Bar Chart</option>
-            <option value="ogive">Ogive (Kumulatif)</option>
-            <option value="boxplot">Box Plot</option>
-            <option value="stemleaf">Stem-and-Leaf Plot</option>
-          </select>
-          <small>Pilih grafik untuk update visualisasi secara langsung.</small>
-        </div>
       </div>
     </div>
   `,
@@ -3952,8 +3955,8 @@ function runDescriptive() {
   const min = Math.min(...data);
   const max = Math.max(...data);
   const rangeVal = max - min;
-  const q1 = calculateCustomQuartile(data, 1); 
-  const q3 = calculateCustomQuartile(data, 3);
+  const q1 = calculateQuartile ? calculateQuartile(data, 1) : calculateCustomQuartile(data, 1); // Gunakan jika ada, atau fallback
+  const q3 = calculateQuartile ? calculateQuartile(data, 3) : calculateCustomQuartile(data, 3);
 
   // Tampilkan tabel hasil
   const resultsHtml = `
