@@ -2210,8 +2210,8 @@
   let analysisToolContents = {
     'deskriptif': `
       <h2>Tool Analisis Statistik Deskriptif</h2>
-      <p>Analisis komprehensif karakteristik data Anda dengan berbagai ukuran pemusatan, penyebaran, dan visualisasi.</p>
-      
+      <p>Analisis komprehensif karakteristik data Anda dengan berbagai ukuran pemusatan, penyebaran, dan visualisasi grafik.</p>
+  
       <div class="analysis-form">
         <h3>Input Data</h3>
         <div class="form-group">
@@ -2222,12 +2222,12 @@
             <option value="file">Upload File (.csv, .xlsx)</option>
           </select>
         </div>
-        
+    
         <div class="form-group file-input-group_deskriptif" style="display:none;">
           <label>Upload File Data:</label>
           <input type="file" accept=".csv,.xlsx" id="dataFile_deskriptif" onchange="handleFileUpload('deskriptif')"/>
         </div>
-        
+    
         <div class="form-group manual-input-group_deskriptif">
           <label>Atau Input Data Manual (pisahkan dengan koma atau baris baru):</label>
           <textarea id="manualData_deskriptif" rows="6" placeholder="Contoh: 23, 45, 67, 34, 56, 78, 45, 67, 89, 23"></textarea>
@@ -2241,17 +2241,38 @@
             <option value="sample2">Sample Data 2 (Tinggi Badan)</option>
           </select>
         </div>
-        
+    
         <div class="form-group">
           <label>Pilih Variabel untuk Analisis:</label>
           <select id="variables_deskriptif" multiple size="5">
             <option value="Data">Data</option>
           </select>
         </div>
-        
+
+        <!-- Tambahan Baru: Dropdown untuk Jenis Grafik -->
+        <div class="form-group">
+          <label>Pilih Jenis Visualisasi Grafik:</label>
+          <select id="chartType_deskriptif">
+            <option value="histogram">Histogram</option>
+            <option value="line">Line Chart</option>
+            <option value="pie">Pie Chart</option>
+            <option value="bar">Bar Chart</option>
+            <option value="ogive">Ogive (Kumulatif)</option>
+            <option value="boxplot">Box Plot</option>
+            <option value="stemleaf">Stem-and-Leaf Plot</option>
+          </select>
+          <small>Pilih grafik untuk visualisasi distribusi data.</small>
+        </div>
+    
         <button class="btn-primary" onclick="runDescriptive()">Analisis Deskriptif</button>
-        
+    
         <div id="descriptiveResults" style="margin-top: 20px;"></div>
+    
+        <!-- Container untuk Grafik (Tambahan Baru) -->
+        <div id="descriptiveChartContainer" style="margin-top: 20px; display: none;">
+          <h4 id="chartTitle">Visualisasi Grafik</h4>
+          <div class="chart-container" id="descriptiveChart"></div>
+        </div>
       </div>
     `,
     
@@ -3859,10 +3880,11 @@ Kelompok3: 45, 67, 89, 56, 78`;
 
 
   /**
-   * Runs descriptive statistics analysis on the input data.
+   * Runs descriptive statistics analysis on the input data with dynamic chart rendering.
    */
   function runDescriptive() {
     const inputMethod = document.getElementById('inputMethod_deskriptif').value;
+    const chartType = document.getElementById('chartType_deskriptif')?.value || 'histogram'; // Default to histogram
     let data = [];
     let selectedVariables = [];
 
@@ -3870,7 +3892,6 @@ Kelompok3: 45, 67, 89, 56, 78`;
       data = parseData('manualData_deskriptif');
       selectedVariables = ['Data'];
     } else if (inputMethod === 'sample') {
-      // Ensure sample data is loaded before parsing
       loadSampleData('deskriptif'); 
       data = parseData('manualData_deskriptif');
       const sampleSelect = document.getElementById('sampleData_deskriptif');
@@ -3883,15 +3904,12 @@ Kelompok3: 45, 67, 89, 56, 78`;
       return;
     }
 
-    if (!data) { // parseData already shows alert
+    if (!data || data.length === 0) {
       alert('Data tidak valid. Pastikan hanya angka yang dipisahkan koma atau baris baru.');
       return;
     }
-    if (data.length === 0) {
-      alert('Tidak ada data yang valid untuk dianalisis.');
-      return;
-    }
 
+    // Hitung statistik deskriptif dasar (sama seperti sebelumnya)
     const n = data.length;
     const mean = calculateMean(data);
     const median = calculateMedian(data);
@@ -3916,71 +3934,368 @@ Kelompok3: 45, 67, 89, 56, 78`;
         <tr><td>Varians</td><td>${variance.toFixed(2)}</td></tr>
         <tr><td>Standar Deviasi</td><td>${stdDev.toFixed(2)}</td></tr>
       </table>
-      <p style="color: #4caf50;">✓ Analisis deskriptif berhasil dijalankan! (Simulasi Frontend)</p>
-    `;
-
-    // Add chart container
-    resultHtml += `
-      <h3>Visualisasi Data: Histogram</h3>
-      <div class="chart-container" id="descriptiveHistogramChart"></div>
-      <p>Histogram menunjukkan distribusi frekuensi data. Bentuknya dapat mengindikasikan normalitas, skewness, atau keberadaan outlier.</p>
+      <p style="color: #4caf50;">✓ Analisis deskriptif berhasil dijalankan!</p>
     `;
 
     document.getElementById('descriptiveResults').innerHTML = resultHtml;
 
-    // Generate histogram data
-    const bins = 10; // Number of bins for the histogram
-    const binWidth = (max - min) / bins;
-    const frequencies = Array(bins).fill(0);
-    const labels = [];
+    // Render grafik dinamis berdasarkan pilihan
+    renderDescriptiveChart(data, chartType);
+  }
 
-    for (let i = 0; i < bins; i++) {
-      const lowerBound = min + i * binWidth;
-      const upperBound = min + (i + 1) * binWidth;
-      labels.push(`${lowerBound.toFixed(1)}-${upperBound.toFixed(1)}`);
-      frequencies[i] = data.filter(x => x >= lowerBound && (x < upperBound || (i === bins - 1 && x === upperBound))).length;
+/**
+ * Renders dynamic chart for descriptive analysis based on selected type.
+ * @param {number[]} data - The input data array.
+ * @param {string} chartType - The selected chart type.
+ */
+function renderDescriptiveChart(data, chartType) {
+  const chartContainer = document.getElementById('descriptiveChartContainer');
+  const chartTitle = document.getElementById('chartTitle');
+  const chartCanvas = document.getElementById('descriptiveChart');
+  
+  if (!chartContainer || !chartTitle || !chartCanvas) {
+    console.error('Chart elements not found.');
+    return;
+  }
+
+  // Sort data for some charts
+  const sortedData = [...data].sort((a, b) => a - b);
+  let chartConfig = null;
+  let titleText = '';
+
+  switch (chartType) {
+    case 'line':
+      titleText = 'Line Chart: Tren Data';
+      chartConfig = generateLineChart(sortedData);
+      break;
+    case 'pie':
+      titleText = 'Pie Chart: Proporsi Frekuensi';
+      chartConfig = generatePieChart(data);
+      break;
+    case 'bar':
+      titleText = 'Bar Chart: Frekuensi Bins';
+      chartConfig = generateBarChart(data);
+      break;
+    case 'histogram':
+      titleText = 'Histogram: Distribusi Frekuensi';
+      chartConfig = generateHistogram(data);
+      break;
+    case 'ogive':
+      titleText = 'Ogive: Frekuensi Kumulatif';
+      chartConfig = generateOgive(data);
+      break;
+    case 'boxplot':
+      titleText = 'Box Plot: Ringkasan Distribusi';
+      chartConfig = generateBoxPlot(data);
+      break;
+    case 'stemleaf':
+      titleText = 'Stem-and-Leaf Plot: Representasi Teks';
+      renderStemLeaf(data); // Non-chart, render as text
+      chartContainer.style.display = 'block';
+      return; // Exit early for text-based plot
+    default:
+      titleText = 'Histogram: Distribusi Frekuensi (Default)';
+      chartConfig = generateHistogram(data);
+  }
+
+  chartTitle.textContent = titleText;
+  chartContainer.style.display = 'block';
+
+  if (chartConfig) {
+    // Destroy existing chart if any
+    if (window.descriptiveChartInstance) {
+      window.descriptiveChartInstance.destroy();
     }
+    // Create new chart
+    const ctx = chartCanvas.getContext('2d');
+    window.descriptiveChartInstance = new Chart(ctx, chartConfig);
+  } else {
+    // Handle null config: Tampilkan pesan error/fallback
+    chartCanvas.innerHTML = `
+      <div style="text-align: center; padding: 20px; color: #f44336; font-weight: bold;">
+        <p>❌ Tidak dapat merender chart: Data tidak memadai untuk tipe '${chartType}'.</p>
+        <p>Gunakan tipe chart lain atau tambahkan lebih banyak data.</p>
+      </div>
+    `;
+    console.warn(`Chart config is null for type: ${chartType}. Fallback message displayed.`);
+  }
+}
 
-    createChart(
-      'descriptiveHistogramChart',
-      'bar',
-      {
-        labels: labels,
-        datasets: [{
-          label: 'Frekuensi',
-          data: frequencies,
-          backgroundColor: 'rgba(75, 192, 192, 0.6)',
-          borderColor: 'rgba(75, 192, 192, 1)',
-          borderWidth: 1
-        }]
-      },
-      {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          title: {
-            display: true,
-            text: 'Histogram Distribusi Data'
-          }
+/**
+ * Generates Line Chart config for sorted data.
+ * @param {number[]} data - Sorted data.
+ * @returns {object} Chart.js config.
+ */
+function generateLineChart(data) {
+  return {
+    type: 'line',
+    data: {
+      labels: data.map((_, i) => `Poin ${i + 1}`),
+      datasets: [{
+        label: 'Nilai Data',
+        data: data,
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        tension: 0.1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { title: { display: true, text: 'Line Chart' } },
+      scales: { y: { beginAtZero: true } }
+    }
+  };
+}
+
+/**
+ * Generates Pie Chart config from frequency bins.
+ * @param {number[]} data - Input data.
+ * @returns {object} Chart.js config.
+ */
+function generatePieChart(data) {
+  const bins = getHistogramBins(data);
+  const labels = bins.labels;
+  const frequencies = bins.frequencies;
+  return {
+    type: 'pie',
+    data: {
+      labels: labels,
+      datasets: [{
+        data: frequencies,
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { title: { display: true, text: 'Pie Chart' } }
+    }
+  };
+}
+
+/**
+ * Generates Bar Chart config from frequency bins.
+ * @param {number[]} data - Input data.
+ * @returns {object} Chart.js config.
+ */
+function generateBarChart(data) {
+  const bins = getHistogramBins(data);
+  return {
+    type: 'bar',
+    data: {
+      labels: bins.labels,
+      datasets: [{
+        label: 'Frekuensi',
+        data: bins.frequencies,
+        backgroundColor: 'rgba(153, 102, 255, 0.6)',
+        borderColor: 'rgba(153, 102, 255, 1)'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { title: { display: true, text: 'Bar Chart' } },
+      scales: { y: { beginAtZero: true } }
+    }
+  };
+}
+
+/**
+ * Generates Histogram config.
+ * @param {number[]} data - Input data.
+ * @returns {object} Chart.js config.
+ */
+function generateHistogram(data) {
+  const bins = getHistogramBins(data);
+  return {
+    type: 'bar',
+    data: {
+      labels: bins.labels,
+      datasets: [{
+        label: 'Frekuensi',
+        data: bins.frequencies,
+        backgroundColor: 'rgba(75, 192, 192, 0.6)',
+        borderColor: 'rgba(75, 192, 192, 1)'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { title: { display: true, text: 'Histogram' } },
+      scales: {
+        x: { title: { display: true, text: 'Interval' } },
+        y: { beginAtZero: true, title: { display: true, text: 'Frekuensi' } }
+      }
+    }
+  };
+}
+
+/**
+ * Generates Ogive (Cumulative Frequency) config.
+ * @param {number[]} data - Input data.
+ * @returns {object} Chart.js config.
+ */
+function generateOgive(data) {
+  const bins = getHistogramBins(data);
+  const cumulative = bins.frequencies.reduce((acc, freq) => {
+    acc.push((acc[acc.length - 1] || 0) + freq);
+    return acc;
+  }, []);
+  return {
+    type: 'line',
+    data: {
+      labels: bins.labels,
+      datasets: [{
+        label: 'Frekuensi Kumulatif',
+        data: cumulative,
+        borderColor: 'rgb(255, 99, 132)',
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+        fill: false,
+        tension: 0.1
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { title: { display: true, text: 'Ogive' } },
+      scales: { y: { beginAtZero: true } }
+    }
+  };
+}
+
+/**
+ * Generates Box Plot simulation config (using scatter + line for quartiles).
+ * @param {number[]} data - Input data.
+ * @returns {object} Chart.js config.
+ */
+function generateBoxPlot(data) {
+  const sorted = [...data].sort((a, b) => a - b);
+  const n = sorted.length;
+  if (n < 4) {
+    console.warn('Data terlalu sedikit untuk box plot (minimal 4 poin).');
+    return null; // Atau fallback ke histogram
+  }
+
+  // Hitung quartiles
+  const q1Index = Math.floor((n + 1) / 4);
+  const q3Index = Math.floor(3 * (n + 1) / 4);
+  const q1 = sorted.slice(0, q1Index).length > 0 ? calculateMedian(sorted.slice(0, q1Index)) : sorted[0];
+  const median = calculateMedian(sorted);
+  const q3 = sorted.slice(q3Index).length > 0 ? calculateMedian(sorted.slice(q3Index)) : sorted[n - 1];
+
+  const iqr = q3 - q1;
+  const lowerFence = q1 - 1.5 * iqr;
+  const upperFence = q3 + 1.5 * iqr;
+
+  // Whiskers: min/max non-outlier
+  const lowerWhisker = Math.max(...sorted.filter(x => x >= lowerFence));
+  const upperWhisker = Math.min(...sorted.filter(x => x <= upperFence));
+  const outliers = sorted.filter(x => x < lowerFence || x > upperFence);
+
+  // Data untuk chart: line untuk box dan whiskers, scatter untuk median dan outliers
+  const boxLineData = [
+    { x: 1, y: q1 },    // Q1
+    { x: 1, y: q3 },    // Q3 (vertical line for box)
+    { x: 0.5, y: lowerWhisker }, // Lower whisker
+    { x: 1, y: lowerWhisker },   // Connect to Q1
+    { x: 1.5, y: upperWhisker }, // Upper whisker
+    { x: 1, y: upperWhisker }    // Connect to Q3
+  ];
+
+  const medianPoint = [{ x: 1, y: median }];
+  const outlierPoints = outliers.map(out => ({ x: 1, y: out }));
+
+  return {
+    type: 'scatter', // Base type scatter, with line dataset
+    data: {
+      datasets: [
+        {
+          label: 'Box & Whiskers',
+          data: boxLineData,
+          type: 'line', // Override to line for box/whiskers
+          borderColor: 'rgb(75, 192, 192)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          fill: false,
+          showLine: true,
+          pointRadius: 0, // No points on line
+          tension: 0
         },
-        scales: {
-          x: {
-            title: {
-              display: true,
-              text: 'Nilai'
-            }
-          },
-          y: {
-            title: {
-              display: true,
-              text: 'Frekuensi'
-            },
-            beginAtZero: true
-          }
+        {
+          label: 'Median',
+          data: medianPoint,
+          backgroundColor: 'rgb(255, 99, 132)',
+          borderColor: 'rgb(255, 99, 132)',
+          pointRadius: 8,
+          pointStyle: 'rect'
+        },
+        ...(outliers.length > 0 ? [{
+          label: 'Outliers',
+          data: outlierPoints,
+          backgroundColor: 'rgba(255, 99, 132, 0.8)',
+          borderColor: 'rgba(255, 99, 132, 1)',
+          pointRadius: 5
+        }] : [])
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        title: { display: true, text: 'Box Plot (Simulasi)' },
+        legend: { display: true }
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          position: 'bottom',
+          min: 0.5,
+          max: 1.5,
+          ticks: { display: false }, // Hide x ticks for single box
+          grid: { display: false }
+        },
+        y: {
+          title: { display: true, text: 'Nilai' },
+          beginAtZero: false
         }
       }
-    );
-  }
+    }
+  };
+}
+
+/**
+ * Renders Stem-and-Leaf plot as text (non-chart).
+ * @param {number[]} data - Input data.
+ */
+function renderStemLeaf(data) {
+  const sorted = [...data].sort((a, b) => a - b);
+  const stemMultiplier = 10; // Adjust for decimal places (e.g., 10 for one decimal)
+  const stems = {};
+  
+  sorted.forEach(val => {
+    const stem = Math.floor(val / stemMultiplier);
+    const leaf = Math.round((val % stemMultiplier) * 10) / 10; // Preserve one decimal
+    if (!stems[stem]) stems[stem] = [];
+    stems[stem].push(leaf);
+  });
+
+  let stemLeafHtml = '<h5>Stem-and-Leaf Plot:</h5><pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto;">';
+  stemLeafHtml += 'Stem | Leaf\n';
+  stemLeafHtml += '-----|--------\n';
+  
+  Object.keys(stems).sort((a, b) => a - b).forEach(stem => {
+    const leaves = stems[stem].sort((a, b) => a - b).map(l => l.toFixed(1).padStart(4, ' ')).join(' ');
+    stemLeafHtml += `${stem.padStart(3)}  | ${leaves}\n`;
+  });
+  
+  stemLeafHtml += '</pre>';
+  stemLeafHtml += `<p><small>Key: Stem = puluhan/satuan utama, Leaf = satuan/desimal. Contoh: Stem 2 | Leaf 3.5 berarti 23.5.</small></p>`;
+  
+  const chartContainer = document.getElementById('descriptiveChartContainer');
+  const chartCanvas = document.getElementById('descriptiveChart');
+  chartCanvas.innerHTML = stemLeafHtml; // Render as HTML in canvas container
+}
+
 
   /**
    * Updates the t-Test form based on the selected test type (one-sample, two-sample, paired).
