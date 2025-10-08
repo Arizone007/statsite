@@ -4300,8 +4300,8 @@ function generateBoxPlot(data) {
   const upperFence = q3 + 1.5 * iqr;
 
   // Whiskers: min/max non-outlier (gunakan Math.max/min dengan filter)
-  const lowerWhisker = Math.max(...sorted.filter(x => x >= lowerFence));
-  const upperWhisker = Math.min(...sorted.filter(x => x <= upperFence));
+  const upperWhisker = Math.max(...sorted.filter(x => x >= lowerFence));
+  const lowerWhisker = Math.min(...sorted.filter(x => x <= upperFence));
   const outliers = sorted.filter(x => x < lowerFence || x > upperFence);
 
   // Koordinat untuk kotak (lebar: 0.8-1.2 untuk simetri)
