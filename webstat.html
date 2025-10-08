@@ -3943,6 +3943,46 @@ Kelompok3: 45, 67, 89, 56, 78`;
     renderDescriptiveChart(data, chartType);
   }
 
+// **FUNGSI BARU: Helper untuk menghitung bins frekuensi (untuk Histogram, Pie, Bar, Ogive)**
+/**
+ * Menghitung bins frekuensi sederhana untuk data numerik.
+ * Menggunakan Sturges' rule untuk jumlah bins (k ≈ 1 + log2(n)).
+ * @param {number[]} data - Array data numerik.
+ * @returns {object} {labels: string[], frequencies: number[]}
+ */
+function getHistogramBins(data) {
+  if (!data || data.length < 2) {
+    console.warn('Data terlalu sedikit untuk bins. Mengembalikan empty bins.');
+    return { labels: [], frequencies: [] };
+  }
+
+  const n = data.length;
+  const min = Math.min(...data);
+  const max = Math.max(...data);
+  const range = max - min;
+  
+  // Sturges' rule: k = 1 + log2(n), minimal 5 bins
+  const numBins = Math.max(5, Math.floor(1 + Math.log2(n)));
+  const binWidth = range / numBins;
+  
+  const bins = new Array(numBins).fill(0);
+  const labels = [];
+
+  for (let i = 0; i < numBins; i++) {
+    const lower = min + i * binWidth;
+    const upper = lower + binWidth;
+    labels.push(`${lower.toFixed(1)} - ${upper.toFixed(1)}`);
+  }
+
+  data.forEach(val => {
+    const binIndex = Math.min(Math.floor((val - min) / binWidth), numBins - 1);
+    bins[binIndex]++;
+  });
+
+  return { labels, frequencies: bins };
+}
+
+// **FUNGSI UTAMA PERBAIKAN: renderDescriptiveChart (GANTI SELURUH FUNGSI LAMA DENGAN INI)**
 /**
  * Renders dynamic chart for descriptive analysis based on selected type.
  * @param {number[]} data - The input data array.
@@ -3958,10 +3998,28 @@ function renderDescriptiveChart(data, chartType) {
     return;
   }
 
+  // **PERBAIKAN: Validasi data minimal**
+  if (!data || data.length < 2) {
+    chartCanvas.innerHTML = `
+      <div style="text-align: center; padding: 20px; color: #f44336; font-weight: bold;">
+        <p>⚠️ Data tidak cukup untuk membuat chart.</p>
+        <p>Minimal 2 observasi diperlukan. Tambahkan data lebih banyak.</p>
+        <button onclick="runDescriptive()" style="margin-top: 10px; padding: 5px 10px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          Coba Lagi
+        </button>
+      </div>
+    `;
+    chartContainer.style.display = 'block';
+    return;
+  }
+
   // Sort data for some charts
   const sortedData = [...data].sort((a, b) => a - b);
   let chartConfig = null;
   let titleText = '';
+
+  // **PERBAIKAN: Reset canvas div ke empty sebelum switch (untuk konsistensi)**
+  chartCanvas.innerHTML = ''; // Clear previous content
 
   switch (chartType) {
     case 'line':
@@ -4001,23 +4059,75 @@ function renderDescriptiveChart(data, chartType) {
   chartTitle.textContent = titleText;
   chartContainer.style.display = 'block';
 
-  if (chartConfig) {
+  // **PERBAIKAN: Handle Null Config dengan try-catch dan fallback**
+  if (!chartConfig) {
+    console.warn(`Chart config is null for type '${chartType}'. Data mungkin tidak cukup. Fallback ke histogram.`);
+    
+    // Tampilkan pesan error sementara
+    chartCanvas.innerHTML = `
+      <div style="text-align: center; padding: 20px; color: #f44336; font-weight: bold;">
+        <p>⚠️ Tidak dapat membuat chart '${chartType}'.</p>
+        <p>Alasan: Data tidak memenuhi syarat (misal: kurang dari 4 observasi untuk Box Plot).</p>
+        <p>Sedang mencoba fallback ke Histogram...</p>
+      </div>
+    `;
+    
+    // Fallback: Coba generate histogram
+    const fallbackConfig = generateHistogram(data);
+    try {
+      if (fallbackConfig) {
+        // **PERBAIKAN KRITIS: Buat canvas ELEKSIWIT di fallback**
+        chartCanvas.innerHTML = '<canvas></canvas>';
+        const canvasElement = chartCanvas.querySelector('canvas');
+        if (!canvasElement) throw new Error('Canvas creation failed');
+        const ctx = canvasElement.getContext('2d');
+        if (!ctx) throw new Error('getContext failed');
+        
+        window.descriptiveChartInstance = new Chart(ctx, fallbackConfig);
+        chartTitle.textContent = 'Histogram (Fallback): Distribusi Frekuensi';
+        console.log('Fallback chart (histogram) berhasil dibuat.');
+      } else {
+        throw new Error('Fallback histogram juga gagal. Data mungkin invalid.');
+      }
+    } catch (error) {
+      console.error('Error saat membuat fallback chart:', error);
+      chartCanvas.innerHTML += `
+        <p style="color: #f44336;">Error: ${error.message}. Silakan tambahkan data lebih banyak atau pilih chart lain.</p>
+        <button onclick="runDescriptive()" style="margin-top: 10px; padding: 5px 10px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          Coba Lagi
+        </button>
+      `;
+    }
+    return;
+  }
+
+  // **PERBAIKAN: Buat canvas ELEKSIWIT untuk config valid (konsisten di semua case)**
+  try {
     // Destroy existing chart if any
     if (window.descriptiveChartInstance) {
       window.descriptiveChartInstance.destroy();
     }
-    // Create new chart
-    const ctx = chartCanvas.getContext('2d');
+    
+    // **PERBAIKAN KRITIS: Buat canvas sebelum Chart.js**
+    chartCanvas.innerHTML = '<canvas></canvas>';
+    const canvasElement = chartCanvas.querySelector('canvas');
+    if (!canvasElement) throw new Error('Canvas creation failed');
+    const ctx = canvasElement.getContext('2d');
+    if (!ctx) throw new Error('getContext failed');
+    
     window.descriptiveChartInstance = new Chart(ctx, chartConfig);
-  } else {
-    // Handle null config: Tampilkan pesan error/fallback
+    console.log(`Chart '${chartType}' berhasil dibuat.`);
+  } catch (error) {
+    console.error('Error saat membuat chart:', error);
     chartCanvas.innerHTML = `
       <div style="text-align: center; padding: 20px; color: #f44336; font-weight: bold;">
-        <p>❌ Tidak dapat merender chart: Data tidak memadai untuk tipe '${chartType}'.</p>
-        <p>Gunakan tipe chart lain atau tambahkan lebih banyak data.</p>
+        <p>⚠️ Error saat merender chart '${chartType}': ${error.message}</p>
+        <p>Silakan periksa data input atau refresh halaman.</p>
+        <button onclick="runDescriptive()" style="margin-top: 10px; padding: 5px 10px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer;">
+          Coba Lagi
+        </button>
       </div>
     `;
-    console.warn(`Chart config is null for type: ${chartType}. Fallback message displayed.`);
   }
 }
 
@@ -4164,20 +4274,15 @@ function generateOgive(data) {
   };
 }
 
-/**
- * Generates Box Plot simulation config (using scatter + line for quartiles).
- * @param {number[]} data - Input data.
- * @returns {object} Chart.js config.
- */
+// **FUNGSI PERBAIKAN: Generate Box Plot**
 function generateBoxPlot(data) {
   const sorted = [...data].sort((a, b) => a - b);
   const n = sorted.length;
   if (n < 4) {
-    console.warn('Data terlalu sedikit untuk box plot (minimal 4 poin).');
-    return null; // Atau fallback ke histogram
+    console.warn('Data terlalu sedikit untuk box plot (minimal 4 poin). Mengembalikan null.');
+    return null;
   }
 
-  // Hitung quartiles
   const q1Index = Math.floor((n + 1) / 4);
   const q3Index = Math.floor(3 * (n + 1) / 4);
   const q1 = sorted.slice(0, q1Index).length > 0 ? calculateMedian(sorted.slice(0, q1Index)) : sorted[0];
@@ -4188,37 +4293,35 @@ function generateBoxPlot(data) {
   const lowerFence = q1 - 1.5 * iqr;
   const upperFence = q3 + 1.5 * iqr;
 
-  // Whiskers: min/max non-outlier
   const lowerWhisker = Math.max(...sorted.filter(x => x >= lowerFence));
   const upperWhisker = Math.min(...sorted.filter(x => x <= upperFence));
   const outliers = sorted.filter(x => x < lowerFence || x > upperFence);
 
-  // Data untuk chart: line untuk box dan whiskers, scatter untuk median dan outliers
   const boxLineData = [
-    { x: 1, y: q1 },    // Q1
-    { x: 1, y: q3 },    // Q3 (vertical line for box)
-    { x: 0.5, y: lowerWhisker }, // Lower whisker
-    { x: 1, y: lowerWhisker },   // Connect to Q1
-    { x: 1.5, y: upperWhisker }, // Upper whisker
-    { x: 1, y: upperWhisker }    // Connect to Q3
+    { x: 1, y: q1 },
+    { x: 1, y: q3 },
+    { x: 0.5, y: lowerWhisker },
+    { x: 1, y: lowerWhisker },
+    { x: 1.5, y: upperWhisker },
+    { x: 1, y: upperWhisker }
   ];
 
   const medianPoint = [{ x: 1, y: median }];
   const outlierPoints = outliers.map(out => ({ x: 1, y: out }));
 
   return {
-    type: 'scatter', // Base type scatter, with line dataset
+    type: 'scatter',
     data: {
       datasets: [
         {
           label: 'Box & Whiskers',
           data: boxLineData,
-          type: 'line', // Override to line for box/whiskers
+          type: 'line',
           borderColor: 'rgb(75, 192, 192)',
           backgroundColor: 'rgba(75, 192, 192, 0.2)',
           fill: false,
           showLine: true,
-          pointRadius: 0, // No points on line
+          pointRadius: 0,
           tension: 0
         },
         {
@@ -4251,7 +4354,7 @@ function generateBoxPlot(data) {
           position: 'bottom',
           min: 0.5,
           max: 1.5,
-          ticks: { display: false }, // Hide x ticks for single box
+          ticks: { display: false },
           grid: { display: false }
         },
         y: {
@@ -4263,23 +4366,31 @@ function generateBoxPlot(data) {
   };
 }
 
-/**
- * Renders Stem-and-Leaf plot as text (non-chart).
- * @param {number[]} data - Input data.
- */
+// **FUNGSI PERBAIKAN: Render Stem-and-Leaf Plot**
 function renderStemLeaf(data) {
+  if (!data || data.length < 2) {
+    const chartCanvas = document.getElementById('descriptiveChart');
+    chartCanvas.innerHTML = `
+      <div style="text-align: center; padding: 20px; color: #f44336; font-weight: bold;">
+        <p>⚠️ Data tidak cukup untuk Stem-and-Leaf Plot.</p>
+        <p>Minimal 2 observasi diperlukan.</p>
+      </div>
+    `;
+    return;
+  }
+
   const sorted = [...data].sort((a, b) => a - b);
-  const stemMultiplier = 10; // Adjust for decimal places (e.g., 10 for one decimal)
+  const stemMultiplier = 10;
   const stems = {};
   
   sorted.forEach(val => {
     const stem = Math.floor(val / stemMultiplier);
-    const leaf = Math.round((val % stemMultiplier) * 10) / 10; // Preserve one decimal
+    const leaf = Math.round((val % stemMultiplier) * 10) / 10;
     if (!stems[stem]) stems[stem] = [];
     stems[stem].push(leaf);
   });
 
-  let stemLeafHtml = '<h5>Stem-and-Leaf Plot:</h5><pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto;">';
+  let stemLeafHtml = '<h5>Stem-and-Leaf Plot:</h5><pre style="background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; font-family: monospace; font-size: 14px;">';
   stemLeafHtml += 'Stem | Leaf\n';
   stemLeafHtml += '-----|--------\n';
   
@@ -4291,11 +4402,10 @@ function renderStemLeaf(data) {
   stemLeafHtml += '</pre>';
   stemLeafHtml += `<p><small>Key: Stem = puluhan/satuan utama, Leaf = satuan/desimal. Contoh: Stem 2 | Leaf 3.5 berarti 23.5.</small></p>`;
   
-  const chartContainer = document.getElementById('descriptiveChartContainer');
   const chartCanvas = document.getElementById('descriptiveChart');
-  chartCanvas.innerHTML = stemLeafHtml; // Render as HTML in canvas container
+  chartCanvas.innerHTML = stemLeafHtml;
+  console.log('Stem-and-Leaf plot berhasil dirender.');
 }
-
 
   /**
    * Updates the t-Test form based on the selected test type (one-sample, two-sample, paired).
