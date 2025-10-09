@@ -2208,74 +2208,73 @@
 
 // Konten untuk analysis tools (sekarang disimpan dalam objek global)
 let analysisToolContents = {
-  'deskriptif': `
-    <h2>Tool Analisis Statistik Deskriptif</h2>
-    <p>Analisis komprehensif karakteristik data Anda dengan berbagai ukuran pemusatan, penyebaran, dan visualisasi grafik.</p>
+'deskriptif': `
+  <h2>Tool Analisis Statistik Deskriptif</h2>
+  <p>Analisis komprehensif karakteristik data Anda dengan berbagai ukuran pemusatan, penyebaran, dan visualisasi grafik.</p>
 
-    <div class="analysis-form">
-      <h3>Input Data</h3>
-      <div class="form-group">
-        <label>Metode Input Data:</label>
-        <select id="inputMethod_deskriptif" onchange="toggleInputMethod('deskriptif')">
-          <option value="manual">Input Manual</option>
-          <option value="sample">Gunakan Sample Data</option>
-          <option value="file">Upload File (.csv, .xlsx)</option>
-        </select>
-      </div>
-
-      <div class="form-group file-input-group_deskriptif" style="display:none;">
-        <label>Upload File Data:</label>
-        <input type="file" accept=".csv,.xlsx" id="dataFile_deskriptif" onchange="handleFileUpload('deskriptif')"/>
-      </div>
-
-      <div class="form-group manual-input-group_deskriptif">
-        <label>Atau Input Data Manual (pisahkan dengan koma atau baris baru):</label>
-        <textarea id="manualData_deskriptif" rows="6" placeholder="Contoh: 23, 45, 67, 34, 56, 78, 45, 67, 89, 23"></textarea>
-      </div>
-
-      <div class="form-group sample-input-group_deskriptif" style="display:none;">
-        <label>Pilih Sample Data:</label>
-        <select id="sampleData_deskriptif" onchange="loadSampleData('deskriptif')">
-          <option value="">-- Pilih Sample --</option>
-          <option value="sample1">Sample Data 1 (Penjualan)</option>
-          <option value="sample2">Sample Data 2 (Tinggi Badan)</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>Pilih Variabel untuk Analisis:</label>
-        <select id="variables_deskriptif" multiple size="5">
-          <option value="Data">Data</option>
-        </select>
-      </div>
-
-      <!-- **TOMTOM: Analisis Deskriptif (Dropdown Dipindah ke Bawah Ini)** -->
-      <button class="btn-primary" onclick="runDescriptive()">Analisis Deskriptif</button>
-
-      <!-- **PEMINDAHAN BARU: Wrapper untuk Dropdown, Awalnya Hidden dan Disabled** -->
-      <div id="chartSelectorContainer_deskriptif" class="form-group" style="margin-top: 15px; display: none;">
-        <label>Pilih Jenis Visualisasi Grafik:</label>
-        <select id="chartType_deskriptif" disabled>
-          <option value="histogram">Histogram (Default)</option>
-          <option value="line">Line Chart</option>
-          <option value="pie">Pie Chart</option>
-          <option value="bar">Bar Chart</option>
-          <option value="ogive">Ogive (Kumulatif)</option>
-          <option value="boxplot">Box Plot</option>
-          <option value="stemleaf">Stem-and-Leaf Plot</option>
-        </select>
-        <small>Pilih grafik untuk update visualisasi secara langsung setelah analisis.</small>
-      </div>
-
-      <div id="descriptiveResults" style="margin-top: 20px;"></div>
-
-      <!-- Container untuk Grafik (Tambahan Baru) -->
-      <div id="descriptiveChartContainer" style="margin-top: 20px; display: none;">
-        <h4 id="chartTitle">Visualisasi Grafik</h4>
-        <div class="chart-container" id="descriptiveChart"></div>
-      </div>
+  <div class="analysis-form">
+    <h3>Input Data</h3>
+    <div class="form-group">
+      <label>Metode Input Data:</label>
+      <select id="inputMethod_deskriptif" onchange="toggleInputMethod('deskriptif')">
+        <option value="manual">Input Manual</option>
+        <option value="sample">Gunakan Sample Data</option>
+        <option value="file">Upload File (.csv, .xlsx)</option>
+      </select>
     </div>
-  `,
+
+    <div class="form-group file-input-group_deskriptif" style="display:none;">
+      <label>Upload File Data:</label>
+      <input type="file" accept=".csv,.xlsx" id="dataFile_deskriptif" onchange="handleFileUpload('deskriptif')"/>
+    </div>
+
+    <div class="form-group manual-input-group_deskriptif">
+      <label>Atau Input Data Manual (pisahkan dengan koma atau baris baru):</label>
+      <textarea id="manualData_deskriptif" rows="6" placeholder="Contoh: 23, 45, 67, 34, 56, 78, 45, 67, 89, 23"></textarea>
+    </div>
+
+    <div class="form-group sample-input-group_deskriptif" style="display:none;">
+      <label>Pilih Sample Data:</label>
+      <select id="sampleData_deskriptif" onchange="loadSampleData('deskriptif')">
+        <option value="">-- Pilih Sample --</option>
+        <option value="sample1">Sample Data 1 (Penjualan)</option>
+        <option value="sample2">Sample Data 2 (Tinggi Badan)</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>Pilih Variabel untuk Analisis:</label>
+      <select id="variables_deskriptif" multiple size="5">
+        <option value="Data">Data</option>
+      </select>
+    </div>
+
+    <button class="btn-primary" onclick="runDescriptive()">Analisis Deskriptif</button>
+
+    <div id="descriptiveResults" style="margin-top: 20px;"></div>
+
+    <!-- Container untuk Grafik (Pertama, tanpa dropdown) -->
+    <div id="descriptiveChartContainer" style="margin-top: 20px; display: none;">
+      <h4 id="chartTitle">Visualisasi Grafik</h4>
+      <div class="chart-container" id="descriptiveChart"></div>
+    </div>
+
+    <!-- **PERBAIKAN: Dropdown Dipindah ke Bawah Grafik (Awalnya Hidden)** -->
+    <div id="chartSelectorContainer_deskriptif" class="form-group" style="margin-top: 15px; display: none;">
+      <label>Pilih Jenis Visualisasi Grafik:</label>
+      <select id="chartType_deskriptif" disabled>
+        <option value="histogram">Histogram (Default)</option>
+        <option value="line">Line Chart</option>
+        <option value="pie">Pie Chart</option>
+        <option value="bar">Bar Chart</option>
+        <option value="ogive">Ogive (Kumulatif)</option>
+        <option value="boxplot">Box Plot</option>
+        <option value="stemleaf">Stem-and-Leaf Plot</option>
+      </select>
+      <small>Pilih grafik untuk update visualisasi secara langsung setelah analisis.</small>
+    </div>
+  </div>
+`,
       
     'uji-mean': `
       <h2>Tool Uji t (t-Test)</h2>
@@ -4069,7 +4068,7 @@ function renderDescriptiveChart(data, chartType) {
     return;
   }
 
-  // **PERBAIKAN: Validasi data minimal**
+  // **PERBAIKAN: Validasi data minimal (minimal 2 poin untuk semua chart)**
   if (!data || data.length < 2) {
     chartCanvas.innerHTML = `
       <div style="text-align: center; padding: 20px; color: #f44336; font-weight: bold;">
@@ -4084,116 +4083,88 @@ function renderDescriptiveChart(data, chartType) {
     return;
   }
 
+  // **PERBAIKAN: Destroy chart instance secara robust (gunakan Chart.js v3+ method)**
+  if (window.descriptiveChartInstance) {
+    try {
+      window.descriptiveChartInstance.destroy();
+      console.log('Previous chart destroyed successfully.');
+    } catch (error) {
+      console.warn('Error destroying previous chart:', error);
+    }
+    window.descriptiveChartInstance = null;
+  }
+
   // Sort data for some charts
   const sortedData = [...data].sort((a, b) => a - b);
   let chartConfig = null;
   let titleText = '';
 
-  // **PERBAIKAN: Reset canvas div ke empty sebelum switch (untuk konsistensi)**
+  // **PERBAIKAN: Reset canvas div ke empty sebelum switch**
   chartCanvas.innerHTML = ''; // Clear previous content
 
-  switch (chartType) {
-    case 'line':
-      titleText = 'Line Chart: Tren Data';
-      chartConfig = generateLineChart(sortedData);
-      break;
-    case 'pie':
-      titleText = 'Pie Chart: Proporsi Frekuensi';
-      chartConfig = generatePieChart(data);
-      break;
-    case 'bar':
-      titleText = 'Bar Chart: Frekuensi Bins';
-      chartConfig = generateBarChart(data);
-      break;
-    case 'histogram':
-      titleText = 'Histogram: Distribusi Frekuensi';
-      chartConfig = generateHistogram(data);
-      break;
-    case 'ogive':
-      titleText = 'Ogive: Frekuensi Kumulatif';
-      chartConfig = generateOgive(data);
-      break;
-    case 'boxplot':
-      titleText = 'Box Plot: Ringkasan Distribusi';
-      chartConfig = generateBoxPlot(data);
-      break;
-    case 'stemleaf':
-      titleText = 'Stem-and-Leaf Plot: Representasi Teks';
-      renderStemLeaf(data); // Non-chart, render as text
-      chartContainer.style.display = 'block';
-      return; // Exit early for text-based plot
-    default:
-      titleText = 'Histogram: Distribusi Frekuensi (Default)';
-      chartConfig = generateHistogram(data);
-  }
-
-  chartTitle.textContent = titleText;
-  chartContainer.style.display = 'block';
-
-  // **PERBAIKAN: Handle Null Config dengan try-catch dan fallback**
-  if (!chartConfig) {
-    console.warn(`Chart config is null for type '${chartType}'. Data mungkin tidak cukup. Fallback ke histogram.`);
-    
-    // Tampilkan pesan error sementara
-    chartCanvas.innerHTML = `
-      <div style="text-align: center; padding: 20px; color: #f44336; font-weight: bold;">
-        <p>⚠️ Tidak dapat membuat chart '${chartType}'.</p>
-        <p>Alasan: Data tidak memenuhi syarat (misal: kurang dari 4 observasi untuk Box Plot).</p>
-        <p>Sedang mencoba fallback ke Histogram...</p>
-      </div>
-    `;
-    
-    // Fallback: Coba generate histogram
-    const fallbackConfig = generateHistogram(data);
-    try {
-      if (fallbackConfig) {
-        // **PERBAIKAN KRITIS: Buat canvas ELEKSIWIT di fallback**
-        chartCanvas.innerHTML = '<canvas></canvas>';
-        const canvasElement = chartCanvas.querySelector('canvas');
-        if (!canvasElement) throw new Error('Canvas creation failed');
-        const ctx = canvasElement.getContext('2d');
-        if (!ctx) throw new Error('getContext failed');
-        
-        window.descriptiveChartInstance = new Chart(ctx, fallbackConfig);
-        chartTitle.textContent = 'Histogram (Fallback): Distribusi Frekuensi';
-        console.log('Fallback chart (histogram) berhasil dibuat.');
-      } else {
-        throw new Error('Fallback histogram juga gagal. Data mungkin invalid.');
-      }
-    } catch (error) {
-      console.error('Error saat membuat fallback chart:', error);
-      chartCanvas.innerHTML += `
-        <p style="color: #f44336;">Error: ${error.message}. Silakan tambahkan data lebih banyak atau pilih chart lain.</p>
-        <button onclick="runDescriptive()" style="margin-top: 10px; padding: 5px 10px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer;">
-          Coba Lagi
-        </button>
-      `;
-    }
-    return;
-  }
-
-  // **PERBAIKAN: Buat canvas ELEKSIWIT untuk config valid (konsisten di semua case)**
   try {
-    // Destroy existing chart if any
-    if (window.descriptiveChartInstance) {
-      window.descriptiveChartInstance.destroy();
+    switch (chartType) {
+      case 'line':
+        titleText = 'Line Chart: Tren Data';
+        chartConfig = generateLineChart(sortedData);
+        break;
+      case 'pie':
+        titleText = 'Pie Chart: Proporsi Frekuensi';
+        chartConfig = generatePieChart(data);
+        break;
+      case 'bar':
+        titleText = 'Bar Chart: Frekuensi Bins';
+        chartConfig = generateBarChart(data);
+        break;
+      case 'histogram':
+        titleText = 'Histogram: Distribusi Frekuensi';
+        chartConfig = generateHistogram(data);
+        break;
+      case 'ogive':
+        titleText = 'Ogive: Frekuensi Kumulatif';
+        chartConfig = generateOgive(data);
+        break;
+      case 'boxplot':
+        titleText = 'Box Plot: Ringkasan Distribusi';
+        chartConfig = generateBoxPlot(data);
+        if (!chartConfig) throw new Error('Data tidak cukup untuk Box Plot (minimal 4 poin).');
+        break;
+      case 'stemleaf':
+        titleText = 'Stem-and-Leaf Plot: Representasi Teks';
+        renderStemLeaf(data); // Non-chart, render as text
+        chartContainer.style.display = 'block';
+        return; // Exit early for text-based plot
+      default:
+        titleText = 'Histogram: Distribusi Frekuensi (Default)';
+        chartConfig = generateHistogram(data);
     }
+
+    chartTitle.textContent = titleText;
+    chartContainer.style.display = 'block';
+
+    // **PERBAIKAN: Handle Null Config dengan fallback histogram**
+    if (!chartConfig) {
+      console.warn(`Chart config is null for type '${chartType}'. Fallback ke histogram.`);
+      chartConfig = generateHistogram(data);
+    }
+
+    // **PERBAIKAN: Buat canvas ELEKSIWIT dengan error handling**
+    chartCanvas.innerHTML = '<canvas id="descriptiveCanvas"></canvas>'; // Tambah ID unik untuk canvas
+    const canvasElement = document.getElementById('descriptiveCanvas');
+    if (!canvasElement) throw new Error('Canvas creation failed.');
     
-    // **PERBAIKAN KRITIS: Buat canvas sebelum Chart.js**
-    chartCanvas.innerHTML = '<canvas></canvas>';
-    const canvasElement = chartCanvas.querySelector('canvas');
-    if (!canvasElement) throw new Error('Canvas creation failed');
     const ctx = canvasElement.getContext('2d');
-    if (!ctx) throw new Error('getContext failed');
-    
+    if (!ctx) throw new Error('getContext failed.');
+
     window.descriptiveChartInstance = new Chart(ctx, chartConfig);
     console.log(`Chart '${chartType}' berhasil dibuat.`);
+
   } catch (error) {
     console.error('Error saat membuat chart:', error);
     chartCanvas.innerHTML = `
       <div style="text-align: center; padding: 20px; color: #f44336; font-weight: bold;">
         <p>⚠️ Error saat merender chart '${chartType}': ${error.message}</p>
-        <p>Silakan periksa data input atau refresh halaman.</p>
+        <p>Silakan periksa data input atau pilih chart lain.</p>
         <button onclick="runDescriptive()" style="margin-top: 10px; padding: 5px 10px; background: #2196f3; color: white; border: none; border-radius: 4px; cursor: pointer;">
           Coba Lagi
         </button>
