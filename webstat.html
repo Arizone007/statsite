@@ -6,6 +6,7 @@
 <title>Statistical Analysis and Research Consulting (SARC)</title>
 <!-- Chart.js CDN for dynamic charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+window.currentDescriptiveData = []; // Global untuk data deskriptif
 <style>
   /* Reset CSS */
   * {
@@ -3889,129 +3890,117 @@ Kelompok3: 45, 67, 89, 56, 78`;
       return 1.96;
   };
 
-// **FUNGSI PERBAIKAN: runDescriptive (Ganti Seluruh Fungsi Lama dengan Ini)**
 /**
- * Runs descriptive statistics analysis and renders initial results.
- * Integrasi dengan input method (manual, sample, file).
+ * Runs descriptive statistical analysis on input data.
  */
 function runDescriptive() {
-  // Ambil input dari textarea manual (atau dari file/sample jika dimuat ke sana)
-  const manualInput = document.getElementById('manualData_deskriptif');
-  const resultsContainer = document.getElementById('descriptiveResults');
-  const chartContainer = document.getElementById('descriptiveChartContainer');
-  const chartSelectorContainer = document.getElementById('chartSelectorContainer_deskriptif');
-  const chartTypeSelect = document.getElementById('chartType_deskriptif');
-  const variablesSelect = document.getElementById('variables_deskriptif');
-  
-  if (!manualInput || !resultsContainer || !chartContainer) {
-    console.error('Elements for descriptive analysis not found.');
-    alert('Elemen input tidak ditemukan. Refresh halaman.');
-    return;
-  }
+  const manualData = document.getElementById('manualData_deskriptif').value.trim();
+  const inputMethod = document.getElementById('inputMethod_deskriptif').value;
+  let data = [];
 
-  let inputText = manualInput.value.trim();
-
-  // **INTEGRASI DENGAN INPUT METHOD**: Jika sample atau file, asumsikan data sudah dimuat ke textarea
-  const inputMethod = document.getElementById('inputMethod_deskriptif')?.value;
-  if (inputMethod === 'sample') {
-    inputText = manualInput.value.trim();
-    if (!inputText) {
-      alert('Pilih sample data terlebih dahulu.');
-      return;
+  try {
+    // Parse data berdasarkan metode input
+    if (inputMethod === 'manual' && manualData) {
+      data = manualData.split(/[\s,;\n]+/).map(num => parseFloat(num.trim())).filter(num => !isNaN(num));
+    } else if (inputMethod === 'sample') {
+      const sampleSelect = document.getElementById('sampleData_deskriptif');
+      if (sampleSelect.value === 'sample1') {
+        data = [120, 150, 180, 200, 170, 190, 160, 140, 210, 155]; // Sample penjualan
+      } else if (sampleSelect.value === 'sample2') {
+        data = [165, 170, 162, 175, 168, 172, 160, 178, 169, 174]; // Sample tinggi badan
+      }
+    } else if (inputMethod === 'file') {
+      // Simulasi file upload (ganti dengan parsing real jika ada library)
+      data = [23, 45, 67, 34, 56, 78, 45, 67, 89, 23]; // Fallback sample
+      alert('Upload file simulasi: Menggunakan data sample default.');
     }
-  } else if (inputMethod === 'file') {
-    inputText = manualInput.value.trim(); // Fallback; sesuaikan jika handleFileUpload isi variabel lain
-    if (!inputText) {
-      alert('Upload file dan proses data terlebih dahulu.');
-      return;
+
+    if (data.length === 0) {
+      throw new Error('Tidak ada data valid. Pastikan input manual atau pilih sample.');
     }
+
+    // **PERBAIKAN: Set global data**
+    window.currentDescriptiveData = [...data]; // Copy array
+
+    // Hitung statistik deskriptif (mean, median, dll.)
+    const n = data.length;
+    const mean = data.reduce((a, b) => a + b, 0) / n;
+    const sortedData = [...data].sort((a, b) => a - b);
+    const median = n % 2 === 0 ? (sortedData[n/2 - 1] + sortedData[n/2]) / 2 : sortedData[Math.floor(n/2)];
+    const mode = findMode(data);
+    const range = Math.max(...data) - Math.min(...data);
+    const variance = data.reduce((sum, num) => sum + Math.pow(num - mean, 2), 0) / n;
+    const stdDev = Math.sqrt(variance);
+    const q1 = sortedData[Math.floor((n + 1) / 4) - 1];
+    const q3 = sortedData[Math.floor(3 * (n + 1) / 4) - 1];
+    const iqr = q3 - q1;
+
+    // Tampilkan hasil statistik
+    const resultsDiv = document.getElementById('descriptiveResults');
+    resultsDiv.innerHTML = `
+      <h3>Hasil Analisis Deskriptif</h3>
+      <div class="stats-grid">
+        <div class="stat-card"><strong>Jumlah Data (n)</strong>: ${n}</div>
+        <div class="stat-card"><strong>Mean (Rata-rata)</strong>: ${mean.toFixed(2)}</div>
+        <div class="stat-card"><strong>Median</strong>: ${median.toFixed(2)}</div>
+        <div class="stat-card"><strong>Modus</strong>: ${mode || 'Tidak ada'}</div>
+        <div class="stat-card"><strong>Range</strong>: ${range.toFixed(2)}</div>
+        <div class="stat-card"><strong>Variansi</strong>: ${variance.toFixed(2)}</div>
+        <div class="stat-card"><strong>Deviasi Standar</strong>: ${stdDev.toFixed(2)}</div>
+        <div class="stat-card"><strong>Kuartil 1 (Q1)</strong>: ${q1 ? q1.toFixed(2) : 'N/A'}</div>
+        <div class="stat-card"><strong>Kuartil 3 (Q3)</strong>: ${q3 ? q3.toFixed(2) : 'N/A'}</div>
+        <div class="stat-card"><strong>Interkuartil Range (IQR)</strong>: ${iqr ? iqr.toFixed(2) : 'N/A'}</div>
+      </div>
+    `;
+
+    // **PERBAIKAN: Render histogram default**
+    renderDescriptiveChart(window.currentDescriptiveData, 'histogram');
+
+    // **PERBAIKAN: Enable dan show dropdown, attach listener**
+    const chartTypeSelect = document.getElementById('chartType_deskriptif');
+    const chartSelectorContainer = document.getElementById('chartSelectorContainer_deskriptif');
+    if (chartTypeSelect && chartSelectorContainer) {
+      chartTypeSelect.disabled = false;
+      chartSelectorContainer.style.display = 'block';
+
+      // **PERBAIKAN: Attach event listener secara eksplisit (hindari dynamic load issue)**
+      chartTypeSelect.removeEventListener('change', handleChartTypeChange); // Remove jika ada sebelumnya
+      chartTypeSelect.addEventListener('change', handleChartTypeChange); // Attach baru
+      console.log('Event listener untuk dropdown deskriptif terpasang.');
+    }
+
+  } catch (error) {
+    console.error('Error di runDescriptive:', error);
+    document.getElementById('descriptiveResults').innerHTML = `
+      <p style="color: #f44336;">Error: ${error.message}. Silakan periksa input data.</p>
+    `;
   }
-
-  if (!inputText) {
-    alert('Silakan masukkan data numerik terlebih dahulu (manual, sample, atau file).');
-    return;
-  }
-
-  // Parse data (pisah koma atau baris baru)
-  const data = inputText.split(/[\s,\n\r]+/).map(val => parseFloat(val.trim())).filter(val => !isNaN(val));
-  if (data.length < 1) {
-    alert('Data tidak valid. Pastikan input berupa angka.');
-    return;
-  }
-
-  // Ambil variabel terpilih (asumsi single untuk deskriptif)
-  const selectedVariable = Array.from(variablesSelect?.selectedOptions || []).map(opt => opt.value)[0] || 'Data';
-
-  // Simpan data untuk update grafik nanti
-  currentDescriptiveData = data;
-
-  // **GUNAKAN FUNGSI ASLI: Hitung mean dulu untuk variance dan stddev**
-  const mean = calculateMean(data);
-  const median = calculateMedian(data);
-  const mode = calculateMode(data); // Sudah return string
-  const stdDev = calculateStdDev(data, mean);
-  const variance = calculateVariance(data, mean);
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const rangeVal = max - min;
-  const q1 = calculateCustomQuartile(data, 1); // calculateQuartile ? calculateQuartile(data, 1) : 
-  const q3 = calculateCustomQuartile(data, 3); // calculateQuartile ? calculateQuartile(data, 3) :
-
-  // Tampilkan tabel hasil
-  const resultsHtml = `
-    <h4>Hasil Statistik Deskriptif untuk Variabel: ${selectedVariable}</h4>
-    <table class="results-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-      <thead><tr><th>Statistik</th><th>Nilai</th></tr></thead>
-      <tbody>
-        <tr><td>Jumlah Observasi (n)</td><td>${data.length}</td></tr>
-        <tr><td>Rata-rata (Mean)</td><td>${mean.toFixed(4)}</td></tr>
-        <tr><td>Median</td><td>${median.toFixed(4)}</td></tr>
-        <tr><td>Modus</td><td>${mode}</td></tr>
-        <tr><td>Standar Deviasi</td><td>${stdDev.toFixed(4)}</td></tr>
-        <tr><td>Varians</td><td>${variance.toFixed(4)}</td></tr>
-        <tr><td>Minimum</td><td>${min.toFixed(4)}</td></tr>
-        <tr><td>Maksimum</td><td>${max.toFixed(4)}</td></tr>
-        <tr><td>Range</td><td>${rangeVal.toFixed(4)}</td></tr>
-        <tr><td>Kuartil Q1 (25%)</td><td>${q1.toFixed(4)}</td></tr>
-        <tr><td>Kuartil Q3 (75%)</td><td>${q3.toFixed(4)}</td></tr>
-      </tbody>
-    </table>
-    <p style="font-size: 12px; color: #666;"><small>Data asli: ${data.join(', ')}</small></p>
-  `;
-  resultsContainer.innerHTML = resultsHtml;
-  resultsContainer.style.display = 'block';
-
-  // Enable dan tampilkan dropdown selector
-  if (chartSelectorContainer) {
-    chartSelectorContainer.style.display = 'block';
-  }
-  if (chartTypeSelect) {
-    chartTypeSelect.disabled = false;
-    chartTypeSelect.value = 'histogram'; // Default
-  }
-
-  // Render grafik default (Histogram)
-  renderDescriptiveChart(data, 'histogram');
-
-  console.log('Analisis deskriptif selesai untuk variabel:', selectedVariable);
 }
 
-// **EVENT LISTENER BARU: Update Grafik Saat Dropdown Berubah (Tambahkan Ini Setelah Fungsi runDescriptive)**
-document.addEventListener('DOMContentLoaded', function() {
-  const chartTypeSelect = document.getElementById('chartType_deskriptif');
-  if (chartTypeSelect) {
-    chartTypeSelect.addEventListener('change', function() {
-      if (currentDescriptiveData.length > 0) {
-        const selectedType = this.value;
-        renderDescriptiveChart(currentDescriptiveData, selectedType);
-        console.log(`Grafik deskriptif diupdate ke: ${selectedType}`);
-      } else {
-        alert('Lakukan analisis deskriptif terlebih dahulu untuk melihat grafik.');
-        this.value = 'histogram'; // Reset ke default
-      }
-    });
+function findMode(data) {
+  const freqMap = {};
+  data.forEach(num => freqMap[num] = (freqMap[num] || 0) + 1);
+  const maxFreq = Math.max(...Object.values(freqMap));
+  const modes = Object.keys(freqMap).filter(key => freqMap[key] === maxFreq);
+  return modes.length === 1 ? parseFloat(modes[0]) : null; // Single mode or null
+}
+
+// **PERBAIKAN: Fungsi helper untuk handle change event (pisah untuk modularitas)**
+function handleChartTypeChange() {
+  const chartType = this.value; // 'this' adalah select element
+  if (window.currentDescriptiveData && window.currentDescriptiveData.length > 0) {
+    console.log(`Mengubah grafik ke: ${chartType}`);
+    // Tambah loading brief
+    const chartCanvas = document.getElementById('descriptiveChart');
+    if (chartCanvas) {
+      chartCanvas.innerHTML = '<div style="text-align: center; padding: 20px;">Loading grafik...</div>';
+    }
+    renderDescriptiveChart(window.currentDescriptiveData, chartType);
+  } else {
+    console.warn('Data deskriptif tidak tersedia untuk render.');
+    alert('Data tidak tersedia. Jalankan analisis ulang terlebih dahulu.');
   }
-});
+}
 
 // **FUNGSI BARU: Helper untuk menghitung bins frekuensi (untuk Histogram, Pie, Bar, Ogive)**
 /**
