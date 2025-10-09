@@ -4204,7 +4204,7 @@ function renderDescriptiveChart(data, chartType) {
         chartConfig = generateHistogram(data);
         break;
       case 'ogive':
-        titleText = 'Ogive: Frekuensi Kumulatif & Lebih Dari';
+        titleText = 'Ogive: Frekuensi Kumulatif Kurang Dari & Lebih Dari';
         chartConfig = generateOgive(data);
         break;
       case 'boxplot':
@@ -4392,19 +4392,31 @@ function generateOgive(data) {
       },
       options: {
         responsive: true,
+		maintainAspectRatio: true,
+		layout: {
+          padding: { left: 10, right: 10, top: 10, bottom: 10 } /* Tambah padding internal */
+        },
         plugins: {
           title: { display: true, text: 'Ogive Sederhana (Data Kurang)' },
-          legend: { display: true }
+          legend: { display: true },
+		  tooltip: { enabled: true }
         },
         scales: {
-          x: { title: { display: true, text: 'Nilai Data' } },
-          y: { 
+          x: {
+            title: { display: true, text: 'Batas Kelas' },
+            ticks: { maxRotation: 45, minRotation: 0 }, /* Rotasi label x di mobile untuk hindari overlap */
+            grid: { display: true }
+          },
+          y: {
             title: { display: true, text: 'Frekuensi Kumulatif (%)' },
             min: 0,
             max: 100,
-            ticks: { callback: function(value) { return value + '%'; } }
+            ticks: { callback: function(value) { return value + '%'; }, stepSize: 10 },
+            grid: { display: true }
           }
-        }
+        },
+        elements: { point: { radius: 3 } }, /* Kurangi ukuran titik di mobile */
+        interaction: { mode: 'index', intersect: false } /* Tooltip lebih mudah di-touch di HP */
       }
     };
   }
