@@ -768,17 +768,25 @@
     box-shadow: 0 0.25rem 0.75rem rgba(0,0,0,0.2);
   }
 
-  /* Chart Container Styling */
+  /* Perbaikan Chart Container untuk Responsif Mobile */
   .chart-container {
     position: relative;
     margin: 1.5rem auto;
     width: 80%; /* Adjust as needed */
     max-width: 600px; /* Max width for charts */
-    height: 400px; /* Fixed height for consistency */
+    height: auto;  /* PERBAIKAN: Ubah dari fixed 400px ke auto untuk fleksibilitas */
+    min-height: 300px;  /* PERBAIKAN: Min-height agar tidak terlalu kecil */
+    aspect-ratio: 16 / 9;  /* PERBAIKAN: Proporsi otomatis, hindari distorsi di mobile */
     background-color: #f9f9f9;
     border-radius: 0.5rem;
     padding: 1rem;
     box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.1);
+	
+	/* Pastikan canvas di dalam chart-container responsive */
+    .chart-container canvas {
+      max-height: 100% !important;  /* PERBAIKAN: Paksa canvas isi container */
+      width: 100% !important;
+    }
   }
 
   /* --- Media Queries for Responsiveness --- */
@@ -1317,6 +1325,12 @@
   
   .table-container {
     margin: 10px 0;
+  }
+  .chart-container {
+    width: 95%;
+    min-height: 250px;  /* PERBAIKAN: Kurangi min-height di HP kecil */
+    aspect-ratio: 4 / 3;  /* PERBAIKAN: Proporsi lebih vertikal untuk mobile */
+    padding: 0.5rem;  /* PERBAIKAN: Kurangi padding internal */
   }
 }
 
@@ -4392,31 +4406,37 @@ function generateOgive(data) {
       },
       options: {
         responsive: true,
-		maintainAspectRatio: true,
-		layout: {
-          padding: { left: 10, right: 10, top: 10, bottom: 10 } /* Tambah padding internal */
+        maintainAspectRatio: false,  // PERBAIKAN: Set false untuk responsive di mobile
+        layout: {
+          padding: { left: 10, right: 10, top: 10, bottom: 20 }  // PERBAIKAN: Tambah padding bottom untuk ruang sumbu X
         },
         plugins: {
           title: { display: true, text: 'Ogive Sederhana (Data Kurang)' },
           legend: { display: true },
-		  tooltip: { enabled: true }
+          tooltip: { enabled: true }
         },
         scales: {
           x: {
             title: { display: true, text: 'Batas Kelas' },
-            ticks: { maxRotation: 45, minRotation: 0 }, /* Rotasi label x di mobile untuk hindari overlap */
+            ticks: { 
+              maxRotation: 45,  // PERBAIKAN: Rotasi label X di mobile untuk hindari overlap
+              minRotation: 0 
+            },
             grid: { display: true }
           },
           y: {
             title: { display: true, text: 'Frekuensi Kumulatif (%)' },
             min: 0,
-            max: 100,
-            ticks: { callback: function(value) { return value + '%'; }, stepSize: 10 },
+            max: 100,  // PERBAIKAN: Eksplisit max 100 untuk konsistensi
+            ticks: { 
+              callback: function(value) { return value + '%'; }, 
+              stepSize: 10 
+            },
             grid: { display: true }
           }
         },
-        elements: { point: { radius: 3 } }, /* Kurangi ukuran titik di mobile */
-        interaction: { mode: 'index', intersect: false } /* Tooltip lebih mudah di-touch di HP */
+        elements: { point: { radius: 3 } },  // PERBAIKAN: Kurangi ukuran titik di mobile
+        interaction: { mode: 'index', intersect: false }  // Tooltip lebih mudah di-touch di HP
       }
     };
   }
@@ -4492,6 +4512,10 @@ function generateOgive(data) {
     },
     options: {
       responsive: true,
+      maintainAspectRatio: false,  // PERBAIKAN: Set false untuk isi container penuh di mobile
+      layout: {
+        padding: { left: 10, right: 10, top: 10, bottom: 20 }  // PERBAIKAN: Padding bottom untuk ruang sumbu X
+      },
       interaction: { mode: 'index', intersect: false }, // Tooltip untuk kedua line
       plugins: {
         title: { 
@@ -4514,6 +4538,10 @@ function generateOgive(data) {
       scales: {
         x: { 
           title: { display: true, text: 'Batas Kelas (Upper Limits)' },
+          ticks: { 
+            maxRotation: 45,  // PERBAIKAN: Rotasi label X di mobile
+            minRotation: 0 
+          },
           grid: { display: true }
         },
         y: { 
