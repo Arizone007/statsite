@@ -6,7 +6,6 @@
 <title>Statistical Analysis and Research Consulting (SARC)</title>
 <!-- Chart.js CDN for dynamic charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-window.currentDescriptiveData = []; // Global untuk data deskriptif
 <style>
   /* Reset CSS */
   * {
@@ -1263,7 +1262,80 @@ window.currentDescriptiveData = []; // Global untuk data deskriptif
          padding: 2px;
          transition: background-color 0.3s ease;
        }
+
+
+/* Styling untuk Tabel Analisis Deskriptif */
+.table-container {
+  overflow-x: auto; /* Scroll horizontal pada mobile jika tabel lebar */
+  margin: 15px 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Shadow ringan untuk depth */
+}
+
+.descriptive-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 14px;
+}
+
+.descriptive-table th,
+.descriptive-table td {
+  padding: 12px 15px; /* Padding rapi */
+  text-align: left;
+  border-bottom: 1px solid #ddd; /* Garis pemisah halus */
+}
+
+.descriptive-table th {
+  background-color: #2196f3; /* Warna header biru (sesuaikan tema) */
+  color: white;
+  font-weight: bold;
+  text-align: center;
+}
+
+.descriptive-table tbody tr:nth-child(even) {
+  background-color: #f9f9f9; /* Striped rows untuk readability */
+}
+
+.descriptive-table tbody tr:hover {
+  background-color: #e3f2fd; /* Hover effect untuk interaktivitas */
+}
+
+.descriptive-table tfoot {
+  font-weight: bold;
+  background-color: #f5f5f5;
+}
+
+/* Responsif: Pada mobile, kurangi padding dan font */
+@media (max-width: 480px) {
+  .descriptive-table th,
+  .descriptive-table td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
   
+  .table-container {
+    margin: 10px 0;
+  }
+}
+
+/* Interpretasi Box (jika digunakan) */
+.interpretation {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.interpretation ul {
+  margin: 5px 0;
+  padding-left: 20px;
+}
+
+.interpretation li {
+  margin-bottom: 5px;
+}
+
+
 </style>
 </head>
 <body>
@@ -3899,7 +3971,7 @@ function runDescriptive() {
   let data = [];
 
   try {
-    // Parse data berdasarkan metode input
+    // Parse data berdasarkan metode input (tetap sama)
     if (inputMethod === 'manual' && manualData) {
       data = manualData.split(/[\s,;\n]+/).map(num => parseFloat(num.trim())).filter(num => !isNaN(num));
     } else if (inputMethod === 'sample') {
@@ -3910,7 +3982,6 @@ function runDescriptive() {
         data = [165, 170, 162, 175, 168, 172, 160, 178, 169, 174]; // Sample tinggi badan
       }
     } else if (inputMethod === 'file') {
-      // Simulasi file upload (ganti dengan parsing real jika ada library)
       data = [23, 45, 67, 34, 56, 78, 45, 67, 89, 23]; // Fallback sample
       alert('Upload file simulasi: Menggunakan data sample default.');
     }
@@ -3919,10 +3990,10 @@ function runDescriptive() {
       throw new Error('Tidak ada data valid. Pastikan input manual atau pilih sample.');
     }
 
-    // **PERBAIKAN: Set global data**
-    window.currentDescriptiveData = [...data]; // Copy array
+    // Set global data untuk chart
+    window.currentDescriptiveData = [...data];
 
-    // Hitung statistik deskriptif (mean, median, dll.)
+    // Hitung statistik deskriptif (tetap sama)
     const n = data.length;
     const mean = data.reduce((a, b) => a + b, 0) / n;
     const sortedData = [...data].sort((a, b) => a - b);
@@ -3931,41 +4002,64 @@ function runDescriptive() {
     const range = Math.max(...data) - Math.min(...data);
     const variance = data.reduce((sum, num) => sum + Math.pow(num - mean, 2), 0) / n;
     const stdDev = Math.sqrt(variance);
-    const q1 = sortedData[Math.floor((n + 1) / 4) - 1];
-    const q3 = sortedData[Math.floor(3 * (n + 1) / 4) - 1];
-    const iqr = q3 - q1;
+    const q1Index = Math.floor((n + 1) / 4) - 1;
+    const q3Index = Math.floor(3 * (n + 1) / 4) - 1;
+    const q1 = n > 0 ? sortedData[q1Index] || 'N/A' : 'N/A';
+    const q3 = n > 0 ? sortedData[q3Index] || 'N/A' : 'N/A';
+    const iqr = (q1 !== 'N/A' && q3 !== 'N/A') ? (q3 - q1).toFixed(2) : 'N/A';
 
-    // Tampilkan hasil statistik
+    // **PERBAIKAN: Tampilkan hasil dalam tabel rapi**
     const resultsDiv = document.getElementById('descriptiveResults');
     resultsDiv.innerHTML = `
-      <h3>Hasil Analisis Deskriptif</h3>
-      <div class="stats-grid">
-        <div class="stat-card"><strong>Jumlah Data (n)</strong>: ${n}</div>
-        <div class="stat-card"><strong>Mean (Rata-rata)</strong>: ${mean.toFixed(2)}</div>
-        <div class="stat-card"><strong>Median</strong>: ${median.toFixed(2)}</div>
-        <div class="stat-card"><strong>Modus</strong>: ${mode || 'Tidak ada'}</div>
-        <div class="stat-card"><strong>Range</strong>: ${range.toFixed(2)}</div>
-        <div class="stat-card"><strong>Variansi</strong>: ${variance.toFixed(2)}</div>
-        <div class="stat-card"><strong>Deviasi Standar</strong>: ${stdDev.toFixed(2)}</div>
-        <div class="stat-card"><strong>Kuartil 1 (Q1)</strong>: ${q1 ? q1.toFixed(2) : 'N/A'}</div>
-        <div class="stat-card"><strong>Kuartil 3 (Q3)</strong>: ${q3 ? q3.toFixed(2) : 'N/A'}</div>
-        <div class="stat-card"><strong>Interkuartil Range (IQR)</strong>: ${iqr ? iqr.toFixed(2) : 'N/A'}</div>
+      <h3>Hasil Analisis Statistik Deskriptif</h3>
+      <p><em>Data: ${n} observasi. Contoh: ${data.slice(0, 5).join(', ')}${data.length > 5 ? '...' : ''}</em></p>
+      
+      <!-- Tabel Output Rapi -->
+      <div class="table-container">
+        <table class="descriptive-table">
+          <thead>
+            <tr>
+              <th>Ukuran Statistik</th>
+              <th>Nilai</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Jumlah Data (n)</td><td>${n}</td></tr>
+            <tr><td>Mean (Rata-rata)</td><td>${mean.toFixed(2)}</td></tr>
+            <tr><td>Median</td><td>${median.toFixed(2)}</td></tr>
+            <tr><td>Modus</td><td>${mode ? mode.toFixed(2) : 'Tidak ada'}</td></tr>
+            <tr><td>Range (Rentang)</td><td>${range.toFixed(2)}</td></tr>
+            <tr><td>Variansi</td><td>${variance.toFixed(2)}</td></tr>
+            <tr><td>Deviasi Standar</td><td>${stdDev.toFixed(2)}</td></tr>
+            <tr><td>Kuartil 1 (Q1)</td><td>${typeof q1 === 'number' ? q1.toFixed(2) : q1}</td></tr>
+            <tr><td>Kuartil 3 (Q3)</td><td>${typeof q3 === 'number' ? q3.toFixed(2) : q3}</td></tr>
+            <tr><td>Interkuartil Range (IQR)</td><td>${iqr}</td></tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Opsional: Tambah interpretasi singkat -->
+      <div class="interpretation" style="margin-top: 15px; padding: 10px; background: #f5f5f5; border-left: 4px solid #2196f3; border-radius: 4px;">
+        <h4>Interpretasi Singkat:</h4>
+        <ul>
+          <li><strong>Mean & Median</strong>: Ukuran pemusatan data. Jika berbeda jauh, data mungkin skewed.</li>
+          <li><strong>Deviasi Standar</strong>: Tingkat penyebaran data dari mean (semakin tinggi, semakin bervariasi).</li>
+          <li><strong>IQR</strong>: Penyebaran 50% data tengah, tahan terhadap outlier.</li>
+        </ul>
       </div>
     `;
 
-    // **PERBAIKAN: Render histogram default**
+    // Render histogram default (tetap sama)
     renderDescriptiveChart(window.currentDescriptiveData, 'histogram');
 
-    // **PERBAIKAN: Enable dan show dropdown, attach listener**
+    // Enable dan show dropdown, attach listener (tetap sama seperti sebelumnya)
     const chartTypeSelect = document.getElementById('chartType_deskriptif');
     const chartSelectorContainer = document.getElementById('chartSelectorContainer_deskriptif');
     if (chartTypeSelect && chartSelectorContainer) {
       chartTypeSelect.disabled = false;
       chartSelectorContainer.style.display = 'block';
-
-      // **PERBAIKAN: Attach event listener secara eksplisit (hindari dynamic load issue)**
-      chartTypeSelect.removeEventListener('change', handleChartTypeChange); // Remove jika ada sebelumnya
-      chartTypeSelect.addEventListener('change', handleChartTypeChange); // Attach baru
+      chartTypeSelect.removeEventListener('change', handleChartTypeChange);
+      chartTypeSelect.addEventListener('change', handleChartTypeChange);
       console.log('Event listener untuk dropdown deskriptif terpasang.');
     }
 
@@ -4369,13 +4463,13 @@ function generateBoxPlot(data) {
   // Dataset 5: Whisker bawah (vertikal dari Q1 ke lowerWhisker)
   const lowerWhiskerLine = [
     { x: center, y: q1 },
-    /*{ x: center, y: lowerWhisker }*/
+    { x: center, y: lowerWhisker }
   ];
 
   // Dataset 6: Whisker atas (vertikal dari Q3 ke upperWhisker)
   const upperWhiskerLine = [
     { x: center, y: q3 },
-    /*{ x: center, y: upperWhisker }*/
+    { x: center, y: upperWhisker }
   ];
 
   // Dataset 7: Titik outliers (jika ada)
@@ -4432,7 +4526,7 @@ function generateBoxPlot(data) {
         },
         // Median line
         {
-          label: 'Median (50th Percentile)',
+          label: 'Q2 (50th Percentile)',
           data: medianLine,
           type: 'line',
           borderColor: 'rgb(255, 99, 132)',
@@ -4440,7 +4534,7 @@ function generateBoxPlot(data) {
           borderWidth: 3,
           fill: false,
           showLine: true,
-          pointRadius: 0,
+          pointRadius: 3,
           tension: 0
         },
         // Lower whisker
