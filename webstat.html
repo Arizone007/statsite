@@ -4204,7 +4204,7 @@ function renderDescriptiveChart(data, chartType) {
         chartConfig = generateHistogram(data);
         break;
       case 'ogive':
-        titleText = 'Ogive: Frekuensi Kumulatif';
+        titleText = 'Ogive: Frekuensi Kumulatif & Lebih Dari';
         chartConfig = generateOgive(data);
         break;
       case 'boxplot':
@@ -4372,29 +4372,153 @@ function generateHistogram(data) {
  * @returns {object} Chart.js config.
  */
 function generateOgive(data) {
-  const bins = getHistogramBins(data);
-  const cumulative = bins.frequencies.reduce((acc, freq) => {
-    acc.push((acc[acc.length - 1] || 0) + freq);
-    return acc;
-  }, []);
+  if (!data || data.length < 5) {
+    console.warn('Data terlalu sedikit untuk ogive (minimal 5 observasi). Fallback ke line sederhana.');
+    // Fallback: Simple cumulative line jika data kurang
+    const sortedData = [...data].sort((a, b) => a - b);
+    const cumulative = sortedData.map((_, i) => (i + 1) / data.length * 100);
+    return {
+      type: 'line',
+      data: {
+        labels: sortedData,
+        datasets: [{
+          label: 'Kumulatif Sederhana (Fallback)',
+          data: cumulative,
+          borderColor: 'rgb(75, 192, 192)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          tension: 0.1,
+          fill: false
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          title: { display: true, text: 'Ogive Sederhana (Data Kurang)' },
+          legend: { display: true }
+        },
+        scales: {
+          x: { title: { display: true, text: 'Nilai Data' } },
+          y: { 
+            title: { display: true, text: 'Frekuensi Kumulatif (%)' },
+            min: 0,
+            max: 100,
+            ticks: { callback: function(value) { return value + '%'; } }
+          }
+        }
+      }
+    };
+  }
+
+  // Sort data dan hitung jumlah bins (Sturges' rule)
+  const sortedData = [...data].sort((a, b) => a - b);
+  const n = data.length;
+  const numBins = Math.max(3, Math.floor(1 + Math.log2(n))); // Minimal 3 bins
+  const minVal = Math.min(...data);
+  const maxVal = Math.max(...data);
+  const binWidth = (maxVal - minVal) / numBins;
+
+  // Buat bins: lower dan upper limits
+  const bins = [];
+  const upperLimits = []; // Untuk x-axis (batas atas bin)
+  for (let i = 0; i < numBins; i++) {
+    const lower = minVal + i * binWidth;
+    const upper = lower + binWidth;
+    bins.push({ lower, upper });
+    upperLimits.push(upper);
+  }
+  upperLimits.push(maxVal + binWidth); // Tambah bin terakhir untuk 100%
+
+  // Hitung frekuensi untuk setiap bin
+  const frequencies = bins.map(bin => 
+    data.filter(val => val > bin.lower && val <= bin.upper).length / n * 100 // Relatif %
+  );
+
+  // Kumulatif Kurang Dari (Less Than): Naik dari kiri
+  const cumLessThan = [];
+  let cumSum = 0;
+  frequencies.forEach(freq => {
+    cumSum += freq;
+    cumLessThan.push(Math.round(cumSum * 100) / 100); // Round ke 2 desimal
+  });
+
+  // Kumulatif Lebih Dari (More Than): Turun dari kanan (100% - cumLessThan terbalik)
+  const cumMoreThan = [];
+  for (let i = cumLessThan.length - 1; i >= 0; i--) {
+    cumMoreThan.push(100 - (cumLessThan[i] || 0));
+  }
+  cumMoreThan.reverse(); // Balik agar align dengan x-axis
+
+  // Labels x: Batas atas bin (untuk ogive)
+  const labels = upperLimits.map(limit => Math.round(limit * 100) / 100).slice(0, -1); // Exclude extra
+
   return {
     type: 'line',
     data: {
-      labels: bins.labels,
-      datasets: [{
-        label: 'Frekuensi Kumulatif',
-        data: cumulative,
-        borderColor: 'rgb(255, 99, 132)',
-        backgroundColor: 'rgba(255, 99, 132, 0.2)',
-        fill: false,
-        tension: 0.1
-      }]
+      labels: labels,
+      datasets: [
+        {
+          label: 'Kumulatif Kurang Dari (≤)',
+          data: cumLessThan,
+          borderColor: 'rgb(54, 162, 235)', // Biru
+          backgroundColor: 'rgba(54, 162, 235, 0.1)',
+          tension: 0.3, // Smooth curve
+          fill: false,
+          pointRadius: 4,
+          pointBackgroundColor: 'rgb(54, 162, 235)'
+        },
+        {
+          label: 'Kumulatif Lebih Dari (>)',
+          data: cumMoreThan,
+          borderColor: 'rgb(255, 99, 132)', // Merah
+          backgroundColor: 'rgba(255, 99, 132, 0.1)',
+          tension: 0.3,
+          fill: false,
+          pointRadius: 4,
+          pointBackgroundColor: 'rgb(255, 99, 132)',
+          borderDash: [5, 5] // Opsional: Garis putus-putus untuk bedakan
+        }
+      ]
     },
     options: {
       responsive: true,
-      maintainAspectRatio: false,
-      plugins: { title: { display: true, text: 'Ogive' } },
-      scales: { y: { beginAtZero: true } }
+      interaction: { mode: 'index', intersect: false }, // Tooltip untuk kedua line
+      plugins: {
+        title: { 
+          display: true, 
+          text: 'Ogive: Frekuensi Kumulatif Kurang Dari & Lebih Dari',
+          font: { size: 16 }
+        },
+        legend: { 
+          display: true, 
+          position: 'top' 
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}%`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: { 
+          title: { display: true, text: 'Batas Kelas (Upper Limits)' },
+          grid: { display: true }
+        },
+        y: { 
+          title: { display: true, text: 'Frekuensi Kumulatif (%)' },
+          min: 0,
+          max: 100,
+          ticks: { 
+            callback: function(value) { return value + '%'; },
+            stepSize: 10
+          },
+          grid: { display: true }
+        }
+      },
+      elements: {
+        point: { radius: 4 } // Titik lebih jelas
+      }
     }
   };
 }
