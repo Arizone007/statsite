@@ -1349,6 +1349,53 @@
   margin-bottom: 5px;
 }
 
+/* Whiteboard Styles */
+.whiteboard-container {
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 4/3; /* Responsif */
+}
+#whiteboard-canvas {
+  width: 100%;
+  height: 100%;
+  background: #fff;
+}
+.tool-btn {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.3s;
+}
+.tool-btn:hover, .tool-btn.active {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+#whiteboard-toolbar {
+  justify-content: center;
+}
+@media (max-width: 768px) {
+  #whiteboard-toolbar {
+    flex-direction: column;
+    gap: 5px;
+  }
+  .tool-btn {
+    width: 100%;
+    padding: 10px;
+  }
+}
+/* Fullscreen */
+.whiteboard-fullscreen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999;
+  background: white;
+}
 
 </style>
 </head>
@@ -1457,6 +1504,13 @@
       <div class="material-subtitle editable-content" data-editable-id="material-subtitle-8">Tools analisis data statistik interaktif</div>
       <button class="edit-btn" onclick="editMaterial(8, event)">Edit</button>
       <button class="delete-btn" onclick="deleteMaterial(8, event)">Hapus</button>
+    </div>
+
+    <div class="material-item" data-material-id="9" onclick="showMaterial(9)">
+      <strong class="editable-content" data-editable-id="material-title-9">9. Whiteboard</strong>
+      <div class="material-subtitle editable-content" data-editable-id="material-subtitle-9">Fitur menggambar dan anotasi interaktif</div>
+      <button class="edit-btn" onclick="editMaterial(9, event)">Edit</button>
+      <button class="delete-btn" onclick="deleteMaterial(9, event)">Hapus</button>
     </div>
 
     <div class="admin-controls">
@@ -2290,8 +2344,52 @@
           <li>Kolaborasi tim untuk proyek bersama</li>
         </ul>
       `
-    }
-  };
+    },
+  
+  9: {
+  title: "9. Whiteboard",
+  subtitle: "Fitur menggambar dan anotasi interaktif",
+  content: `
+    <h2>Whiteboard Interaktif SARC</h2>
+    <p>Gunakan whiteboard ini untuk menggambar, menambahkan teks, shape, atau anotasi selama analisis data. Dukung touch di mobile.</p>
+    
+    <!-- Toolbar Whiteboard -->
+    <div id="whiteboard-toolbar" style="background: #f5f5f5; padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+      <button id="pen-tool" class="tool-btn" onclick="setTool('pen')" style="background: #4caf50;">🖊️ Pen</button>
+      <button id="erase-tool" class="tool-btn" onclick="setTool('erase')" style="background: #ff9800;">🧽 Erase</button>
+      <button id="text-tool" class="tool-btn" onclick="setTool('text')" style="background: #2196f3;">📝 Text</button>
+      <button id="shape-tool" class="tool-btn" onclick="setTool('shape')" style="background: #9c27b0;">🔺 Shape</button>
+      <button id="delete-tool" class="tool-btn" onclick="deleteSelected()" style="background: #f44336;">🗑️ Delete</button>
+      <button id="fullscreen-tool" class="tool-btn" onclick="toggleFullscreen()" style="background: #607d8b;">⛶ Fullscreen</button>
+      
+      <!-- Color Picker -->
+      <label style="display: flex; align-items: center; gap: 5px;">
+        Warna: 
+        <input type="color" id="color-picker" value="#000000" onchange="setColor(this.value)" style="width: 40px; height: 30px; border: none; border-radius: 4px;">
+      </label>
+      
+      <!-- Brush Size -->
+      <label style="display: flex; align-items: center; gap: 5px;">
+        Ukuran: <input type="range" id="brush-size" min="1" max="20" value="5" onchange="setBrushSize(this.value)" style="width: 80px;">
+      </label>
+      
+      <button id="clear-canvas" class="tool-btn" onclick="clearCanvas()" style="background: #9e9e9e;">🗑️ Clear All</button>
+    </div>
+    
+    <!-- Canvas Whiteboard -->
+    <div class="whiteboard-container" style="position: relative; background: white; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+      <canvas id="whiteboard-canvas" width="800" height="600" style="display: block; cursor: crosshair; touch-action: none;"></canvas>
+      <div id="text-input-overlay" style="position: absolute; display: none; background: white; padding: 5px; border: 1px solid #ccc; border-radius: 4px; z-index: 10;">
+        <input type="text" id="text-input" placeholder="Ketik teks..." style="border: none; outline: none; width: 150px;" onblur="insertText()" onkeydown="if(event.key==='Enter') insertText()">
+      </div>
+    </div>
+    
+    <p style="margin-top: 10px; font-size: 14px; color: #666;">
+      Instruksi: Pilih tool, lalu klik dan drag di canvas untuk menggambar. Gunakan touch di mobile. Simpan gambar dengan screenshot (Ctrl+PrintScreen).
+    </p>
+  `
+  }
+};
 
 // Konten untuk analysis tools (sekarang disimpan dalam objek global)
 let analysisToolContents = {
@@ -6844,6 +6942,214 @@ function renderStemLeaf(data) {
   if (window.location.hostname !== 'localhost') {
     console.log = function() {}; // Disable console.log in production
   }
+
+// Whiteboard Variables
+let canvas, ctx, currentTool = 'pen', currentColor = '#000000', brushSize = 5;
+let isDrawing = false, startX, startY;
+let objects = []; // Array untuk teks/shape (untuk delete)
+
+// Initialize Whiteboard
+function initWhiteboard() {
+  canvas = document.getElementById('whiteboard-canvas');
+  if (!canvas) return;
+  ctx = canvas.getContext('2d');
+  resizeCanvas();
+  addEventListeners();
+  window.addEventListener('resize', resizeCanvas);
+}
+
+// Resize Canvas Responsif
+function resizeCanvas() {
+  const container = canvas.parentElement;
+  canvas.width = container.clientWidth;
+  canvas.height = container.clientHeight;
+  ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear on resize
+  redrawObjects(); // Redraw teks/shape
+}
+
+// Event Listeners untuk Draw/Erase/Text/Shape
+function addEventListeners() {
+  // Mouse Events
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mouseout', stopDrawing);
+
+  // Touch Events (Mobile)
+  canvas.addEventListener('touchstart', handleTouch);
+  canvas.addEventListener('touchmove', handleTouch);
+  canvas.addEventListener('touchend', stopDrawing);
+}
+
+function handleTouch(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+    clientX: touch.clientX,
+    clientY: touch.clientY
+  });
+  canvas.dispatchEvent(mouseEvent);
+}
+
+function startDrawing(e) {
+  const rect = canvas.getBoundingClientRect();
+  startX = e.clientX - rect.left;
+  startY = e.clientY - rect.top;
+  isDrawing = true;
+
+  if (currentTool === 'pen' || currentTool === 'erase') {
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+  } else if (currentTool === 'text') {
+    showTextInput(startX, startY);
+  } else if (currentTool === 'shape') {
+    // Shape akan digambar saat mouse up
+  }
+}
+
+function draw(e) {
+  if (!isDrawing) return;
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  if (currentTool === 'pen') {
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = currentColor;
+    ctx.lineWidth = brushSize;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  } else if (currentTool === 'erase') {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over'; // Reset
+  } else if (currentTool === 'shape' && isDrawing) {
+    // Preview shape (sederhana: lingkaran)
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear preview
+    redrawObjects();
+    ctx.beginPath();
+    ctx.arc(startX, startY, Math.abs(x - startX), 0, Math.PI * 2);
+    ctx.strokeStyle = currentColor;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  }
+}
+
+function stopDrawing(e) {
+  if (!isDrawing) return;
+  isDrawing = false;
+
+  if (currentTool === 'shape') {
+    const rect = canvas.getBoundingClientRect();
+    const endX = e.clientX - rect.left;
+    const endY = e.clientY - rect.top;
+    // Insert shape (contoh: lingkaran)
+    const shape = { type: 'circle', x: startX, y: startY, r: Math.abs(endX - startX), color: currentColor };
+    objects.push(shape);
+    redrawObjects();
+  }
+}
+
+// Tool Setters
+function setTool(tool) {
+  currentTool = tool;
+  document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(tool + '-tool').classList.add('active');
+  canvas.style.cursor = tool === 'pen' ? 'crosshair' : tool === 'erase' ? 'grab' : 'default';
+}
+
+function setColor(color) {
+  currentColor = color;
+}
+
+function setBrushSize(size) {
+  brushSize = parseInt(size);
+}
+
+// Text Input
+function showTextInput(x, y) {
+  const overlay = document.getElementById('text-input-overlay');
+  const input = document.getElementById('text-input');
+  overlay.style.left = x + 'px';
+  overlay.style.top = y + 'px';
+  overlay.style.display = 'block';
+  input.focus();
+}
+
+function insertText() {
+  const text = document.getElementById('text-input').value.trim();
+  if (text) {
+    const overlay = document.getElementById('text-input-overlay');
+    const rect = canvas.getBoundingClientRect();
+    const x = parseInt(overlay.style.left) - rect.left;
+    const y = parseInt(overlay.style.top) - rect.top;
+    const textObj = { type: 'text', x: x, y: y, content: text, color: currentColor, size: 16 };
+    objects.push(textObj);
+    redrawObjects();
+  }
+  document.getElementById('text-input').value = '';
+  document.getElementById('text-input-overlay').style.display = 'none';
+}
+
+// Redraw Objects (Teks/Shape)
+function redrawObjects() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  objects.forEach(obj => {
+    ctx.strokeStyle = obj.color || currentColor;
+    ctx.fillStyle = obj.color || currentColor;
+    if (obj.type === 'text') {
+      ctx.font = `${obj.size}px Arial`;
+      ctx.fillText(obj.content, obj.x, obj.y);
+    } else if (obj.type === 'circle') {
+      ctx.beginPath();
+      ctx.arc(obj.x, obj.y, obj.r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    // Tambah shape lain jika perlu (persegi, garis)
+  });
+}
+
+// Delete Selected (Sederhana: Hapus terakhir)
+function deleteSelected() {
+  if (objects.length > 0) {
+    objects.pop();
+    redrawObjects();
+  }
+}
+
+// Clear Canvas
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  objects = [];
+}
+
+// Fullscreen
+function toggleFullscreen() {
+  const container = document.querySelector('.whiteboard-container');
+  if (!document.fullscreenElement) {
+    container.requestFullscreen().then(() => {
+      container.classList.add('whiteboard-fullscreen');
+      resizeCanvas();
+    });
+  } else {
+    document.exitFullscreen().then(() => {
+      container.classList.remove('whiteboard-fullscreen');
+      resizeCanvas();
+    });
+  }
+}
+
+// Init saat showMaterial(9)
+// Override showMaterial untuk init whiteboard
+const originalShowMaterial = showMaterial;
+showMaterial = function(materialId) {
+  originalShowMaterial(materialId);
+  if (materialId === 9) {
+    setTimeout(initWhiteboard, 100); // Delay untuk canvas render
+  }
+}
 
 </script>
 </body>
