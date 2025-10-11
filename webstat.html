@@ -140,11 +140,11 @@
   }
 
   .materials-title {
-    background: linear-gradient(135deg, #8bc34a, #9ccc65);
+    background: linear-gradient(135deg, #2196f3, #42a5f5);;
     padding: 0.75rem; /* 12px */
     font-weight: bold;
     font-size: 1rem; /* 16px */
-    color: #2e7d32;
+    color: white;
     text-align: center;
     border-radius: 0.5rem; /* 8px */
     margin-bottom: 1rem; /* 16px */
@@ -1349,52 +1349,135 @@
   margin-bottom: 5px;
 }
 
-/* Whiteboard Styles */
-.whiteboard-container {
-  max-width: 100%;
-  height: auto;
-  aspect-ratio: 4/3; /* Responsif */
+/* Revisi: Style untuk pemisahan section di sidebar */
+.materials-section,
+.tools-section {
+  margin-bottom: 1.5rem; /* Spacing antar section */
+  padding-bottom: 1rem;
+  border-bottom: 0.125rem solid #ddd; /* Garis pemisah halus */
+}
+
+.materials-section .materials-title {
+  background: linear-gradient(135deg, #8bc34a, #9ccc65); /* Hijau untuk Materials */
+  color: #2e7d32;
+}
+
+.tools-section .tools-title {
+  background: linear-gradient(135deg, #2196f3, #42a5f5); /* Biru untuk Tools */
+  color: white;
+  padding: 0.75rem;
+  font-weight: bold;
+  font-size: 1rem;
+  text-align: center;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.1);
+}
+
+/* Whiteboard Specific Styles */
+#whiteboard-toolbar .tool-btn {
+  transition: background 0.3s ease;
+}
+#whiteboard-toolbar .tool-btn:hover,
+#whiteboard-toolbar .tool-btn.active {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+#whiteboard-toolbar .tool-btn.active {
+  background: #333 !important;
 }
 #whiteboard-canvas {
-  width: 100%;
-  height: 100%;
-  background: #fff;
+  touch-action: none; /* Prevent default touch behaviors */
 }
-.tool-btn {
-  padding: 8px 12px;
-  border: none;
-  border-radius: 4px;
-  color: white;
-  cursor: pointer;
-  font-size: 14px;
-  transition: background 0.3s;
-}
-.tool-btn:hover, .tool-btn.active {
-  opacity: 0.8;
-  transform: scale(1.05);
-}
-#whiteboard-toolbar {
-  justify-content: center;
+#text-cursor {
+  pointer-events: none;
+  min-width: 100px;
+  min-height: 20px;
+  z-index: 10;
 }
 @media (max-width: 768px) {
+  #whiteboard-canvas {
+    width: 100% !important;
+    height: auto !important;
+  }
   #whiteboard-toolbar {
     flex-direction: column;
-    gap: 5px;
+    align-items: stretch;
   }
-  .tool-btn {
-    width: 100%;
-    padding: 10px;
+  #whiteboard-toolbar label {
+    justify-content: space-between;
   }
 }
-/* Fullscreen */
-.whiteboard-fullscreen {
+
+/* Perbaikan Fullscreen: Toolbar tetap visible dan fixed di atas saat fullscreen */
+#whiteboard-container:-webkit-full-screen #whiteboard-toolbar,
+#whiteboard-container:-moz-full-screen #whiteboard-toolbar,
+#whiteboard-container:fullscreen #whiteboard-toolbar {
   position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100vw !important;
-  height: 100vh !important;
-  z-index: 9999;
-  background: white;
+  top: 10px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 1000 !important;
+  width: 90% !important;
+  max-width: 800px !important;
+  background: rgba(245, 245, 245, 0.95) !important; /* Semi-transparent untuk tidak ganggu */
+  backdrop-filter: blur(5px) !important; /* Blur background untuk modern look */
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+  padding: 8px !important; /* Kurangi padding di fullscreen */
+}
+
+#whiteboard-container:-webkit-full-screen #canvas-wrapper,
+#whiteboard-container:-moz-full-screen #canvas-wrapper,
+#whiteboard-container:fullscreen #canvas-wrapper {
+  margin-top: 80px !important; /* Offset untuk toolbar fixed */
+  border: none !important; /* Hilangkan border di fullscreen */
+  border-radius: 0 !important;
+  height: calc(100vh - 100px) !important; /* Full height minus toolbar dan margin */
+  width: 100% !important;
+}
+
+#whiteboard-container:-webkit-full-screen canvas,
+#whiteboard-container:-moz-full-screen canvas,
+#whiteboard-container:fullscreen canvas {
+  width: 100% !important;
+  height: 100% !important;
+  cursor: crosshair !important;
+}
+
+/* Mobile adjustments di fullscreen */
+@media (max-width: 768px) {
+  #whiteboard-container:-webkit-full-screen #whiteboard-toolbar,
+  #whiteboard-container:-moz-full-screen #whiteboard-toolbar,
+  #whiteboard-container:fullscreen #whiteboard-toolbar {
+    flex-direction: column !important;
+    width: 95% !important;
+    gap: 5px !important;
+  }
+  
+  #whiteboard-container:-webkit-full-screen #canvas-wrapper,
+  #whiteboard-container:-moz-full-screen #canvas-wrapper,
+  #whiteboard-container:fullscreen #canvas-wrapper {
+    margin-top: 120px !important; /* Lebih besar di mobile */
+  }
+}
+
+/* Tools section: Non-editable, no dashed border di admin mode */
+body.admin-active .tools-section .material-item {
+  border: none !important; /* Override dashed border */
+}
+
+body.admin-active .tools-section .material-item:hover {
+  background: rgba(255,255,255,0.9); /* Tetap hover effect, tapi no edit visual */
+}
+
+/* Responsif: Section tetap stack di mobile */
+@media (max-width: 768px) {
+  .materials-section,
+  .tools-section {
+    border-bottom: 0.0625rem solid #ddd; /* Garis lebih tipis di mobile */
+    margin-bottom: 1rem;
+  }
 }
 
 </style>
@@ -1446,9 +1529,12 @@
   </header>
 
   <!-- Materials Sidebar -->
-  <nav class="materials" id="materials-sidebar">
+<nav class="materials" id="materials-sidebar">
+  <!-- Section 1: Materials (Editable) -->
+  <div class="materials-section">
     <div class="materials-title editable-content" data-editable-id="materials-sidebar-title">Materials</div>
     
+    <!-- Items 1-7: Editable (dibangun dinamis via JS, tapi contoh statis di sini untuk demo) -->
     <div class="material-item" data-material-id="1" onclick="showMaterial(1)">
       <strong class="editable-content" data-editable-id="material-title-1">1. Pengantar Statistika</strong>
       <div class="material-subtitle editable-content" data-editable-id="material-subtitle-1">Sejarah, arti, peran, populasi, sampel, teknik sampling, parameter dan statistik</div>
@@ -1498,25 +1584,31 @@
       <button class="delete-btn" onclick="deleteMaterial(7, event)">Hapus</button>
     </div>
 
-    <!-- AnalysisTools will be dynamically re-added at the end -->
-    <div class="material-item" data-material-id="8" onclick="showMaterial(8)">
-      <strong class="editable-content" data-editable-id="material-title-8">8. AnalysisTools</strong>
-      <div class="material-subtitle editable-content" data-editable-id="material-subtitle-8">Tools analisis data statistik interaktif</div>
-      <button class="edit-btn" onclick="editMaterial(8, event)">Edit</button>
-      <button class="delete-btn" onclick="deleteMaterial(8, event)">Hapus</button>
-    </div>
-
-    <div class="material-item" data-material-id="9" onclick="showMaterial(9)">
-      <strong class="editable-content" data-editable-id="material-title-9">9. Whiteboard</strong>
-      <div class="material-subtitle editable-content" data-editable-id="material-subtitle-9">Fitur menggambar dan anotasi interaktif</div>
-      <button class="edit-btn" onclick="editMaterial(9, event)">Edit</button>
-      <button class="delete-btn" onclick="deleteMaterial(9, event)">Hapus</button>
-    </div>
-
+    <!-- Admin Controls (Tetap di Materials section, editable) -->
     <div class="admin-controls">
       <button class="add-material-btn" onclick="addNewMaterial()">+ Tambah Materi Baru</button>
     </div>
-  </nav>
+  </div>
+
+  <!-- Section 2: Tools (Statis, Non-Editable) -->
+  <div class="tools-section">
+    <div class="tools-title">Tools</div> <!-- Statis, no editable -->
+    
+    <!-- Item 8: Analysis (Statis, no editable-content atau tombol edit/hapus) -->
+    <div class="material-item" data-material-id="8" onclick="showMaterial(8)">
+      <strong>Analysis</strong> <!-- Hapus editable-content -->
+      <div class="material-subtitle">Tools analisis data statistik interaktif</div> <!-- Hapus editable-content -->
+      <!-- No edit/delete buttons -->
+    </div>
+	
+	<!-- Item Baru: Whiteboard (di dalam tools-section, setelah Analysis) -->
+    <div class="material-item" data-material-id="9" onclick="showMaterial(9)">
+      <strong>Whiteboard</strong>
+      <div class="material-subtitle">Tools untuk menggambar, menulis catatan, dan brainstorming</div>
+      <!-- No edit/delete buttons karena tools statis -->
+    </div>
+  </div>
+</nav>
 
   <!-- Resizer for sidebar -->
   <div class="resizer" id="resizer"></div>
@@ -2293,10 +2385,10 @@
       `
     },
     8: {
-      title: "8. AnalysisTools",
+      title: "Analysis",
       subtitle: "Tools analisis data statistik interaktif",
       content: `
-        <h2>8. AnalysisTools - Tools Analisis Statistik</h2>
+        <h2>Analysis - Tools Analisis Statistik</h2>
         <p>Platform tools interaktif untuk melakukan berbagai jenis analisis statistik dengan mudah dan akurat.</p>
         
         <div class="analysis-tools">
@@ -2345,51 +2437,71 @@
         </ul>
       `
     },
-  
-  9: {
-  title: "9. Whiteboard",
-  subtitle: "Fitur menggambar dan anotasi interaktif",
-  content: `
-    <h2>Whiteboard Interaktif SARC</h2>
-    <p>Gunakan whiteboard ini untuk menggambar, menambahkan teks, shape, atau anotasi selama analisis data. Dukung touch di mobile.</p>
+	9: {
+      title: "Whiteboard",
+      subtitle: "Tools interaktif untuk menggambar dan menulis catatan",
+      content: `
+        <h2>Whiteboard - Tools Menggambar dan Catatan</h2>
+        <p>Gunakan whiteboard ini untuk brainstorming, sketsa diagram, atau catatan cepat. Dukung mouse dan touch.</p>
     
-    <!-- Toolbar Whiteboard -->
-    <div id="whiteboard-toolbar" style="background: #f5f5f5; padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-      <button id="pen-tool" class="tool-btn" onclick="setTool('pen')" style="background: #4caf50;">🖊️ Pen</button>
-      <button id="erase-tool" class="tool-btn" onclick="setTool('erase')" style="background: #ff9800;">🧽 Erase</button>
-      <button id="text-tool" class="tool-btn" onclick="setTool('text')" style="background: #2196f3;">📝 Text</button>
-      <button id="shape-tool" class="tool-btn" onclick="setTool('shape')" style="background: #9c27b0;">🔺 Shape</button>
-      <button id="delete-tool" class="tool-btn" onclick="deleteSelected()" style="background: #f44336;">🗑️ Delete</button>
-      <button id="fullscreen-tool" class="tool-btn" onclick="toggleFullscreen()" style="background: #607d8b;">⛶ Fullscreen</button>
+        <!-- Toolbar -->
+        <div id="whiteboard-container" style="position: relative;">
+          <div id="whiteboard-toolbar" style="background: #f5f5f5; padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10;">
+		  
+		  <!-- Pen Tool -->
+          <button id="pen-tool" class="tool-btn" style="background: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">Pen</button>
       
-      <!-- Color Picker -->
-      <label style="display: flex; align-items: center; gap: 5px;">
-        Warna: 
-        <input type="color" id="color-picker" value="#000000" onchange="setColor(this.value)" style="width: 40px; height: 30px; border: none; border-radius: 4px;">
-      </label>
+          <!-- Color Picker -->
+          <label style="display: flex; align-items: center; gap: 5px;">
+            Warna:
+            <select id="color-picker" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+              <option value="#000000">Hitam</option>
+              <option value="#FF0000">Merah</option>
+              <option value="#00FF00">Hijau</option>
+              <option value="#0000FF">Biru</option>
+              <option value="#FFFF00">Kuning</option>
+              <option value="#FF00FF">Magenta</option>
+              <option value="#00FFFF">Cyan</option>
+            </select>
+            <input type="color" id="color-input" value="#000000" style="width: 40px; height: 30px; border: none; border-radius: 4px; cursor: pointer;">
+          </label>
       
-      <!-- Brush Size -->
-      <label style="display: flex; align-items: center; gap: 5px;">
-        Ukuran: <input type="range" id="brush-size" min="1" max="20" value="5" onchange="setBrushSize(this.value)" style="width: 80px;">
-      </label>
+          <!-- Line Width -->
+          <label style="display: flex; align-items: center; gap: 5px;">
+            Ketebalan:
+            <input type="range" id="line-width" min="1" max="20" value="2" style="width: 80px;">
+            <span id="line-width-value">2px</span>
+          </label>
       
-      <button id="clear-canvas" class="tool-btn" onclick="clearCanvas()" style="background: #9e9e9e;">🗑️ Clear All</button>
-    </div>
-    
-    <!-- Canvas Whiteboard -->
-    <div class="whiteboard-container" style="position: relative; background: white; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-      <canvas id="whiteboard-canvas" width="800" height="600" style="display: block; cursor: crosshair; touch-action: none;"></canvas>
-      <div id="text-input-overlay" style="position: absolute; display: none; background: white; padding: 5px; border: 1px solid #ccc; border-radius: 4px; z-index: 10;">
-        <input type="text" id="text-input" placeholder="Ketik teks..." style="border: none; outline: none; width: 150px;" onblur="insertText()" onkeydown="if(event.key==='Enter') insertText()">
-      </div>
-    </div>
-    
-    <p style="margin-top: 10px; font-size: 14px; color: #666;">
-      Instruksi: Pilih tool, lalu klik dan drag di canvas untuk menggambar. Gunakan touch di mobile. Simpan gambar dengan screenshot (Ctrl+PrintScreen).
-    </p>
-  `
-  }
-};
+          <!-- Text Tool -->
+          <button id="text-tool" class="tool-btn" style="background: #2196F3; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">Text</button>
+          <input type="text" id="text-input" placeholder="Ketik teks..." style="padding: 5px; border-radius: 4px; border: 1px solid #ccc; display: none; width: 150px;" maxlength="100">
+      
+          <!-- Eraser -->
+          <button id="eraser-tool" class="tool-btn" style="background: #FF9800; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">Erase</button>
+      
+          <!-- Delete All -->
+          <button id="clear-tool" class="tool-btn" style="background: #F44336; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="clearCanvas()">Delete All</button>
+      
+          <!-- Save -->
+          <button id="save-tool" class="tool-btn" style="background: #9C27B0; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="saveCanvas()">Save PNG</button>
+		    <button id="fullscreen-tool" class="tool-btn" style="background: #607D8B; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="toggleFullscreen()">Fullscreen</button>
+		  </div>
+                            
+		<!-- Canvas Container (pindah ke dalam wrapper) -->
+		  <div id="canvas-wrapper" style="position: relative; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+		  <canvas id="whiteboard-canvas" width="800" height="500" style="display: block; cursor: crosshair;"></canvas>
+		  <div id="text-cursor" style="position: absolute; display: none; border: 2px dashed #2196F3; background: rgba(33, 150, 243, 0.1);"></div>
+		</div>
+    	
+		</div>
+        
+		<p style="margin-top: 10px; font-size: 14px; color: #666;">
+          Instruksi: Pilih tool, lalu klik dan drag di canvas. Untuk text, klik canvas setelah pilih tool Text, lalu ketik di input.
+        </p>
+      `
+    }
+  };
 
 // Konten untuk analysis tools (sekarang disimpan dalam objek global)
 let analysisToolContents = {
@@ -3081,6 +3193,311 @@ Kelompok2: 34, 56, 78"></textarea>
   // Initial content for the welcome page
   let initialWelcomeContent = ''; // Will be set after DOMContentLoaded
 
+// Whiteboard Variables (Global)
+let canvas, ctx, isDrawing = false, isErasing = false, isTextMode = false;
+let currentColor = '#000000', currentLineWidth = 2;
+let startX, startY, textX, textY;
+let toolActive = 'pen'; // Default tool
+
+// Initialize Whiteboard when shown
+function initWhiteboard() {
+  canvas = document.getElementById('whiteboard-canvas');
+  if (!canvas) return;
+  ctx = canvas.getContext('2d');
+  
+  // Resize canvas to fit container
+  function resizeCanvas() {
+    const container = canvas.parentElement;
+    canvas.width = container.clientWidth;
+    canvas.height = container.clientHeight;
+    ctx.fillStyle = 'white';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  // Event Listeners for Tools
+  document.getElementById('pen-tool').addEventListener('click', () => selectTool('pen'));
+  document.getElementById('text-tool').addEventListener('click', () => selectTool('text'));
+  document.getElementById('eraser-tool').addEventListener('click', () => selectTool('erase'));
+  
+  // Color Change
+  document.getElementById('color-picker').addEventListener('change', (e) => {
+    currentColor = e.target.value;
+    document.getElementById('color-input').value = currentColor;
+  });
+  document.getElementById('color-input').addEventListener('change', (e) => {
+    currentColor = e.target.value;
+    document.getElementById('color-picker').value = currentColor;
+  });
+  
+  // Line Width
+  document.getElementById('line-width').addEventListener('input', (e) => {
+    currentLineWidth = e.target.value;
+    document.getElementById('line-width-value').textContent = currentLineWidth + 'px';
+  });
+  
+  // Text Input
+  document.getElementById('text-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      addTextToCanvas();
+      e.target.style.display = 'none';
+      isTextMode = false;
+    }
+  });
+
+  // Drawing Events (Mouse)
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  canvas.addEventListener('mouseup', stopDrawing);
+  canvas.addEventListener('mouseout', stopDrawing);
+
+  // Touch Events (Mobile)
+  canvas.addEventListener('touchstart', handleTouch);
+  canvas.addEventListener('touchmove', handleTouch);
+  canvas.addEventListener('touchend', stopDrawing);
+
+  // Initial Draw
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+// Tool Selection
+function selectTool(tool) {
+  toolActive = tool;
+  isErasing = tool === 'erase';
+  isTextMode = tool === 'text';
+  
+  // Update active class
+  document.querySelectorAll('#whiteboard-toolbar .tool-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(tool + '-tool')?.classList.add('active');
+  
+  canvas.style.cursor = tool === 'pen' || tool === 'erase' ? 'crosshair' : 'default';
+  
+  if (tool === 'text') {
+    document.getElementById('text-input').style.display = 'inline-block';
+    document.getElementById('text-input').focus();
+  } else {
+    document.getElementById('text-input').style.display = 'none';
+  }
+  
+  if (isErasing) {
+    ctx.globalCompositeOperation = 'destination-out'; // Erase mode
+  } else {
+    ctx.globalCompositeOperation = 'source-over'; // Normal draw
+  }
+}
+
+// Drawing Functions
+function startDrawing(e) {
+  if (isTextMode) {
+    const rect = canvas.getBoundingClientRect();
+    textX = e.clientX - rect.left;
+    textY = e.clientY - rect.top;
+    document.getElementById('text-cursor').style.left = textX + 'px';
+    document.getElementById('text-cursor').style.top = textY + 'px';
+    document.getElementById('text-cursor').style.display = 'block';
+    return;
+  }
+  
+  isDrawing = true;
+  const rect = canvas.getBoundingClientRect();
+  startX = e.clientX - rect.left;
+  startY = e.clientY - rect.top;
+  ctx.beginPath();
+  ctx.moveTo(startX, startY);
+}
+
+function draw(e) {
+  if (!isDrawing || isTextMode) return;
+  
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  
+  ctx.lineWidth = currentLineWidth;
+  ctx.lineCap = 'round';
+  ctx.strokeStyle = isErasing ? 'white' : currentColor;
+  
+  ctx.lineTo(x, y);
+  ctx.stroke();
+}
+
+function stopDrawing() {
+  if (isDrawing) {
+    isDrawing = false;
+    ctx.closePath();
+  }
+  if (isTextMode) {
+    document.getElementById('text-cursor').style.display = 'none';
+  }
+}
+
+// Text Addition
+function addTextToCanvas() {
+  const text = document.getElementById('text-input').value.trim();
+  if (!text) return;
+  
+  ctx.fillStyle = currentColor;
+  ctx.font = `${currentLineWidth * 2}px Arial`;
+  ctx.fillText(text, textX, textY);
+  
+  document.getElementById('text-input').value = '';
+}
+
+// Touch Handler
+function handleTouch(e) {
+  e.preventDefault();
+  const touch = e.touches[0];
+  const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
+                                    e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
+    clientX: touch.clientX,
+    clientY: touch.clientY
+  });
+  canvas.dispatchEvent(mouseEvent);
+}
+
+// Clear Canvas
+function clearCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = 'white';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+// Save Canvas
+function saveCanvas() {
+  const link = document.createElement('a');
+  link.download = 'whiteboard.png';
+  link.href = canvas.toDataURL();
+  link.click();
+}
+
+// Fullscreen Toggle (Base dari kode sederhana Anda + fix toolbar visible, resize, switch text)
+function toggleFullscreen() {
+  const container = document.getElementById('whiteboard-container');  // Target utama (include toolbar)
+  const fallbackContainer = document.getElementById('canvas-wrapper');  // Backup seperti kode Anda
+  const fullscreenBtn = document.getElementById('fullscreen-tool');
+  const canvas = document.getElementById('whiteboard-canvas');
+  const ctx = canvas ? canvas.getContext('2d') : null;  // Fix: Definisikan ctx di sini
+
+  if (!container || !fullscreenBtn || !canvas || !ctx) {
+    alert('Elemen tidak ditemukan. Refresh halaman.');
+    return;
+  }
+
+  if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement) {
+    // Enter: Coba container utama, fallback ke canvas-wrapper (seperti kode Anda)
+    const target = container.requestFullscreen ? container : fallbackContainer;
+    target.requestFullscreen()
+      .then(() => {
+        // Switch text & warna
+        fullscreenBtn.textContent = 'Exit Fullscreen';
+        fullscreenBtn.style.background = '#f44336';
+        
+        // Resize canvas full (sederhana, setelah success)
+        setTimeout(() => {
+          canvas.width = target.clientWidth || window.innerWidth;
+          canvas.height = target.clientHeight || (window.innerHeight - 60);  // Minus toolbar
+          ctx.fillStyle = 'white';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);  // Redraw white
+          console.log(`Fullscreen enter: Canvas ${canvas.width}x${canvas.height}`);
+        }, 10);  // Delay kecil untuk DOM update
+      })
+      .catch(err => {
+        alert('Fullscreen tidak didukung: ' + err.message);
+        console.error(err);
+      });
+  } else {
+    // Exit
+    document.exitFullscreen()
+      .then(() => {
+        // Switch text & warna
+        fullscreenBtn.textContent = 'Fullscreen';
+        fullscreenBtn.style.background = '#607D8B';
+        
+        // Resize ke asli
+        setTimeout(() => {
+          canvas.width = 800;  // Ukuran asli dari HTML
+          canvas.height = 500;
+          ctx.fillStyle = 'white';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          console.log('Fullscreen exit: Canvas reset 800x500');
+        }, 10);
+      })
+      .catch(err => console.error('Exit error:', err));
+  }
+}
+
+/*----
+// Fullscreen Toggle (PERBAIKAN: Sertakan toolbar, switch button text, dan listener exit)
+function toggleFullscreen() {
+  const container = document.getElementById('whiteboard-container'); // Target wrapper baru
+  const fullscreenBtn = document.getElementById('fullscreen-tool');
+  const toolbar = document.getElementById('whiteboard-toolbar');
+  const canvasWrapper = document.getElementById('canvas-wrapper');
+  const canvas = document.getElementById('whiteboard-canvas');
+
+  if (!container || !fullscreenBtn) {
+    alert('Elemen fullscreen tidak ditemukan. Refresh halaman.');
+    return;
+  }
+
+  if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement) {
+    // Enter fullscreen
+    if (container.requestFullscreen) {
+      container.requestFullscreen();
+    } else if (container.webkitRequestFullscreen) {
+      container.webkitRequestFullscreen();
+    } else if (container.mozRequestFullScreen) {
+      container.mozRequestFullScreen();
+    } else {
+      alert('Fullscreen tidak didukung di browser ini.');
+      return;
+    }
+    fullscreenBtn.textContent = 'Exit Fullscreen'; // Switch text
+    fullscreenBtn.style.background = '#f44336'; // Ubah warna ke merah
+    console.log('Entered fullscreen mode.');
+  } else {
+    // Exit fullscreen
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    }
+    fullscreenBtn.textContent = 'Fullscreen'; // Kembali ke text asli
+    fullscreenBtn.style.background = '#607D8B'; // Kembali ke warna asli
+    console.log('Exited fullscreen mode.');
+  }
+
+  // Resize canvas saat fullscreen change (untuk responsive)
+  function resizeCanvas() {
+    if (canvas && canvasWrapper) {
+      canvas.width = canvasWrapper.clientWidth;
+      canvas.height = canvasWrapper.clientHeight;
+      // Redraw existing content if needed (opsional: simpan state canvas)
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  // Listener untuk fullscreen change (enter/exit)
+  document.addEventListener('fullscreenchange', resizeCanvas);
+  document.addEventListener('webkitfullscreenchange', resizeCanvas);
+  document.addEventListener('mozfullscreenchange', resizeCanvas);
+}*/
+
+// Update showMaterial to init whiteboard
+const originalShowMaterial = showMaterial;
+showMaterial = function(materialId) {
+  originalShowMaterial(materialId);
+  if (materialId === 9) {
+    // Delay init to ensure DOM is ready
+    setTimeout(initWhiteboard, 100);
+  }
+};
+
 /**
  * Displays the content of a selected material (dengan force close sidebar di mobile).
  * @param {number} materialId - The ID of the material to display.
@@ -3133,10 +3550,10 @@ function showMaterial(materialId) {
     document.querySelectorAll('.material-item').forEach(item => {
       item.classList.remove('active');
     });
-    // Set active class for AnalysisTools sidebar item
-    const analysisToolsItem = document.querySelector('.material-item[data-material-id="8"]'); // Assuming AnalysisTools is always ID 8 initially
-    if (analysisToolsItem) {
-      analysisToolsItem.classList.add('active');
+    // Set active class for Analysis sidebar item
+    const AnalysisItem = document.querySelector('.material-item[data-material-id="8"]'); // Assuming Analysis is always ID 8 initially
+    if (AnalysisItem) {
+      AnalysisItem.classList.add('active');
     }
 
     const pageContentDiv = document.getElementById('pageContent');
@@ -3235,7 +3652,7 @@ function showMaterial(materialId) {
     } else if (lowerCaseMessage.includes('apa itu statistika')) {
       return 'Statistika adalah ilmu yang berkaitan dengan pengumpulan, pengorganisasian, analisis, interpretasi, dan presentasi data. Anda bisa membaca lebih lanjut di materi <a href="#" onclick="showMaterial(1); toggleHelpFAQModal();">Pengantar Statistika</a>.';
     } else if (lowerCaseMessage.includes('tools analisis') || lowerCaseMessage.includes('alat analisis')) {
-      return 'Kami memiliki berbagai tools analisis statistik interaktif. Anda bisa melihatnya di menu <a href="#" onclick="showMaterial(8); toggleHelpFAQModal();">AnalysisTools</a>. Beberapa tool yang tersedia antara lain Statistik Deskriptif, Uji t, ANOVA, Korelasi, dan Regresi Linear.';
+      return 'Kami memiliki berbagai tools analisis statistik interaktif. Anda bisa melihatnya di menu <a href="#" onclick="showMaterial(8); toggleHelpFAQModal();">Analysis</a>. Beberapa tool yang tersedia antara lain Statistik Deskriptif, Uji t, ANOVA, Korelasi, dan Regresi Linear.';
     } else if (lowerCaseMessage.includes('uji t') || lowerCaseMessage.includes('t-test')) {
       return 'Uji t digunakan untuk membandingkan rata-rata satu atau dua kelompok. Anda bisa mencobanya di <a href="#" onclick="showAnalysisTool(\'uji-mean\'); toggleHelpFAQModal();">Tool Uji t</a>. Ada tiga jenis utama: One-sample, Independent Two-sample, dan Paired t-test.';
     } else if (lowerCaseMessage.includes('anova')) {
@@ -3356,13 +3773,15 @@ function showMaterial(materialId) {
   /**
    * Enables contenteditable for all elements with class 'editable-content'.
    */
-  function enableAdminEditing() {
-    document.querySelectorAll('.editable-content').forEach(el => {
-      el.setAttribute('contenteditable', 'true');
-      el.addEventListener('focus', handleEditFocus);
-      el.addEventListener('blur', handleEditBlur);
-    });
-  }
+function enableAdminEditing() {
+  document.querySelectorAll('.editable-content').forEach(el => {
+    // Skip jika di Tools section
+    if (el.closest('.tools-section')) return;
+    el.setAttribute('contenteditable', 'true');
+    el.addEventListener('focus', handleEditFocus);
+    el.addEventListener('blur', handleEditBlur);
+  });
+}
 
   /**
    * Disables contenteditable for all elements with class 'editable-content'.
@@ -3490,7 +3909,7 @@ function showMaterial(materialId) {
     loadPageContentFromLocalStorage();
   }
 
-  let nextMaterialId = 9; // Start from the next available ID
+  let nextMaterialId = 10; // Start from the next available ID
 
   /**
    * Adds a new material item to the sidebar and content.
@@ -3498,14 +3917,13 @@ function showMaterial(materialId) {
   function addNewMaterial() {
     if (!isAdminMode) return; // Only allow adding in admin mode
 
-    // Find the current AnalysisTools item
-    const analysisToolsItem = Object.values(materialContents).find(item => item.title.includes("AnalysisTools"));
+    // Find the current Analysis item
+    const AnalysisItem = Object.values(materialContents).find(item => item.title.includes("Analysis"));
 
     // Create a new ID for the new material
     // Find the maximum existing ID and add 1
-    const existingIds = Object.keys(materialContents).map(Number);
+    const existingIds = Object.keys(materialContents).map(Number).filter(id => id <= 7); // Hanya Materials
     const newMaterialId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
-
 
     // Create the new material object
     const newMaterial = {
@@ -3518,14 +3936,14 @@ function showMaterial(materialId) {
       `
     };
 
-    // Re-number existing materials (excluding AnalysisTools) to maintain sequential numbering
+    // Re-number existing materials (excluding Analysis) to maintain sequential numbering
     const updatedMaterialContents = {};
     let currentNewId = 1;
     const sortedKeys = Object.keys(materialContents).map(Number).sort((a, b) => a - b);
 
     for (const key of sortedKeys) {
-        if (materialContents[key].title.includes("AnalysisTools")) { // Check if it's the AnalysisTools item
-            continue; // Skip AnalysisTools for now
+        if (materialContents[key].title.includes("Analysis")) { // Check if it's the Analysis item
+            continue; // Skip Analysis for now
         }
         // Re-number existing materials
         updatedMaterialContents[currentNewId] = {
@@ -3535,15 +3953,15 @@ function showMaterial(materialId) {
         currentNewId++;
     }
 
-    // Insert the new material before AnalysisTools
+    // Insert the new material before Analysis
     updatedMaterialContents[currentNewId] = newMaterial;
     currentNewId++;
 
-    // Add AnalysisTools back at the end with its new number
-    if (analysisToolsItem) {
+    // Add Analysis back at the end with its new number
+    if (AnalysisItem) {
         updatedMaterialContents[currentNewId] = {
-            ...analysisToolsItem,
-            title: `${currentNewId}. ${analysisToolsItem.title.split('. ').slice(1).join('. ')}`
+            ...AnalysisItem,
+            title: `${currentNewId}. ${AnalysisItem.title.split('. ').slice(1).join('. ')}`
         };
     }
 
@@ -3553,8 +3971,10 @@ function showMaterial(materialId) {
     // Rebuild the sidebar to reflect the new order and numbering
     loadInitialContent();
 
-    alert(`Materi "${newMaterial.title}" berhasil ditambahkan!`);
-    showMaterial(newMaterialId); // Display the new material
+	loadInitialContent(); // Rebuild hanya Materials
+    alert(`Materi "${newMaterial.title}" berhasil ditambahkan ke Materials!`);
+    showMaterial(newMaterialId);
+
   }
 
   /**
@@ -3562,38 +3982,37 @@ function showMaterial(materialId) {
    * @param {number} materialId - The ID of the material to delete.
    * @param {Event} event - The event object (to stop propagation).
    */
-  function deleteMaterial(materialId, event) {
-    event.stopPropagation(); // Prevent showMaterial from being called
-    if (!isAdminMode) return; // Only allow deleting in admin mode
+function deleteMaterial(materialId, event) {
+  event.stopPropagation();
+  if (!isAdminMode || materialId === 8) return; // Blokir delete Tools
 
-    if (confirm(`Apakah Anda yakin ingin menghapus materi "${materialContents[materialId].title}"?`)) {
-      // Remove the material
-      delete materialContents[materialId];
+  if (confirm(`Apakah Anda yakin ingin menghapus materi "${materialContents[materialId].title}"?`)) {
+    delete materialContents[materialId];
+    // Re-number hanya Materials (1-7)
+    const updatedMaterialContents = {};
+    let currentNewId = 1;
+    const sortedKeys = Object.keys(materialContents).map(Number).filter(id => id <= 7).sort((a, b) => a - b);
 
-      // Re-number remaining materials to maintain sequential order
-      const updatedMaterialContents = {};
-      let currentNewId = 1;
-      const sortedKeys = Object.keys(materialContents).map(Number).sort((a, b) => a - b);
-
-      for (const key of sortedKeys) {
-          updatedMaterialContents[currentNewId] = {
-              ...materialContents[key],
-              title: `${currentNewId}. ${materialContents[key].title.split('. ').slice(1).join('. ')}`
-          };
-          currentNewId++;
-      }
-      materialContents = updatedMaterialContents;
-      saveToLocalStorage('materialContents', materialContents);
-
-      // Rebuild the sidebar to reflect the new order and numbering
-      loadInitialContent();
-
-      alert('Materi berhasil dihapus!');
-      // Show welcome page or first material after deletion
-      document.getElementById('pageContent').innerHTML = initialWelcomeContent;
-      loadPageContentFromLocalStorage();
+    for (const key of sortedKeys) {
+      updatedMaterialContents[currentNewId] = {
+        ...materialContents[key],
+        title: `${currentNewId}. ${materialContents[key].title.split('. ').slice(1).join('. ')}`
+      };
+      currentNewId++;
     }
+    // Tools tetap di ID 8, statis
+    if (materialContents[8]) {
+      updatedMaterialContents[8] = materialContents[8]; // Jangan ubah Tools
+    }
+    materialContents = updatedMaterialContents;
+    saveToLocalStorage('materialContents', materialContents);
+
+    loadInitialContent(); // Rebuild sidebar
+    alert('Materi berhasil dihapus dari Materials!');
+    document.getElementById('pageContent').innerHTML = initialWelcomeContent;
+    loadPageContentFromLocalStorage();
   }
+}
 
   /**
    * Enables admin editing for a specific element.
@@ -3608,51 +4027,81 @@ function showMaterial(materialId) {
   /**
    * Loads initial content from local storage and rebuilds the sidebar.
    */
-  function loadInitialContent() {
-    // Load material contents from local storage
-    const storedMaterialContents = loadFromLocalStorage('materialContents');
-    if (storedMaterialContents) {
-      materialContents = storedMaterialContents;
-    }
-
-    const materialsNav = document.getElementById('materials-sidebar');
-    const adminControls = materialsNav.querySelector('.admin-controls');
-    
-    // Remove all existing material items to rebuild them
-    materialsNav.querySelectorAll('.material-item').forEach(item => item.remove());
-
-    // Sort material IDs numerically to ensure correct order
-    const sortedMaterialIds = Object.keys(materialContents).map(Number).sort((a, b) => a - b);
-
-    sortedMaterialIds.forEach(id => {
-      const material = materialContents[id];
-      const newMaterialItem = document.createElement('div');
-      newMaterialItem.classList.add('material-item');
-      newMaterialItem.setAttribute('data-material-id', id);
-      // Check if it's the AnalysisTools item, then call showAnalysisTool
-      if (material.title.includes("AnalysisTools")) {
-        newMaterialItem.setAttribute('onclick', `showMaterial(${id})`); // Still call showMaterial, which will then call showAnalysisTool
-      } else {
-        newMaterialItem.setAttribute('onclick', `showMaterial(${id})`);
-      }
-      
-      newMaterialItem.innerHTML = `
-        <strong class="editable-content" data-editable-id="material-title-${id}">${material.title}</strong>
-        <div class="material-subtitle editable-content" data-editable-id="material-subtitle-${id}">${material.subtitle}</div>
-        <button class="edit-btn" onclick="editMaterial(${id}, event)">Edit</button>
-        <button class="delete-btn" onclick="deleteMaterial(${id}, event)">Hapus</button>
-      `;
-      materialsNav.insertBefore(newMaterialItem, adminControls);
-    });
-    // Update nextMaterialId to ensure new materials get unique IDs
-    nextMaterialId = Math.max(...Object.keys(materialContents).map(Number)) + 1;
-
-    // Load other page content from local storage
-    loadPageContentFromLocalStorage();
-
-    // Set initial welcome content after loading from storage
-    initialWelcomeContent = document.getElementById('pageContent').innerHTML;
+function loadInitialContent() {
+  // Load material contents from local storage
+  const storedMaterialContents = loadFromLocalStorage('materialContents');
+  if (storedMaterialContents) {
+    materialContents = storedMaterialContents;
   }
+
+  const materialsNav = document.getElementById('materials-sidebar');
+  
+  // Clear existing content except admin-controls (jika ada)
+  const existingSections = materialsNav.querySelectorAll('.materials-section, .tools-section');
+  existingSections.forEach(section => section.remove());
+
+  // Buat Materials Section (Editable, items 1-7)
+  const materialsSection = document.createElement('div');
+  materialsSection.classList.add('materials-section');
+  materialsSection.innerHTML = `
+    <div class="materials-title editable-content" data-editable-id="materials-sidebar-title">Materials</div>
+  `;
+  materialsNav.appendChild(materialsSection);
+
+  // Buat Tools Section (Statis, items 8 & 9)
+  const toolsSection = document.createElement('div');
+  toolsSection.classList.add('tools-section');
+  toolsSection.innerHTML = `
+    <div class="tools-title">Tools</div>
+    <!-- Item 8: Analysis -->
+    <div class="material-item" data-material-id="8" onclick="showMaterial(8)">
+      <strong>Analysis</strong>
+      <div class="material-subtitle">Tools analisis data statistik interaktif</div>
+    </div>
+    <!-- Item 9: Whiteboard (Tambahan untuk perbaikan) -->
+    <div class="material-item" data-material-id="9" onclick="showMaterial(9)">
+      <strong>Whiteboard</strong>
+      <div class="material-subtitle">Tools untuk menggambar, menulis catatan, dan brainstorming</div>
+    </div>
+  `;
+  materialsNav.appendChild(toolsSection);
+
+  // Tambah admin-controls ke Materials section (editable)
+  const adminControls = document.createElement('div');
+  adminControls.classList.add('admin-controls');
+  adminControls.innerHTML = '<button class="add-material-btn" onclick="addNewMaterial()">+ Tambah Materi Baru</button>';
+  materialsSection.appendChild(adminControls);
+
+  // Bangun Materials items (1-7) secara dinamis (editable)
+  const sortedMaterialIds = Object.keys(materialContents)
+    .map(Number)
+    .filter(id => id >= 1 && id <= 7) // Hanya 1-7 untuk Materials
+    .sort((a, b) => a - b);
+
+  sortedMaterialIds.forEach(id => {
+    const material = materialContents[id];
+    const newMaterialItem = document.createElement('div');
+    newMaterialItem.classList.add('material-item');
+    newMaterialItem.setAttribute('data-material-id', id);
+    newMaterialItem.setAttribute('onclick', `showMaterial(${id})`);
+    newMaterialItem.innerHTML = `
+      <strong class="editable-content" data-editable-id="material-title-${id}">${material.title}</strong>
+      <div class="material-subtitle editable-content" data-editable-id="material-subtitle-${id}">${material.subtitle}</div>
+      <button class="edit-btn" onclick="editMaterial(${id}, event)">Edit</button>
+      <button class="delete-btn" onclick="deleteMaterial(${id}, event)">Hapus</button>
+    `;
+    materialsSection.insertBefore(newMaterialItem, adminControls); // Insert sebelum admin-controls
+  });
+
+  // Update nextMaterialId (hanya untuk Materials)
+  nextMaterialId = Math.max(...Object.keys(materialContents).map(Number).filter(id => id <= 7)) + 1 || 8;
+
+  // Load other page content from local storage
+  loadPageContentFromLocalStorage();
+
+  // Set initial welcome content after loading from storage
+  initialWelcomeContent = document.getElementById('pageContent').innerHTML;
+}
 
   /**
    * Loads general page content (header, footer, welcome text) from local storage.
@@ -6716,10 +7165,10 @@ function renderStemLeaf(data) {
       }
     });
 
-    // Initialize tool-specific forms on load (if AnalysisTools is shown)
+    // Initialize tool-specific forms on load (if Analysis is shown)
     const currentActiveMaterial = document.querySelector('.material-item.active');
     if (currentActiveMaterial && currentActiveMaterial.dataset.materialId === '8') {
-      showMaterial(8); // Ensure AnalysisTools is properly initialized
+      showMaterial(8); // Ensure Analysis is properly initialized
     }
 
     // Set initial welcome content after all loading
@@ -6942,214 +7391,6 @@ function renderStemLeaf(data) {
   if (window.location.hostname !== 'localhost') {
     console.log = function() {}; // Disable console.log in production
   }
-
-// Whiteboard Variables
-let canvas, ctx, currentTool = 'pen', currentColor = '#000000', brushSize = 5;
-let isDrawing = false, startX, startY;
-let objects = []; // Array untuk teks/shape (untuk delete)
-
-// Initialize Whiteboard
-function initWhiteboard() {
-  canvas = document.getElementById('whiteboard-canvas');
-  if (!canvas) return;
-  ctx = canvas.getContext('2d');
-  resizeCanvas();
-  addEventListeners();
-  window.addEventListener('resize', resizeCanvas);
-}
-
-// Resize Canvas Responsif
-function resizeCanvas() {
-  const container = canvas.parentElement;
-  canvas.width = container.clientWidth;
-  canvas.height = container.clientHeight;
-  ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear on resize
-  redrawObjects(); // Redraw teks/shape
-}
-
-// Event Listeners untuk Draw/Erase/Text/Shape
-function addEventListeners() {
-  // Mouse Events
-  canvas.addEventListener('mousedown', startDrawing);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseup', stopDrawing);
-  canvas.addEventListener('mouseout', stopDrawing);
-
-  // Touch Events (Mobile)
-  canvas.addEventListener('touchstart', handleTouch);
-  canvas.addEventListener('touchmove', handleTouch);
-  canvas.addEventListener('touchend', stopDrawing);
-}
-
-function handleTouch(e) {
-  e.preventDefault();
-  const touch = e.touches[0];
-  const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
-    clientX: touch.clientX,
-    clientY: touch.clientY
-  });
-  canvas.dispatchEvent(mouseEvent);
-}
-
-function startDrawing(e) {
-  const rect = canvas.getBoundingClientRect();
-  startX = e.clientX - rect.left;
-  startY = e.clientY - rect.top;
-  isDrawing = true;
-
-  if (currentTool === 'pen' || currentTool === 'erase') {
-    ctx.beginPath();
-    ctx.moveTo(startX, startY);
-  } else if (currentTool === 'text') {
-    showTextInput(startX, startY);
-  } else if (currentTool === 'shape') {
-    // Shape akan digambar saat mouse up
-  }
-}
-
-function draw(e) {
-  if (!isDrawing) return;
-  const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-
-  if (currentTool === 'pen') {
-    ctx.lineTo(x, y);
-    ctx.strokeStyle = currentColor;
-    ctx.lineWidth = brushSize;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-  } else if (currentTool === 'erase') {
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath();
-    ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalCompositeOperation = 'source-over'; // Reset
-  } else if (currentTool === 'shape' && isDrawing) {
-    // Preview shape (sederhana: lingkaran)
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear preview
-    redrawObjects();
-    ctx.beginPath();
-    ctx.arc(startX, startY, Math.abs(x - startX), 0, Math.PI * 2);
-    ctx.strokeStyle = currentColor;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  }
-}
-
-function stopDrawing(e) {
-  if (!isDrawing) return;
-  isDrawing = false;
-
-  if (currentTool === 'shape') {
-    const rect = canvas.getBoundingClientRect();
-    const endX = e.clientX - rect.left;
-    const endY = e.clientY - rect.top;
-    // Insert shape (contoh: lingkaran)
-    const shape = { type: 'circle', x: startX, y: startY, r: Math.abs(endX - startX), color: currentColor };
-    objects.push(shape);
-    redrawObjects();
-  }
-}
-
-// Tool Setters
-function setTool(tool) {
-  currentTool = tool;
-  document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
-  document.getElementById(tool + '-tool').classList.add('active');
-  canvas.style.cursor = tool === 'pen' ? 'crosshair' : tool === 'erase' ? 'grab' : 'default';
-}
-
-function setColor(color) {
-  currentColor = color;
-}
-
-function setBrushSize(size) {
-  brushSize = parseInt(size);
-}
-
-// Text Input
-function showTextInput(x, y) {
-  const overlay = document.getElementById('text-input-overlay');
-  const input = document.getElementById('text-input');
-  overlay.style.left = x + 'px';
-  overlay.style.top = y + 'px';
-  overlay.style.display = 'block';
-  input.focus();
-}
-
-function insertText() {
-  const text = document.getElementById('text-input').value.trim();
-  if (text) {
-    const overlay = document.getElementById('text-input-overlay');
-    const rect = canvas.getBoundingClientRect();
-    const x = parseInt(overlay.style.left) - rect.left;
-    const y = parseInt(overlay.style.top) - rect.top;
-    const textObj = { type: 'text', x: x, y: y, content: text, color: currentColor, size: 16 };
-    objects.push(textObj);
-    redrawObjects();
-  }
-  document.getElementById('text-input').value = '';
-  document.getElementById('text-input-overlay').style.display = 'none';
-}
-
-// Redraw Objects (Teks/Shape)
-function redrawObjects() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  objects.forEach(obj => {
-    ctx.strokeStyle = obj.color || currentColor;
-    ctx.fillStyle = obj.color || currentColor;
-    if (obj.type === 'text') {
-      ctx.font = `${obj.size}px Arial`;
-      ctx.fillText(obj.content, obj.x, obj.y);
-    } else if (obj.type === 'circle') {
-      ctx.beginPath();
-      ctx.arc(obj.x, obj.y, obj.r, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-    // Tambah shape lain jika perlu (persegi, garis)
-  });
-}
-
-// Delete Selected (Sederhana: Hapus terakhir)
-function deleteSelected() {
-  if (objects.length > 0) {
-    objects.pop();
-    redrawObjects();
-  }
-}
-
-// Clear Canvas
-function clearCanvas() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  objects = [];
-}
-
-// Fullscreen
-function toggleFullscreen() {
-  const container = document.querySelector('.whiteboard-container');
-  if (!document.fullscreenElement) {
-    container.requestFullscreen().then(() => {
-      container.classList.add('whiteboard-fullscreen');
-      resizeCanvas();
-    });
-  } else {
-    document.exitFullscreen().then(() => {
-      container.classList.remove('whiteboard-fullscreen');
-      resizeCanvas();
-    });
-  }
-}
-
-// Init saat showMaterial(9)
-// Override showMaterial untuk init whiteboard
-const originalShowMaterial = showMaterial;
-showMaterial = function(materialId) {
-  originalShowMaterial(materialId);
-  if (materialId === 9) {
-    setTimeout(initWhiteboard, 100); // Delay untuk canvas render
-  }
-}
 
 </script>
 </body>
