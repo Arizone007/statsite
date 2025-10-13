@@ -1480,6 +1480,33 @@ body.admin-active .tools-section .material-item:hover {
   }
 }
 
+/* PERBAIKAN Lanjutan: Style untuk Random Number Generator */
+#random-numbers-list span {
+  display: inline-block;
+  margin: 2px;
+}
+#random-numbers-list p {
+  margin: 5px 0;
+}
+#rng-stats {
+  color: #28a745;
+  font-size: 14px;
+}
+.btn-secondary {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-secondary:hover {
+  background: #5a6268;
+}
+#rng-output {
+  min-height: 200px;
+}
+
 </style>
 </head>
 <body>
@@ -1586,29 +1613,29 @@ body.admin-active .tools-section .material-item:hover {
 
     <!-- Admin Controls (Tetap di Materials section, editable) -->
     <div class="admin-controls">
-      <button class="add-material-btn" onclick="addNewMaterial()">+ Tambah Materi Baru</button>
+      <button class="add-material-btn" onclick="addMaterial()">+ Tambah Materi</button>
     </div>
   </div>
 
-  <!-- Section 2: Tools (Statis, Non-Editable) -->
+ /* <!-- Section 2: Tools (Statis, Non-Editable) -->
   <div class="tools-section">
     <div class="tools-title">Tools</div> <!-- Statis, no editable -->
     
     <!-- Item 8: Analysis (Statis, no editable-content atau tombol edit/hapus) -->
-    <div class="material-item" data-material-id="8" onclick="showMaterial(8)">
+    <div class="material-item" data-material-id='analysis' onclick="showMaterial('analysis')">
       <strong>Analysis</strong> <!-- Hapus editable-content -->
       <div class="material-subtitle">Tools analisis data statistik interaktif</div> <!-- Hapus editable-content -->
       <!-- No edit/delete buttons -->
     </div>
 	
 	<!-- Item Baru: Whiteboard (di dalam tools-section, setelah Analysis) -->
-    <div class="material-item" data-material-id="9" onclick="showMaterial(9)">
+    <div class="material-item" data-material-id='whiteboard' onclick="showMaterial('whiteboard')">
       <strong>Whiteboard</strong>
       <div class="material-subtitle">Tools untuk menggambar, menulis catatan, dan brainstorming</div>
       <!-- No edit/delete buttons karena tools statis -->
     </div>
   </div>
-</nav>
+</nav> */
 
   <!-- Resizer for sidebar -->
   <div class="resizer" id="resizer"></div>
@@ -1690,6 +1717,27 @@ body.admin-active .tools-section .material-item:hover {
     </div>
   </div>
 
+<!-- Modal Tambah Materi Baru (Tambahkan di sini) -->
+<div id="addMaterialModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1001; justify-content: center; align-items: center;">
+  <div style="background: white; padding: 20px; width: 90%; max-width: 500px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+    <h3>Tambah Materi Baru</h3>
+    <div class="form-group">
+      <label for="new-material-title">Judul (contoh: Topik Baru):</label>
+      <input type="text" id="new-material-title" placeholder="Masukkan judul materi" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;">
+    </div>
+    <div class="form-group">
+      <label for="new-material-subtitle">Subtitle/Deskripsi Singkat:</label>
+      <input type="text" id="new-material-subtitle" placeholder="Masukkan deskripsi singkat" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px;">
+    </div>
+    <div class="form-group">
+      <label for="new-material-content">Konten Utama (HTML sederhana):</label>
+      <textarea id="new-material-content" rows="6" placeholder="Masukkan konten (bisa HTML seperti &lt;h3&gt;Judul&lt;/h3&gt;&lt;p&gt;Teks&lt;/p&gt;)" style="width: 100%; padding: 8px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 4px; font-family: monospace;"></textarea>
+    </div>
+    <button class="btn-primary" onclick="confirmAddMaterial()" style="margin-right: 10px;">Tambah Materi</button>
+    <button onclick="closeAddMaterialModal()" style="background: #f44336; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Batal</button>
+  </div>
+</div>
+
 <script>
   let isAdminMode = false;
   let currentEditableContent = null; // To store the currently edited element
@@ -1707,15 +1755,153 @@ body.admin-active .tools-section .material-item:hover {
     return stored ? JSON.parse(stored) : null;
   }
 
-  // Konten untuk setiap materi (sekarang disimpan dalam objek global)
-  // Ini akan menjadi sumber kebenaran untuk konten yang dapat diedit
-  let materialContents = {
-    1: {
-      title: "1. Pengantar Statistika",
-      subtitle: "Sejarah, arti, peran, populasi, sampel, teknik sampling, parameter dan statistik",
-      content: `
-        <h2>1. Pengantar Statistika</h2>
+// PERBAIKAN: Pisahkan Materials (editable, array sequential) dari Tools (statis)
+// Hapus seluruh 'let materialContents = { ... };' lama dan ganti dengan ini
+
+let materialsArray = []; // Array untuk materials editable (ID: 1,2,3,... sequential, hanya 1-7 default)
+
+let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering materials)
+  { 
+    id: 'analysis', 
+    title: 'Analysis', 
+    subtitle: 'Tools analisis data statistik interaktif',
+    content:`/*analysisToolContents['deskriptif']*/
+        <h2>Analysis - Tools Analisis Statistik</h2>
+        <p>Platform tools interaktif untuk melakukan berbagai jenis analisis statistik dengan mudah dan akurat.</p>
         
+        <div class="analysis-tools">
+          <h3>Tools Analisis Statistik Tersedia</h3>
+          <div class="tools-grid">
+            <button class="tool-btn" onclick="showAnalysisTool('deskriptif')">Statistik Deskriptif</button>
+            <button class="tool-btn" onclick="showAnalysisTool('uji-mean')">Uji t (t-Test)</button>
+            <button class="tool-btn" onclick="showAnalysisTool('anova')">ANOVA</button>
+            <button class="tool-btn" onclick="showAnalysisTool('mann-whitney')">Mann-Whitney U</button>
+            <button class="tool-btn" onclick="showAnalysisTool('chi-square')">Chi-Square Test</button>
+            <button class="tool-btn" onclick="showAnalysisTool('korelasi')">Analisis Korelasi</button>
+            <button class="tool-btn" onclick="showAnalysisTool('regresi')">Regresi Linear</button>
+            <button class="tool-btn" onclick="showAnalysisTool('clustering')">Clustering</button>
+            <button class="tool-btn" onclick="showAnalysisTool('factor-analysis')">Factor Analysis</button>
+            <button class="tool-btn" onclick="showAnalysisTool('uji-asumsi')">Uji Asumsi Klasik</button>
+            <button class="tool-btn" onclick="showAnalysisTool('uji-instrumen')">Uji Validitas & Reliabilitas</button>
+            <button class="tool-btn" onclick="showAnalysisTool('Sample Size')">Sample Size</button>
+          </div>
+        </div>
+        
+        <h3>Cara Penggunaan Tools</h3>
+        <ol>
+          <li>Pilih jenis analisis yang sesuai dengan tujuan penelitian Anda</li>
+          <li>Upload file data (.csv, .xlsx) atau input data secara manual</li>
+          <li>Atur parameter analisis sesuai kebutuhan</li>
+          <li>Klik tombol "Analisis" untuk memproses data</li>
+          <li>Interpretasikan hasil output yang disediakan</li>
+          <li>Download laporan hasil analisis dalam format PDF atau Excel</li>
+        </ol>
+        
+        <h3>Format Data yang Didukung</h3>
+        <ul>
+          <li><strong>File CSV:</strong> Comma-separated values</li>
+          <li><strong>File Excel:</strong> Format .xlsx dan .xls</li>
+          <li><strong>Input Manual:</strong> Copy-paste dari spreadsheet</li>
+          <li><strong>Database Connection:</strong> Koneksi langsung ke database (fitur premium)</li>
+        </ul>
+        
+        <h3>Fitur Tambahan</h3>
+        <ul>
+          <li>Visualisasi otomatis hasil analisis</li>
+          <li>Export hasil dalam berbagai format</li>
+          <li>History analisis untuk tracking progress</li>
+          <li>Template report untuk dokumentasi</li>
+          <li>Kolaborasi tim untuk proyek bersama</li>
+        </ul>
+		
+		<div id="analysis-content" style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px; min-height: 400px;">
+          <p><em>Pilih tool dari grid di atas untuk memulai analisis. Contoh: Klik "Power Analysis" untuk fitur power uji dan sample size.</em></p>
+        </div>
+    `
+  },
+  { 
+    id: 'whiteboard', 
+    title: 'Whiteboard', 
+    subtitle: 'Tools untuk menggambar, menulis catatan, dan brainstorming',
+    content: `
+        <h2>Whiteboard - Tools Menggambar dan Catatan</h2>
+        <p>Gunakan whiteboard ini untuk brainstorming, sketsa diagram, atau catatan cepat. Dukung mouse dan touch.</p>
+    
+        <!-- Toolbar -->
+        <div id="whiteboard-container" style="position: relative;">
+          <div id="whiteboard-toolbar" style="background: #f5f5f5; padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10;">
+		  
+		  <!-- Pen Tool -->
+          <button id="pen-tool" class="tool-btn" style="background: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">🖊️Pen</button>
+      
+          <!-- Color Picker -->
+          <label style="display: flex; align-items: center; gap: 5px;">
+            Warna:
+            <select id="color-picker" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
+              <option value="#000000">Hitam</option>
+              <option value="#FF0000">Merah</option>
+              <option value="#00FF00">Hijau</option>
+              <option value="#0000FF">Biru</option>
+              <option value="#FFFF00">Kuning</option>
+              <option value="#FF00FF">Magenta</option>
+              <option value="#00FFFF">Cyan</option>
+            </select>
+            <input type="color" id="color-input" value="#000000" style="width: 40px; height: 30px; border: none; border-radius: 4px; cursor: pointer;">
+          </label>
+      
+          <!-- Line Width -->
+          <label style="display: flex; align-items: center; gap: 5px;">
+            Ketebalan:
+            <input type="range" id="line-width" min="1" max="20" value="2" style="width: 80px;">
+            <span id="line-width-value">2px</span>
+          </label>
+      
+          <!-- Text Tool -->
+          <button id="text-tool" class="tool-btn" style="background: #2196F3; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">📝Text</button>
+          <input type="text" id="text-input" placeholder="Ketik teks..." style="padding: 5px; border-radius: 4px; border: 1px solid #ccc; display: none; width: 150px;" maxlength="100">
+      
+          <!-- Eraser -->
+          <button id="eraser-tool" class="tool-btn" style="background: #FF9800; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">🧽Erase</button>
+      
+          <!-- Clear All -->
+          <button id="clear-tool" class="tool-btn" style="background: #F44336; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="clearCanvas()">🗑️Clear</button>
+      
+          <!-- Save -->
+          <button id="save-tool" class="tool-btn" style="background: #9C27B0; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="saveCanvas()">📝 Save</button>
+		    <button id="fullscreen-tool" class="tool-btn" style="background: #607D8B; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="toggleFullscreen()">⛶ Full</button>
+		  </div>
+                            
+		<!-- Canvas Container (pindah ke dalam wrapper) -->
+		  <div id="canvas-wrapper" style="position: relative; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+		  <canvas id="whiteboard-canvas" width="800" height="500" style="display: block; cursor: crosshair;"></canvas>
+		  <div id="text-cursor" style="position: absolute; display: none; border: 2px dashed #2196F3; background: rgba(33, 150, 243, 0.1);"></div>
+		</div>
+    	
+		</div>
+        
+		<p style="margin-top: 10px; font-size: 14px; color: #666;">
+          Instruksi: Pilih tool, lalu klik dan drag di canvas. Untuk text, klik canvas setelah pilih tool Text, lalu ketik di input.
+        </p>
+      `
+    }
+];
+
+// Fungsi load materials dari localStorage (default jika kosong)
+// Panggil fungsi ini di DOMContentLoaded untuk inisialisasi
+function loadMaterialsFromStorage() {
+  const stored = loadFromLocalStorage('materialsArray');
+  if (stored && stored.length > 0) {
+    materialsArray = stored;
+  } else {
+    // Default materials 1-7 (GANTI CONTENT INI DENGAN ISI ASLI DARI materialContents[1-7] lama)
+    materialsArray = [
+      // ID 1: Pengantar Statistika
+      { 
+        id: 1, 
+        title: '1. Pengantar Statistika', 
+        subtitle: 'Sejarah, arti, peran, populasi, sampel, teknik sampling, parameter dan statistik',
+        content: `<!-- GANTI DENGAN CONTENT ASLI DARI materialContents[1].content -->
+        <h2>1. Pengantar Statistika</h2>        
         <h3>Sejarah Statistika</h3>
         <p>Statistika sebagai ilmu berkembang dari kebutuhan praktis untuk mengumpulkan dan menganalisis data. Awalnya digunakan untuk keperluan administrasi negara (state arithmetic), statistika kini telah berkembang menjadi ilmu yang fundamental dalam penelitian ilmiah dan pengambilan keputusan berbasis data.</p>
         
@@ -1776,8 +1962,10 @@ body.admin-active .tools-section .material-item:hover {
           </ol>
         </div>
       `
-    },
-    2: {
+      },
+       
+      {
+	  id: 2,
       title: "2. Statistika Deskriptif",
       subtitle: "Penyajian data, ukuran pemusatan, ukuran penyebaran",
       content: `
@@ -1860,8 +2048,9 @@ body.admin-active .tools-section .material-item:hover {
         </div>
       `
     },
-    3: {
-      title: "3. Statistika Inferensial",
+    {
+      id: 3,
+	  title: "3. Statistika Inferensial",
       subtitle: "Distribusi peluang, uji hipotesis, parametrik, non-parametrik",
       content: `
         <h2>3. Statistika Inferensial</h2>
@@ -1963,8 +2152,9 @@ body.admin-active .tools-section .material-item:hover {
         </div>
       `
     },
-    4: {
-      title: "4. Probabilitas dan Distribusi",
+    {
+      id: 4,
+	  title: "4. Probabilitas dan Distribusi",
       subtitle: "Konsep dasar probabilitas, distribusi diskrit dan kontinu",
       content: `
         <h2>4. Probabilitas dan Distribusi Lanjutan</h2>
@@ -2034,8 +2224,9 @@ body.admin-active .tools-section .material-item:hover {
         </div>
       `
     },
-    5: {
-      title: "5. Teori Statistika Lanjut",
+    {
+      id: 5,
+	  title: "5. Teori Statistika Lanjut",
       subtitle: "GLM, Non-Linear Model, Bayesian",
       content: `
         <h2>5. Teori Statistika Lanjut</h2>
@@ -2122,7 +2313,8 @@ body.admin-active .tools-section .material-item:hover {
         </div>
       `
     },
-    6: {
+    {
+	  id: 6,
       title: "6. Penerapan Statistika",
       subtitle: "Komputer, AI, sains data, big data",
       content: `
@@ -2254,7 +2446,8 @@ body.admin-active .tools-section .material-item:hover {
         </div>
       `
     },
-    7: {
+	{
+	  id: 7,
       title: "7. Materi Lainnya",
       subtitle: "Topik tambahan dan pengembangan",
       content: `
@@ -2383,125 +2576,17 @@ body.admin-active .tools-section .material-item:hover {
           </ol>
         </div>
       `
-    },
-    8: {
-      title: "Analysis",
-      subtitle: "Tools analisis data statistik interaktif",
-      content: `
-        <h2>Analysis - Tools Analisis Statistik</h2>
-        <p>Platform tools interaktif untuk melakukan berbagai jenis analisis statistik dengan mudah dan akurat.</p>
-        
-        <div class="analysis-tools">
-          <h3>Tools Analisis Statistik Tersedia</h3>
-          <div class="tools-grid">
-            <button class="tool-btn" onclick="showAnalysisTool('deskriptif')">Statistik Deskriptif</button>
-            <button class="tool-btn" onclick="showAnalysisTool('uji-mean')">Uji t (t-Test)</button>
-            <button class="tool-btn" onclick="showAnalysisTool('anova')">ANOVA</button>
-            <button class="tool-btn" onclick="showAnalysisTool('mann-whitney')">Mann-Whitney U</button>
-            <button class="tool-btn" onclick="showAnalysisTool('chi-square')">Chi-Square Test</button>
-            <button class="tool-btn" onclick="showAnalysisTool('korelasi')">Analisis Korelasi</button>
-            <button class="tool-btn" onclick="showAnalysisTool('regresi')">Regresi Linear</button>
-            <button class="tool-btn" onclick="showAnalysisTool('clustering')">Clustering</button>
-            <button class="tool-btn" onclick="showAnalysisTool('factor-analysis')">Factor Analysis</button>
-            <button class="tool-btn" onclick="showAnalysisTool('uji-asumsi')">Uji Asumsi Klasik</button>
-            <button class="tool-btn" onclick="showAnalysisTool('uji-instrumen')">Uji Validitas & Reliabilitas</button>
-            <button class="tool-btn" onclick="showAnalysisTool('power-analysis')">Power Analysis</button>
-          </div>
-        </div>
-        
-        <h3>Cara Penggunaan Tools</h3>
-        <ol>
-          <li>Pilih jenis analisis yang sesuai dengan tujuan penelitian Anda</li>
-          <li>Upload file data (.csv, .xlsx) atau input data secara manual</li>
-          <li>Atur parameter analisis sesuai kebutuhan</li>
-          <li>Klik tombol "Analisis" untuk memproses data</li>
-          <li>Interpretasikan hasil output yang disediakan</li>
-          <li>Download laporan hasil analisis dalam format PDF atau Excel</li>
-        </ol>
-        
-        <h3>Format Data yang Didukung</h3>
-        <ul>
-          <li><strong>File CSV:</strong> Comma-separated values</li>
-          <li><strong>File Excel:</strong> Format .xlsx dan .xls</li>
-          <li><strong>Input Manual:</strong> Copy-paste dari spreadsheet</li>
-          <li><strong>Database Connection:</strong> Koneksi langsung ke database (fitur premium)</li>
-        </ul>
-        
-        <h3>Fitur Tambahan</h3>
-        <ul>
-          <li>Visualisasi otomatis hasil analisis</li>
-          <li>Export hasil dalam berbagai format</li>
-          <li>History analisis untuk tracking progress</li>
-          <li>Template report untuk dokumentasi</li>
-          <li>Kolaborasi tim untuk proyek bersama</li>
-        </ul>
-      `
-    },
-	9: {
-      title: "Whiteboard",
-      subtitle: "Tools interaktif untuk menggambar dan menulis catatan",
-      content: `
-        <h2>Whiteboard - Tools Menggambar dan Catatan</h2>
-        <p>Gunakan whiteboard ini untuk brainstorming, sketsa diagram, atau catatan cepat. Dukung mouse dan touch.</p>
-    
-        <!-- Toolbar -->
-        <div id="whiteboard-container" style="position: relative;">
-          <div id="whiteboard-toolbar" style="background: #f5f5f5; padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10;">
-		  
-		  <!-- Pen Tool -->
-          <button id="pen-tool" class="tool-btn" style="background: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">Pen</button>
-      
-          <!-- Color Picker -->
-          <label style="display: flex; align-items: center; gap: 5px;">
-            Warna:
-            <select id="color-picker" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
-              <option value="#000000">Hitam</option>
-              <option value="#FF0000">Merah</option>
-              <option value="#00FF00">Hijau</option>
-              <option value="#0000FF">Biru</option>
-              <option value="#FFFF00">Kuning</option>
-              <option value="#FF00FF">Magenta</option>
-              <option value="#00FFFF">Cyan</option>
-            </select>
-            <input type="color" id="color-input" value="#000000" style="width: 40px; height: 30px; border: none; border-radius: 4px; cursor: pointer;">
-          </label>
-      
-          <!-- Line Width -->
-          <label style="display: flex; align-items: center; gap: 5px;">
-            Ketebalan:
-            <input type="range" id="line-width" min="1" max="20" value="2" style="width: 80px;">
-            <span id="line-width-value">2px</span>
-          </label>
-      
-          <!-- Text Tool -->
-          <button id="text-tool" class="tool-btn" style="background: #2196F3; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">Text</button>
-          <input type="text" id="text-input" placeholder="Ketik teks..." style="padding: 5px; border-radius: 4px; border: 1px solid #ccc; display: none; width: 150px;" maxlength="100">
-      
-          <!-- Eraser -->
-          <button id="eraser-tool" class="tool-btn" style="background: #FF9800; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">Erase</button>
-      
-          <!-- Delete All -->
-          <button id="clear-tool" class="tool-btn" style="background: #F44336; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="clearCanvas()">Delete All</button>
-      
-          <!-- Save -->
-          <button id="save-tool" class="tool-btn" style="background: #9C27B0; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="saveCanvas()">Save PNG</button>
-		    <button id="fullscreen-tool" class="tool-btn" style="background: #607D8B; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="toggleFullscreen()">Fullscreen</button>
-		  </div>
-                            
-		<!-- Canvas Container (pindah ke dalam wrapper) -->
-		  <div id="canvas-wrapper" style="position: relative; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-		  <canvas id="whiteboard-canvas" width="800" height="500" style="display: block; cursor: crosshair;"></canvas>
-		  <div id="text-cursor" style="position: absolute; display: none; border: 2px dashed #2196F3; background: rgba(33, 150, 243, 0.1);"></div>
-		</div>
-    	
-		</div>
-        
-		<p style="margin-top: 10px; font-size: 14px; color: #666;">
-          Instruksi: Pilih tool, lalu klik dan drag di canvas. Untuk text, klik canvas setelah pilih tool Text, lalu ketik di input.
-        </p>
-      `
     }
-  };
+    ];
+   
+   saveToLocalStorage('materialsArray', materialsArray);
+  }
+  
+  // Hitung next ID untuk tambah baru (global agar bisa diakses di addMaterial)
+  window.nextMaterialId = materialsArray.length + 1;
+  
+  console.log('Materials loaded:', materialsArray.length, 'items');
+}
 
 // Konten untuk analysis tools (sekarang disimpan dalam objek global)
 let analysisToolContents = {
@@ -3151,41 +3236,126 @@ Kelompok2: 34, 56, 78"></textarea>
         <div id="instrumentTestResults" style="margin-top: 20px;"></div>
       </div>
     `,
-    'power-analysis': `
-      <h2>Tool Power Analysis</h2>
-      <p>Menentukan ukuran sampel yang diperlukan atau kekuatan uji statistik.</p>
-      <div class="analysis-form">
-        <h3>Pengaturan Power Analysis</h3>
-        <div class="form-group">
-          <label>Jenis Uji:</label>
-          <select id="powerTestType" onchange="updatePowerAnalysisForm()">
-            <option value="t-test">Uji t (Two-sample)</option>
-            <option value="anova">ANOVA (One-way)</option>
-            <option value="correlation">Korelasi Pearson</option>
-            <option value="regression">Regresi Linear Sederhana</option>
-          </select>
+    'Sample Size': `
+      <h2>Menetukan Ukuran Sampel</h2>
+      <p>Menentukan ukuran sampel yang diperlukan atau kekuatan uji statistik.</p>  
+          
+          <div class="analysis-section" style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 20px;">
+            <h3>1. Sample Size Calculator</h3>
+            <p>Hitung ukuran sampel berdasarkan rumus Slovin, Cochran, dan Lemeshow.</p>
+            <div class="form-group">
+              <label for="populasi">Ukuran Populasi (N):</label>
+              <input type="number" id="populasi" value="1000" min="1" placeholder="Contoh: 1000">
+            </div>
+            <div class="form-group">
+              <label for="margin-error">Margin Error (e, %):</label>
+              <input type="number" id="margin-error" value="5" min="1" max="20" step="0.5" placeholder="Contoh: 5">
+            </div>
+            <div class="form-group">
+              <label for="confidence">Confidence Level:</label>
+              <select id="confidence">
+                <option value="90">90% (Z=1.645)</option>
+                <option value="95" selected>95% (Z=1.96)</option>
+                <option value="99">99% (Z=2.576)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="proporsi">Proporsi Estimasi (p, 0-1):</label>
+              <input type="number" id="proporsi" value="0.5" min="0" max="1" step="0.1" placeholder="Default: 0.5">
+            </div>
+            <button class="btn-primary" onclick="calculateSampleSizeAll()" style="margin-bottom: 20px;">Hitung Sample Size</button>
+            <div id="sample-output">
+              <h4>Hasil Perhitungan:</h4>
+              <table id="sample-table" style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                <thead><tr style="background: #f0f0f0;"><th style="border: 1px solid #ddd; padding: 8px;">Rumus</th><th style="border: 1px solid #ddd; padding: 8px;">Ukuran Sampel (n)</th><th style="border: 1px solid #ddd; padding: 8px;">Penjelasan</th></tr></thead>
+                <tbody><!-- Diisi JS --></tbody>
+              </table>
+            </div>
+            <div class="references" style="margin-top: 20px; font-size: 12px;">
+              <h4>Referensi:</h4>
+              <ul>
+                <li>Slovin: Populasi terbatas.</li>
+                <li>Cochran: Estimasi proporsi.</li>
+                <li>Lemeshow: Survei kesehatan (Lemeshow et al., 1990).</li>
+              </ul>
+            </div>
+          </div>
+		  
+		  <div class="analysis-form">
+		  <h3>2. Power Analysis</h3>
+          <div class="form-group">
+            <label>Jenis Uji:</label>
+            <select id="powerTestType" onchange="updatePowerAnalysisForm()">
+              <option value="t-test">Uji t (Two-sample)</option>
+              <option value="anova">ANOVA (One-way)</option>
+              <option value="correlation">Korelasi Pearson</option>
+              <option value="regression">Regresi Linear Sederhana</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label id="effectSizeLabel">Ukuran Efek (Cohen's d):</label>
+            <input type="number" id="effectSize" value="0.5" step="0.1"/>
+            <small id="effectSizeHint">0.2 (kecil), 0.5 (sedang), 0.8 (besar)</small>
+          </div>
+          <div class="form-group">
+            <label>Tingkat Signifikansi (α):</label>
+            <select id="alpha_power">
+              <option value="0.01">0.01</option>
+              <option value="0.05" selected>0.05</option>
+              <option value="0.10">0.10</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Power yang Diinginkan (1-β):</label>
+            <input type="number" id="desiredPower" value="0.8" step="0.05" min="0.5" max="0.99"/>
+          </div>
+          <button class="btn-primary" onclick="runPowerAnalysis()">Hitung Power</button>
+          <div id="powerAnalysisResults" style="margin-top: 20px;"></div>
         </div>
-        <div class="form-group">
-          <label id="effectSizeLabel">Ukuran Efek (Cohen's d):</label>
-          <input type="number" id="effectSize" value="0.5" step="0.1"/>
-          <small id="effectSizeHint">0.2 (kecil), 0.5 (sedang), 0.8 (besar)</small>
-        </div>
-        <div class="form-group">
-          <label>Tingkat Signifikansi (α):</label>
-          <select id="alpha_power">
-            <option value="0.01">0.01</option>
-            <option value="0.05" selected>0.05</option>
-            <option value="0.10">0.10</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Power yang Diinginkan (1-β):</label>
-          <input type="number" id="desiredPower" value="0.8" step="0.05" min="0.5" max="0.99"/>
-        </div>
-        <button class="btn-primary" onclick="runPowerAnalysis()">Hitung Power/Ukuran Sampel</button>
-        <div id="powerAnalysisResults" style="margin-top: 20px;"></div>
+		
+	<!-- Fitur 3: Random Number Generator (Baru - Setelah Sample Size) -->
+    <div class="analysis-section" style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 20px;">
+      <h3>3. Random Number Generator</h3>
+      <p>Generate nomor acak untuk sampel terpilih dari populasi (1 sampai N). Gunakan setelah hitung ukuran sampel di atas.</p>
+      <div class="form-group">
+        <label for="populasi-rng">Ukuran Populasi (N):</label>
+        <input type="number" id="populasi-rng" value="1000" min="1" max="10000" placeholder="Contoh: 1000">
       </div>
-    `
+      <div class="form-group">
+        <label for="sampel-rng">Ukuran Sampel (n):</label>
+        <input type="number" id="sampel-rng" value="100" min="1" placeholder="Contoh: 100 (harus ≤ N)">
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" id="with-replacement" style="margin-right: 5px;"> Izinkan Pengulangan (Dengan Replacement)
+        </label>
+      </div>
+	  <div class="form-group">
+        <label>
+          <input type="checkbox" id="sort-results" checked style="margin-right: 5px;"> Urutkan Hasil (Ascending)
+        </label>
+      </div>
+      <button class="btn-primary" onclick="generateRandomSample()" style="margin-bottom: 20px;">Generate Nomor Acak</button>
+      <button class="btn-secondary" onclick="generateRandomSample(true)" style="margin-left: 10px;">Generate Baru (Random Ulang)</button>
+      
+      <div id="rng-output">
+        <h4>Hasil Nomor Sampel Acak:</h4>
+        <div id="random-numbers-list" style="background: #f8f9fa; padding: 10px; border-radius: 5px; max-height: 300px; overflow-y: auto; font-family: monospace; font-size: 12px;">
+          <!-- Daftar nomor akan diisi oleh JS -->
+        </div>
+        <p id="rng-stats" style="margin-top: 10px; font-weight: bold; color: #28a745;"></p>
+      </div>
+      
+      <div class="references" style="margin-top: 20px; font-size: 12px;">
+        <h4>Referensi Metode:</h4>
+        <ul>
+          <li><strong>Tanpa Pengulangan:</strong> Fisher-Yates Shuffle (algoritma acak unik).</li>
+          <li><strong>Dengan Pengulangan:</strong> Random independen (boleh duplikat).</li>
+          <li>Nomor: 1 sampai N. Gunakan untuk sampling acak sederhana.</li>
+        </ul>
+      </div>
+    </div>
+   `
   };
   
   let currentDescriptiveData = [];
@@ -3391,7 +3561,7 @@ function toggleFullscreen() {
     target.requestFullscreen()
       .then(() => {
         // Switch text & warna
-        fullscreenBtn.textContent = 'Exit Fullscreen';
+        fullscreenBtn.textContent = 'ExitFull';
         fullscreenBtn.style.background = '#f44336';
         
         // Resize canvas full (sederhana, setelah success)
@@ -3412,7 +3582,7 @@ function toggleFullscreen() {
     document.exitFullscreen()
       .then(() => {
         // Switch text & warna
-        fullscreenBtn.textContent = 'Fullscreen';
+        fullscreenBtn.textContent = '⛶ Full';
         fullscreenBtn.style.background = '#607D8B';
         
         // Resize ke asli
@@ -3428,112 +3598,50 @@ function toggleFullscreen() {
   }
 }
 
-/*----
-// Fullscreen Toggle (PERBAIKAN: Sertakan toolbar, switch button text, dan listener exit)
-function toggleFullscreen() {
-  const container = document.getElementById('whiteboard-container'); // Target wrapper baru
-  const fullscreenBtn = document.getElementById('fullscreen-tool');
-  const toolbar = document.getElementById('whiteboard-toolbar');
-  const canvasWrapper = document.getElementById('canvas-wrapper');
-  const canvas = document.getElementById('whiteboard-canvas');
-
-  if (!container || !fullscreenBtn) {
-    alert('Elemen fullscreen tidak ditemukan. Refresh halaman.');
-    return;
-  }
-
-  if (!document.fullscreenElement && !document.webkitFullscreenElement && !document.mozFullScreenElement) {
-    // Enter fullscreen
-    if (container.requestFullscreen) {
-      container.requestFullscreen();
-    } else if (container.webkitRequestFullscreen) {
-      container.webkitRequestFullscreen();
-    } else if (container.mozRequestFullScreen) {
-      container.mozRequestFullScreen();
-    } else {
-      alert('Fullscreen tidak didukung di browser ini.');
-      return;
-    }
-    fullscreenBtn.textContent = 'Exit Fullscreen'; // Switch text
-    fullscreenBtn.style.background = '#f44336'; // Ubah warna ke merah
-    console.log('Entered fullscreen mode.');
-  } else {
-    // Exit fullscreen
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    } else if (document.mozCancelFullScreen) {
-      document.mozCancelFullScreen();
-    }
-    fullscreenBtn.textContent = 'Fullscreen'; // Kembali ke text asli
-    fullscreenBtn.style.background = '#607D8B'; // Kembali ke warna asli
-    console.log('Exited fullscreen mode.');
-  }
-
-  // Resize canvas saat fullscreen change (untuk responsive)
-  function resizeCanvas() {
-    if (canvas && canvasWrapper) {
-      canvas.width = canvasWrapper.clientWidth;
-      canvas.height = canvasWrapper.clientHeight;
-      // Redraw existing content if needed (opsional: simpan state canvas)
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-  }
-
-  // Listener untuk fullscreen change (enter/exit)
-  document.addEventListener('fullscreenchange', resizeCanvas);
-  document.addEventListener('webkitfullscreenchange', resizeCanvas);
-  document.addEventListener('mozfullscreenchange', resizeCanvas);
-}*/
-
 // Update showMaterial to init whiteboard
 const originalShowMaterial = showMaterial;
 showMaterial = function(materialId) {
   originalShowMaterial(materialId);
-  if (materialId === 9) {
+  if (materialId === 'whiteboard') {
     // Delay init to ensure DOM is ready
     setTimeout(initWhiteboard, 100);
   }
-};
+}
 
-/**
- * Displays the content of a selected material (dengan force close sidebar di mobile).
- * @param {number} materialId - The ID of the material to display.
- */
+// PERBAIKAN: Show material/tools dengan ID numerik atau string
 function showMaterial(materialId) {
-  // Force close sidebar on mobile after selection (perbaikan: bukan toggle, tapi remove explicit)
+  // Force close sidebar on mobile
   if (window.innerWidth <= 768) {
     const sidebar = document.getElementById('materials-sidebar');
     sidebar.classList.remove('open');
-    sidebar.style.display = 'none';
     sidebar.style.left = '-100%';
   }
-  // Remove active class from all material items
-  document.querySelectorAll('.material-item').forEach(item => {
-    item.classList.remove('active');
-  });
-  
-  // Add active class to the clicked item
-  const clickedItem = document.querySelector(`.material-item[data-material-id="${materialId}"]`);
-  if (clickedItem) {
-    clickedItem.classList.add('active');
-  }
-  
-  // Display material content
+
+  // Remove active dari semua items
+  document.querySelectorAll('.material-item').forEach(item => item.classList.remove('active'));
+  const clickedItem = document.querySelector(`[data-material-id="${materialId}"]`);
+  if (clickedItem) clickedItem.classList.add('active');
+
   const pageContentDiv = document.getElementById('pageContent');
-  const material = materialContents[materialId];
-  if (material) {
-    pageContentDiv.innerHTML = material.content;
-  } else {
-    pageContentDiv.innerHTML = '<p>Materi sedang dalam pengembangan atau tidak ditemukan.</p>';
+  let content = '<p>Materi tidak ditemukan.</p>';
+
+  // Handle materials (ID numerik)
+  if (typeof materialId === 'number' || !isNaN(materialId)) {
+    const material = materialsArray.find(m => m.id == materialId); // == untuk string/number
+    if (material) content = material.content;
+  } 
+  // Handle tools (ID string)
+  else if (typeof materialId === 'string') {
+    const tool = toolsArray.find(t => t.id === materialId);
+    if (tool) content = tool.content;
   }
-  // Re-enable editable content if in admin mode
-  if (isAdminMode) {
-    enableAdminEditing();
-  }
-  destroyChart(); // Destroy any chart when switching material
+
+  pageContentDiv.innerHTML = content;
+
+  // Re-enable editing jika admin
+  if (isAdminMode) enableAdminEditing();
+
+  destroyChart(); // Destroy chart jika ada
 }
 
   /**
@@ -3568,7 +3676,7 @@ function showMaterial(materialId) {
         updateChiSquareForm();
       } else if (toolId === 'uji-asumsi') {
         updateAssumptionTestForm();
-      } else if (toolId === 'power-analysis') {
+      } else if (toolId === 'Sample Size') {
         updatePowerAnalysisForm(); // Initialize power analysis form
       }
     } else {
@@ -3667,8 +3775,8 @@ function showMaterial(materialId) {
       return 'Uji asumsi klasik adalah prasyarat untuk banyak uji statistik parametrik, meliputi normalitas, homogenitas varians, dan linearitas. Anda bisa mengujinya di <a href="#" onclick="showAnalysisTool(\'uji-asumsi\'); toggleHelpFAQModal();">Tool Uji Asumsi Klasik</a>.';
     } else if (lowerCaseMessage.includes('uji validitas') || lowerCaseMessage.includes('uji reliabilitas')) {
       return 'Uji validitas dan reliabilitas digunakan untuk menilai kualitas instrumen penelitian (misalnya kuesioner). Validitas mengukur apakah instrumen mengukur apa yang seharusnya diukur, sedangkan reliabilitas mengukur konsistensi. Anda bisa mencobanya di <a href="#" onclick="showAnalysisTool(\'uji-instrumen\'); toggleHelpFAQModal();">Tool Uji Validitas & Reliabilitas</a>.';
-    } else if (lowerCaseMessage.includes('power analysis') || lowerCaseMessage.includes('ukuran sampel')) {
-      return 'Power analysis membantu menentukan ukuran sampel yang diperlukan untuk mendeteksi efek dengan probabilitas tertentu, atau untuk mengevaluasi kekuatan uji statistik yang sudah ada. Anda bisa menggunakan <a href="#" onclick="showAnalysisTool(\'power-analysis\'); toggleHelpFAQModal();">Tool Power Analysis</a>.';
+    } else if (lowerCaseMessage.includes('sample size') || lowerCaseMessage.includes('ukuran sampel')) {
+      return 'Power analysis membantu menentukan ukuran sampel yang diperlukan untuk mendeteksi efek dengan probabilitas tertentu, atau untuk mengevaluasi kekuatan uji statistik yang sudah ada. Anda bisa menggunakan <a href="#" onclick="showAnalysisTool(\'Sample Size\'); toggleHelpFAQModal();">Tool Sample Size</a>.';
     } else if (lowerCaseMessage.includes('clustering') || lowerCaseMessage.includes('klastering')) {
       return 'Clustering adalah teknik unsupervised learning untuk mengelompokkan titik data ke dalam grup (cluster) berdasarkan kesamaan. K-Means adalah algoritma clustering yang populer. Anda bisa mencobanya di <a href="#" onclick="showAnalysisTool(\'clustering\'); toggleHelpFAQModal();">Tool Clustering</a>.';
     } else if (lowerCaseMessage.includes('factor analysis') || lowerCaseMessage.includes('analisis faktor')) {
@@ -3909,108 +4017,183 @@ function enableAdminEditing() {
     loadPageContentFromLocalStorage();
   }
 
-  let nextMaterialId = 10; // Start from the next available ID
+  let nextMaterialId = 7; // Start from the next available ID
 
-  /**
-   * Adds a new material item to the sidebar and content.
-   */
-  function addNewMaterial() {
-    if (!isAdminMode) return; // Only allow adding in admin mode
+// PERBAIKAN: Fungsi tambah materi dengan modal
+function addMaterial() {
+  if (!isAdminMode) {
+    alert('Mode admin diperlukan untuk menambah materi!');
+    toggleAdminMode(); // Buka login jika belum
+    return;
+  }
+  const modal = document.getElementById('addMaterialModal');
+  if (modal) {
+    modal.style.display = 'flex'; // Tampilkan modal
+    document.getElementById('new-material-title').focus(); // Fokus ke input judul
+  } else {
+    alert('Modal tidak ditemukan. Refresh halaman.');
+  }
+}
 
-    // Find the current Analysis item
-    const AnalysisItem = Object.values(materialContents).find(item => item.title.includes("Analysis"));
+function confirmAddMaterial() {
+  const title = document.getElementById('new-material-title').value.trim();
+  const subtitle = document.getElementById('new-material-subtitle').value.trim();
+  const content = document.getElementById('new-material-content').value.trim() || '<p>Konten default. Edit di mode admin untuk menambahkan detail.</p><div class="references"><h4>Referensi</h4><ol><li>Tambahkan referensi di sini.</li></ol></div>';
 
-    // Create a new ID for the new material
-    // Find the maximum existing ID and add 1
-    const existingIds = Object.keys(materialContents).map(Number).filter(id => id <= 7); // Hanya Materials
-    const newMaterialId = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
-
-    // Create the new material object
-    const newMaterial = {
-      title: `${newMaterialId}. Materi Baru`,
-      subtitle: "Deskripsi singkat materi baru",
-      content: `
-        <h2>${newMaterialId}. Materi Baru</h2>
-        <p>Ini adalah konten untuk materi baru. Anda bisa mengeditnya di mode admin.</p>
-        <p>Tambahkan informasi relevan di sini.</p>
-      `
-    };
-
-    // Re-number existing materials (excluding Analysis) to maintain sequential numbering
-    const updatedMaterialContents = {};
-    let currentNewId = 1;
-    const sortedKeys = Object.keys(materialContents).map(Number).sort((a, b) => a - b);
-
-    for (const key of sortedKeys) {
-        if (materialContents[key].title.includes("Analysis")) { // Check if it's the Analysis item
-            continue; // Skip Analysis for now
-        }
-        // Re-number existing materials
-        updatedMaterialContents[currentNewId] = {
-            ...materialContents[key],
-            title: `${currentNewId}. ${materialContents[key].title.split('. ').slice(1).join('. ')}`
-        };
-        currentNewId++;
-    }
-
-    // Insert the new material before Analysis
-    updatedMaterialContents[currentNewId] = newMaterial;
-    currentNewId++;
-
-    // Add Analysis back at the end with its new number
-    if (AnalysisItem) {
-        updatedMaterialContents[currentNewId] = {
-            ...AnalysisItem,
-            title: `${currentNewId}. ${AnalysisItem.title.split('. ').slice(1).join('. ')}`
-        };
-    }
-
-    materialContents = updatedMaterialContents;
-    saveToLocalStorage('materialContents', materialContents);
-
-    // Rebuild the sidebar to reflect the new order and numbering
-    loadInitialContent();
-
-	loadInitialContent(); // Rebuild hanya Materials
-    alert(`Materi "${newMaterial.title}" berhasil ditambahkan ke Materials!`);
-    showMaterial(newMaterialId);
-
+  if (!title) {
+    alert('Judul materi wajib diisi!');
+    return;
   }
 
-  /**
-   * Deletes a material item.
-   * @param {number} materialId - The ID of the material to delete.
-   * @param {Event} event - The event object (to stop propagation).
-   */
+  // Tambah ke array materials (ID sequential)
+  const newId = window.nextMaterialId;
+  materialsArray.push({
+    id: newId,
+    title: `${newId}. ${title}`, // Auto tambah nomor
+    subtitle: subtitle || 'Deskripsi default',
+    content: content
+  });
+
+  // Update next ID
+  window.nextMaterialId++;
+
+  // Simpan ke localStorage
+  saveToLocalStorage('materialsArray', materialsArray);
+
+  // Clear dan tutup modal
+  document.getElementById('new-material-title').value = '';
+  document.getElementById('new-material-subtitle').value = '';
+  document.getElementById('new-material-content').value = '';
+  closeAddMaterialModal();
+
+  // Re-render sidebar untuk tampilkan materi baru
+  loadInitialContent();
+
+  alert(`Materi "${title}" berhasil ditambahkan dengan ID ${newId}!`);
+  showMaterial(newId); // Load otomatis ke page content
+}
+
+function closeAddMaterialModal() {
+  const modal = document.getElementById('addMaterialModal');
+  if (modal) modal.style.display = 'none';
+}
+
+// Helper: Render Sidebar (jika belum ada, tambahkan ini di atas addMaterial)
+function renderSidebar() {
+  const sidebar = document.getElementById('sidebar');  // Sesuaikan id sidebar
+  if (!sidebar) return;
+
+  sidebar.innerHTML = '';  // Clear lama
+
+  materialContents.forEach((material, index) => {
+    const item = document.createElement('div');
+    item.className = 'sidebar-item';  // Sesuaikan class
+    item.innerHTML = `
+      <h3>${material.title}</h3>
+      <p>${material.description}</p>
+      <button onclick="loadMaterial(${index})">Lihat</button>
+      <button onclick="editMaterial(${index})">Edit</button>
+      <button onclick="deleteMaterial(${index})">Hapus</button>
+    `;
+    sidebar.appendChild(item);
+  });
+}
+
+// Helper: Attach Edit Listeners (untuk dynamic item baru, jika event delegation)
+function attachEditListeners() {
+  const sidebar = document.getElementById('sidebar');
+  if (!sidebar) return;
+
+  // Event delegation: Attach ke parent untuk item baru (efisien, no re-attach semua)
+  sidebar.addEventListener('click', (e) => {
+    if (e.target.textContent === 'Edit') {
+      const item = e.target.closest('.sidebar-item');
+      const index = Array.from(sidebar.children).indexOf(item);
+      editMaterial(index);
+    }
+  });
+}
+
+// Fungsi Load Material (pastikan ini ada dan update untuk tampil analysistools)
+function loadMaterial(id) {
+  const material = materialContents[id];
+  if (!material) return;
+
+  const contentArea = document.getElementById('content-area');  // Sesuaikan id
+  contentArea.innerHTML = material.content;  // Load konten (termasuk analysistools jika id match)
+
+  // Highlight active di sidebar (opsional)
+  document.querySelectorAll('.sidebar-item').forEach((item, idx) => {
+    item.classList.toggle('active', idx === id);
+  });
+
+  console.log(`Loaded material ${id}: ${material.title}`);
+}
+
+// Fungsi Edit (contoh sederhana, sesuaikan jika ada modal edit)
+function editMaterial(id) {
+  const material = materialContents[id];
+  if (!material) return;
+
+  // Buka modal edit atau isi form (contoh: alert untuk test)
+  const newTitle = prompt('Edit judul:', material.title);
+  const newDesc = prompt('Edit deskripsi:', material.description);
+  const newContent = prompt('Edit konten (HTML):', material.content.substring(0, 100) + '...');
+
+  if (newTitle) {
+    material.title = newTitle;
+    material.description = newDesc || material.description;
+    material.content = newContent || material.content;
+    renderSidebar();  // Re-render setelah edit
+    if (document.querySelector('.active')) loadMaterial(id);  // Reload jika active
+    alert('Materi diupdate!');
+  }
+}
+
+// Fungsi Delete (untuk lengkap, jika perlu)
+function deleteMaterial(id) {
+  if (confirm('Hapus materi?')) {
+    materialContents.splice(id, 1);
+    // Re-index id (opsional, atau gunakan index tetap)
+    materialContents.forEach((mat, idx) => mat.id = idx);
+    renderSidebar();
+    loadMaterial(0);  // Kembali ke materi pertama
+    alert('Dihapus!');
+  }
+}
+
+// PERBAIKAN: Delete dari materialsArray, re-index, re-render
 function deleteMaterial(materialId, event) {
   event.stopPropagation();
-  if (!isAdminMode || materialId === 8) return; // Blokir delete Tools
+  if (!isAdminMode) return;
 
-  if (confirm(`Apakah Anda yakin ingin menghapus materi "${materialContents[materialId].title}"?`)) {
-    delete materialContents[materialId];
-    // Re-number hanya Materials (1-7)
-    const updatedMaterialContents = {};
-    let currentNewId = 1;
-    const sortedKeys = Object.keys(materialContents).map(Number).filter(id => id <= 7).sort((a, b) => a - b);
+  const material = materialsArray.find(m => m.id == materialId);
+  if (!material) return;
 
-    for (const key of sortedKeys) {
-      updatedMaterialContents[currentNewId] = {
-        ...materialContents[key],
-        title: `${currentNewId}. ${materialContents[key].title.split('. ').slice(1).join('. ')}`
-      };
-      currentNewId++;
-    }
-    // Tools tetap di ID 8, statis
-    if (materialContents[8]) {
-      updatedMaterialContents[8] = materialContents[8]; // Jangan ubah Tools
-    }
-    materialContents = updatedMaterialContents;
-    saveToLocalStorage('materialContents', materialContents);
+  if (confirm(`Hapus "${material.title}"?`)) {
+    // Hapus dari array
+    const index = materialsArray.findIndex(m => m.id == materialId);
+    materialsArray.splice(index, 1);
 
-    loadInitialContent(); // Rebuild sidebar
-    alert('Materi berhasil dihapus dari Materials!');
+    // Re-index ID selanjutnya (shift down)
+    materialsArray.forEach((mat, idx) => {
+      mat.id = idx + 1;
+      mat.title = mat.title.replace(/^\d+\.\s*/, '') || mat.title; // Hapus prefix lama
+      mat.title = `${mat.id}. ${mat.title}`; // Tambah prefix baru
+    });
+
+    // Update next ID
+    window.nextMaterialId = materialsArray.length + 1;
+
+    // Simpan
+    saveToLocalStorage('materialsArray', materialsArray);
+
+    // Re-render sidebar
+    loadInitialContent();
+
+    alert('Materi dihapus dan sidebar di-update!');
+    // Kembali ke welcome atau material pertama
     document.getElementById('pageContent').innerHTML = initialWelcomeContent;
-    loadPageContentFromLocalStorage();
   }
 }
 
@@ -4024,23 +4207,28 @@ function deleteMaterial(materialId, event) {
     el.addEventListener('blur', handleEditBlur);
   }
 
-  /**
-   * Loads initial content from local storage and rebuilds the sidebar.
-   */
+// PERBAIKAN: Load initial content dengan array materials + tools statis
 function loadInitialContent() {
-  // Load material contents from local storage
-  const storedMaterialContents = loadFromLocalStorage('materialContents');
-  if (storedMaterialContents) {
-    materialContents = storedMaterialContents;
+  // Load materials dari storage (panggil di sini juga untuk refresh)
+  loadMaterialsFromStorage();
+
+  // Load pageData dari localStorage (tetap sama seperti lama)
+  const pageData = loadFromLocalStorage('pageData');
+  if (pageData) {
+    for (const id in pageData) {
+      const el = document.querySelector(`[data-editable-id="${id}"]`);
+      if (el) el.innerHTML = pageData[id];
+    }
   }
 
   const materialsNav = document.getElementById('materials-sidebar');
-  
-  // Clear existing content except admin-controls (jika ada)
+  if (!materialsNav) return; // Exit jika sidebar tidak ada
+
+  // Clear sections lama
   const existingSections = materialsNav.querySelectorAll('.materials-section, .tools-section');
   existingSections.forEach(section => section.remove());
 
-  // Buat Materials Section (Editable, items 1-7)
+  // Buat Materials Section (editable)
   const materialsSection = document.createElement('div');
   materialsSection.classList.add('materials-section');
   materialsSection.innerHTML = `
@@ -4048,59 +4236,55 @@ function loadInitialContent() {
   `;
   materialsNav.appendChild(materialsSection);
 
-  // Buat Tools Section (Statis, items 8 & 9)
+  // Render materials dari array (sequential, editable)
+  materialsArray.forEach(material => {
+    const item = document.createElement('div');
+    item.classList.add('material-item');
+    item.dataset.materialId = material.id;
+    item.onclick = (e) => { e.stopPropagation(); showMaterial(material.id); };
+    item.innerHTML = `
+      <strong class="editable-content" data-editable-id="material-title-${material.id}">${material.title}</strong>
+      <div class="material-subtitle editable-content" data-editable-id="material-subtitle-${material.id}">${material.subtitle}</div>
+      <button class="edit-btn" onclick="editMaterial(${material.id}, event)">Edit</button>
+      <button class="delete-btn" onclick="deleteMaterial(${material.id}, event)">Hapus</button>
+    `;
+    materialsSection.appendChild(item);
+  });
+
+  // Tambah admin-controls di akhir materials section
+  const adminControls = document.createElement('div');
+  adminControls.classList.add('admin-controls');
+  adminControls.innerHTML = '<button class="add-material-btn" onclick="addMaterial()">+ Tambah Materi</button>';
+  materialsSection.appendChild(adminControls);
+
+  // Buat Tools Section (statis, ID string)
   const toolsSection = document.createElement('div');
   toolsSection.classList.add('tools-section');
   toolsSection.innerHTML = `
     <div class="tools-title">Tools</div>
-    <!-- Item 8: Analysis -->
-    <div class="material-item" data-material-id="8" onclick="showMaterial(8)">
-      <strong>Analysis</strong>
-      <div class="material-subtitle">Tools analisis data statistik interaktif</div>
-    </div>
-    <!-- Item 9: Whiteboard (Tambahan untuk perbaikan) -->
-    <div class="material-item" data-material-id="9" onclick="showMaterial(9)">
-      <strong>Whiteboard</strong>
-      <div class="material-subtitle">Tools untuk menggambar, menulis catatan, dan brainstorming</div>
-    </div>
   `;
+  toolsArray.forEach(tool => {
+    const item = document.createElement('div');
+    item.classList.add('material-item');
+    item.dataset.materialId = tool.id; // ID string
+    item.onclick = (e) => { e.stopPropagation(); showMaterial(tool.id); };
+    item.innerHTML = `
+      <strong>${tool.title}</strong>
+      <div class="material-subtitle">${tool.subtitle}</div>
+    `;
+    toolsSection.appendChild(item);
+  });
   materialsNav.appendChild(toolsSection);
 
-  // Tambah admin-controls ke Materials section (editable)
-  const adminControls = document.createElement('div');
-  adminControls.classList.add('admin-controls');
-  adminControls.innerHTML = '<button class="add-material-btn" onclick="addNewMaterial()">+ Tambah Materi Baru</button>';
-  materialsSection.appendChild(adminControls);
+  // Enable editing jika admin mode (tetap sama)
+  if (isAdminMode) {
+    enableAdminEditing();
+  }
 
-  // Bangun Materials items (1-7) secara dinamis (editable)
-  const sortedMaterialIds = Object.keys(materialContents)
-    .map(Number)
-    .filter(id => id >= 1 && id <= 7) // Hanya 1-7 untuk Materials
-    .sort((a, b) => a - b);
-
-  sortedMaterialIds.forEach(id => {
-    const material = materialContents[id];
-    const newMaterialItem = document.createElement('div');
-    newMaterialItem.classList.add('material-item');
-    newMaterialItem.setAttribute('data-material-id', id);
-    newMaterialItem.setAttribute('onclick', `showMaterial(${id})`);
-    newMaterialItem.innerHTML = `
-      <strong class="editable-content" data-editable-id="material-title-${id}">${material.title}</strong>
-      <div class="material-subtitle editable-content" data-editable-id="material-subtitle-${id}">${material.subtitle}</div>
-      <button class="edit-btn" onclick="editMaterial(${id}, event)">Edit</button>
-      <button class="delete-btn" onclick="deleteMaterial(${id}, event)">Hapus</button>
-    `;
-    materialsSection.insertBefore(newMaterialItem, adminControls); // Insert sebelum admin-controls
-  });
-
-  // Update nextMaterialId (hanya untuk Materials)
-  nextMaterialId = Math.max(...Object.keys(materialContents).map(Number).filter(id => id <= 7)) + 1 || 8;
-
-  // Load other page content from local storage
-  loadPageContentFromLocalStorage();
-
-  // Set initial welcome content after loading from storage
+  // Set initial welcome content
   initialWelcomeContent = document.getElementById('pageContent').innerHTML;
+
+  console.log('Sidebar re-rendered: Materials count =', materialsArray.length, 'Tools count =', toolsArray.length);
 }
 
   /**
@@ -6762,6 +6946,120 @@ function renderStemLeaf(data) {
     );
   }
 
+ // Fungsi Sample Size (dari panduan sebelumnya, sekarang di dalam scope ini)
+  function calculateSampleSizeAll() {
+    const N = parseFloat(document.getElementById('populasi').value) || 0;
+    const ePercent = parseFloat(document.getElementById('margin-error').value) || 5;
+    const confidence = parseFloat(document.getElementById('confidence').value) || 95;
+    const p = parseFloat(document.getElementById('proporsi').value) || 0.5;
+    
+    const e = ePercent / 100;
+    const zScores = { 90: 1.645, 95: 1.96, 99: 2.576 };
+    const Z = zScores[confidence] || 1.96;
+    const q = 1 - p;
+    
+    if (N <= 0 || e <= 0 || e >= 1 || p < 0 || p > 1) {
+      alert('Periksa input: N > 0, e 0-100%, p 0-1!');
+      return;
+    }
+    
+    const nSlovin = N / (1 + N * Math.pow(e, 2));
+    let nCochran = (Math.pow(Z, 2) * p * q) / Math.pow(e, 2);
+    if (N > 0) nCochran = nCochran / (1 + (nCochran - 1) / N);
+        const nLemeshow = (Math.pow(Z, 2) * p * q * N) / (Math.pow(e, 2) * (N - 1) + Math.pow(Z, 2) * p * q);
+    
+    // Bulatkan ke atas
+    const results = [
+      { rumus: 'Slovin', n: Math.ceil(nSlovin), desc: `n = N / (1 + N × e²) = ${N} / (1 + ${N} × ${e.toFixed(3)}²) ≈ ${nSlovin.toFixed(2)}` },
+      { rumus: 'Cochran', n: Math.ceil(nCochran), desc: `n = (Z² × p × q) / e² adjusted = (${Z.toFixed(2)}² × ${p} × ${q}) / ${e.toFixed(3)}² ≈ ${nCochran.toFixed(2)} (untuk N=${N})` },
+      { rumus: 'Lemeshow', n: Math.ceil(nLemeshow), desc: `n = (Z² × p × q × N) / (e² × (N-1) + Z² × p × q) ≈ ${nLemeshow.toFixed(2)}` }
+    ];
+    
+    // Tampilkan di tabel
+    const tbody = document.querySelector('#sample-table tbody');
+    if (tbody) {
+      tbody.innerHTML = '';
+      results.forEach(result => {
+        const row = tbody.insertRow();
+        row.innerHTML = `
+          <td style="border: 1px solid #ddd; padding: 8px;">${result.rumus}</td>
+          <td style="border: 1px solid #ddd; padding: 8px; font-weight: bold; color: #007bff;">${result.n}</td>
+          <td style="border: 1px solid #ddd; padding: 8px; font-size: 12px;">${result.desc}</td>
+        `;
+      });
+    }
+    
+    console.log('Sample size calculated:', results);
+  }
+  
+// Fungsi Random Number Generator (Tambah di dalam blok showAnalysisTool)
+// Safety: Jika sudah ada, skip (dalam scope yang sama)
+if (typeof generateRandomSample === 'undefined') {
+  
+  function generateRandomSample(regenerate = false) {
+    const N = parseInt(document.getElementById('populasi-rng').value) || 1000;
+    const n = parseInt(document.getElementById('sampel-rng').value) || 100;
+    const withReplacement = document.getElementById('with-replacement').checked;
+    const sorted = document.getElementById('sort-results').checked;
+    
+    // Validasi
+    if (N < 1 || n < 1) {
+      alert('Populasi (N) dan Sampel (n) harus ≥ 1!');
+      return;
+    }
+    if (n > N && !withReplacement) {
+      alert('Ukuran sampel (n) tidak boleh > populasi (N) tanpa pengulangan!');
+      return;
+    }
+    if (n > 10000) {
+      if (!confirm('Sampel besar (>10000) mungkin lambat. Lanjutkan?')) return;
+    }
+    
+    let randomNumbers = [];
+    
+    if (withReplacement) {
+      // Dengan pengulangan: Random independen
+      for (let i = 0; i < n; i++) {
+        randomNumbers.push(Math.floor(Math.random() * N) + 1);  // 1 sampai N
+      }
+    } else {
+      // Tanpa pengulangan: Fisher-Yates Shuffle
+      let pool = Array.from({length: N}, (_, i) => i + 1);  // Array 1 sampai N
+      for (let i = pool.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [pool[i], pool[j]] = [pool[j], pool[i]];  // Swap
+      }
+      randomNumbers = pool.slice(0, n);  // Ambil n pertama
+    }
+    
+    // Urutkan jika dipilih
+    if (sorted) {
+      randomNumbers.sort((a, b) => a - b);
+    }
+    
+    // Tampilkan daftar
+    const listDiv = document.getElementById('random-numbers-list');
+    const statsDiv = document.getElementById('rng-stats');
+    if (listDiv && statsDiv) {
+      // Daftar sebagai <ul> atau comma-separated
+      let listHTML = randomNumbers.map(num => `<span style="margin-right: 5px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">${num}</span>`).join(' ');
+      if (randomNumbers.length > 50) {
+        listHTML = `<p>Nomor acak (pertama 50 dari ${n}): ${randomNumbers.slice(0, 50).join(', ')}...</p><p>Total: ${n} nomor unik.</p>`;
+      }
+      listDiv.innerHTML = listHTML;
+      
+      // Stats
+      const uniqueCount = new Set(randomNumbers).size;
+      statsDiv.innerHTML = `Sampel dihasilkan: ${n} nomor${withReplacement ? ' (dengan pengulangan, unik: ' + uniqueCount + ')' : ' unik'} dari populasi ${N}.`;
+      
+      // Scroll ke output
+      listDiv.scrollTop = 0;
+    }
+    
+    console.log('Random sample generated:', randomNumbers.slice(0, 10) + '...');  // Log sample
+  }
+}
+
   /**
    * Runs Instrument Test (Validity & Reliability) on the input data.
    */
@@ -7112,6 +7410,7 @@ function renderStemLeaf(data) {
       placeholder.style.display = 'none';
     }
 
+    loadMaterialsFromStorage();
     // Load initial content (rebuild sidebar and page from localStorage)
     loadInitialContent();
 
