@@ -1506,6 +1506,26 @@ body.admin-active .tools-section .material-item:hover {
 #rng-output {
   min-height: 200px;
 }
+ 
+    /* Tambahkan CSS accordion di akhir blok ini */
+    details > summary {
+      cursor: pointer;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 5px;
+      font-weight: bold; /* Opsional: Untuk tampilan lebih menonjol */
+      transition: background 0.3s ease; /* Animasi halus */
+    }
+    details[open] > summary {
+      background: #e0e0e0;
+    }
+    /* Opsional: Styling tambahan untuk konten accordion */
+    details > div {
+      margin-left: 20px; /* Indent konten di dalam accordion */
+      padding: 10px;
+      border-left: 2px solid #2196f3; /* Garis pemisah */
+    }
 
 </style>
 </head>
@@ -3236,86 +3256,93 @@ Kelompok2: 34, 56, 78"></textarea>
         <div id="instrumentTestResults" style="margin-top: 20px;"></div>
       </div>
     `,
-    'Sample Size': `
-      <h2>Menetukan Ukuran Sampel</h2>
-      <p>Menentukan ukuran sampel yang diperlukan atau kekuatan uji statistik.</p>  
-          
-          <div class="analysis-section" style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 20px;">
-            <h3>1. Sample Size Calculator</h3>
-            <p>Hitung ukuran sampel berdasarkan rumus Slovin, Cochran, dan Lemeshow.</p>
-            <div class="form-group">
-              <label for="populasi">Ukuran Populasi (N):</label>
-              <input type="number" id="populasi" value="1000" min="1" placeholder="Contoh: 1000">
-            </div>
-            <div class="form-group">
-              <label for="margin-error">Margin Error (e, %):</label>
-              <input type="number" id="margin-error" value="5" min="1" max="20" step="0.5" placeholder="Contoh: 5">
-            </div>
-            <div class="form-group">
-              <label for="confidence">Confidence Level:</label>
-              <select id="confidence">
-                <option value="90">90% (Z=1.645)</option>
-                <option value="95" selected>95% (Z=1.96)</option>
-                <option value="99">99% (Z=2.576)</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="proporsi">Proporsi Estimasi (p, 0-1):</label>
-              <input type="number" id="proporsi" value="0.5" min="0" max="1" step="0.1" placeholder="Default: 0.5">
-            </div>
-            <button class="btn-primary" onclick="calculateSampleSizeAll()" style="margin-bottom: 20px;">Hitung Sample Size</button>
-            <div id="sample-output">
-              <h4>Hasil Perhitungan:</h4>
-              <table id="sample-table" style="width: 100%; border-collapse: collapse; font-size: 14px;">
-                <thead><tr style="background: #f0f0f0;"><th style="border: 1px solid #ddd; padding: 8px;">Rumus</th><th style="border: 1px solid #ddd; padding: 8px;">Ukuran Sampel (n)</th><th style="border: 1px solid #ddd; padding: 8px;">Penjelasan</th></tr></thead>
-                <tbody><!-- Diisi JS --></tbody>
-              </table>
-            </div>
-            <div class="references" style="margin-top: 20px; font-size: 12px;">
-              <h4>Referensi:</h4>
-              <ul>
-                <li>Slovin: Populasi terbatas.</li>
-                <li>Cochran: Estimasi proporsi.</li>
-                <li>Lemeshow: Survei kesehatan (Lemeshow et al., 1990).</li>
-              </ul>
-            </div>
-          </div>
-		  
-		  <div class="analysis-form">
-		  <h3>2. Power Analysis</h3>
-          <div class="form-group">
-            <label>Jenis Uji:</label>
-            <select id="powerTestType" onchange="updatePowerAnalysisForm()">
-              <option value="t-test">Uji t (Two-sample)</option>
-              <option value="anova">ANOVA (One-way)</option>
-              <option value="correlation">Korelasi Pearson</option>
-              <option value="regression">Regresi Linear Sederhana</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label id="effectSizeLabel">Ukuran Efek (Cohen's d):</label>
-            <input type="number" id="effectSize" value="0.5" step="0.1"/>
-            <small id="effectSizeHint">0.2 (kecil), 0.5 (sedang), 0.8 (besar)</small>
-          </div>
-          <div class="form-group">
-            <label>Tingkat Signifikansi (α):</label>
-            <select id="alpha_power">
-              <option value="0.01">0.01</option>
-              <option value="0.05" selected>0.05</option>
-              <option value="0.10">0.10</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Power yang Diinginkan (1-β):</label>
-            <input type="number" id="desiredPower" value="0.8" step="0.05" min="0.5" max="0.99"/>
-          </div>
-          <button class="btn-primary" onclick="runPowerAnalysis()">Hitung Power</button>
-          <div id="powerAnalysisResults" style="margin-top: 20px;"></div>
-        </div>
-		
-	<!-- Fitur 3: Random Number Generator (Baru - Setelah Sample Size) -->
-    <div class="analysis-section" style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 20px;">
-      <h3>3. Random Number Generator</h3>
+'Sample Size': `
+  <h2>Menetukan Ukuran Sampel</h2>
+  <p>Menentukan ukuran sampel yang diperlukan atau kekuatan uji statistik. Gunakan accordion di bawah untuk navigasi submenu.</p>
+  
+  <details>
+    <summary>Submenu 1: Sample Size Calculator</summary>
+    <div class="analysis-section" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+      <h3>Sample Size Calculator</h3>
+      <p>Hitung ukuran sampel berdasarkan rumus Slovin, Cochran, dan Lemeshow.</p>
+      <div class="form-group">
+        <label for="populasi">Ukuran Populasi (N):</label>
+        <input type="number" id="populasi" value="1000" min="1" placeholder="Contoh: 1000">
+      </div>
+      <div class="form-group">
+        <label for="margin-error">Margin Error (e, %):</label>
+        <input type="number" id="margin-error" value="5" min="1" max="20" step="0.5" placeholder="Contoh: 5">
+      </div>
+      <div class="form-group">
+        <label for="confidence">Confidence Level:</label>
+        <select id="confidence">
+          <option value="90">90% (Z=1.645)</option>
+          <option value="95" selected>95% (Z=1.96)</option>
+          <option value="99">99% (Z=2.576)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="proporsi">Proporsi Estimasi (p, 0-1):</label>
+        <input type="number" id="proporsi" value="0.5" min="0" max="1" step="0.1" placeholder="Default: 0.5">
+      </div>
+      <button class="btn-primary" onclick="calculateSampleSizeAll()" style="margin-bottom: 20px;">Hitung Sample Size</button>
+      <div id="sample-output">
+        <h4>Hasil Perhitungan:</h4>
+        <table id="sample-table" style="width: 100%; border-collapse: collapse; font-size: 14px;">
+          <thead><tr style="background: #f0f0f0;"><th style="border: 1px solid #ddd; padding: 8px;">Rumus</th><th style="border: 1px solid #ddd; padding: 8px;">Ukuran Sampel (n)</th><th style="border: 1px solid #ddd; padding: 8px;">Penjelasan</th></tr></thead>
+          <tbody><!-- Diisi JS --></tbody>
+        </table>
+      </div>
+      <div class="references" style="margin-top: 20px; font-size: 12px;">
+        <h4>Referensi:</h4>
+        <ul>
+          <li>Slovin: Populasi terbatas.</li>
+          <li>Cochran: Estimasi proporsi.</li>
+          <li>Lemeshow: Survei kesehatan (Lemeshow et al., 1990).</li>
+        </ul>
+      </div>
+    </div>
+  </details>
+  
+  <details>
+    <summary>Submenu 2: Power Analysis</summary>
+    <div class="analysis-form" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+      <h3>Power Analysis</h3>
+      <div class="form-group">
+        <label>Jenis Uji:</label>
+        <select id="powerTestType" onchange="updatePowerAnalysisForm()">
+          <option value="t-test">Uji t (Two-sample)</option>
+          <option value="anova">ANOVA (One-way)</option>
+          <option value="correlation">Korelasi Pearson</option>
+          <option value="regression">Regresi Linear Sederhana</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label id="effectSizeLabel">Ukuran Efek (Cohen's d):</label>
+        <input type="number" id="effectSize" value="0.5" step="0.1"/>
+        <small id="effectSizeHint">0.2 (kecil), 0.5 (sedang), 0.8 (besar)</small>
+      </div>
+      <div class="form-group">
+        <label>Tingkat Signifikansi (α):</label>
+        <select id="alpha_power">
+          <option value="0.01">0.01</option>
+          <option value="0.05" selected>0.05</option>
+          <option value="0.10">0.10</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Power yang Diinginkan (1-β):</label>
+        <input type="number" id="desiredPower" value="0.8" step="0.05" min="0.5" max="0.99"/>
+      </div>
+      <button class="btn-primary" onclick="runPowerAnalysis()">Hitung Power</button>
+      <div id="powerAnalysisResults" style="margin-top: 20px;"></div>
+    </div>
+  </details>
+  
+  <details>
+    <summary>Submenu 3: Random Number Generator</summary>
+    <div class="analysis-section" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+      <h3>Random Number Generator</h3>
       <p>Generate nomor acak untuk sampel terpilih dari populasi (1 sampai N). Gunakan setelah hitung ukuran sampel di atas.</p>
       <div class="form-group">
         <label for="populasi-rng">Ukuran Populasi (N):</label>
@@ -3330,7 +3357,7 @@ Kelompok2: 34, 56, 78"></textarea>
           <input type="checkbox" id="with-replacement" style="margin-right: 5px;"> Izinkan Pengulangan (Dengan Replacement)
         </label>
       </div>
-	  <div class="form-group">
+      <div class="form-group">
         <label>
           <input type="checkbox" id="sort-results" checked style="margin-right: 5px;"> Urutkan Hasil (Ascending)
         </label>
@@ -3355,7 +3382,8 @@ Kelompok2: 34, 56, 78"></textarea>
         </ul>
       </div>
     </div>
-   `
+  </details>
+`
   };
   
   let currentDescriptiveData = [];
@@ -6997,67 +7025,107 @@ function renderStemLeaf(data) {
 if (typeof generateRandomSample === 'undefined') {
   
   function generateRandomSample(regenerate = false) {
-    const N = parseInt(document.getElementById('populasi-rng').value) || 1000;
-    const n = parseInt(document.getElementById('sampel-rng').value) || 100;
-    const withReplacement = document.getElementById('with-replacement').checked;
-    const sorted = document.getElementById('sort-results').checked;
-    
-    // Validasi
-    if (N < 1 || n < 1) {
-      alert('Populasi (N) dan Sampel (n) harus ≥ 1!');
-      return;
-    }
-    if (n > N && !withReplacement) {
-      alert('Ukuran sampel (n) tidak boleh > populasi (N) tanpa pengulangan!');
-      return;
-    }
-    if (n > 10000) {
-      if (!confirm('Sampel besar (>10000) mungkin lambat. Lanjutkan?')) return;
-    }
-    
-    let randomNumbers = [];
-    
-    if (withReplacement) {
-      // Dengan pengulangan: Random independen
-      for (let i = 0; i < n; i++) {
-        randomNumbers.push(Math.floor(Math.random() * N) + 1);  // 1 sampai N
-      }
-    } else {
-      // Tanpa pengulangan: Fisher-Yates Shuffle
-      let pool = Array.from({length: N}, (_, i) => i + 1);  // Array 1 sampai N
-      for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];  // Swap
-      }
-      randomNumbers = pool.slice(0, n);  // Ambil n pertama
-    }
-    
-    // Urutkan jika dipilih
-    if (sorted) {
-      randomNumbers.sort((a, b) => a - b);
-    }
-    
-    // Tampilkan daftar
-    const listDiv = document.getElementById('random-numbers-list');
-    const statsDiv = document.getElementById('rng-stats');
-    if (listDiv && statsDiv) {
-      // Daftar sebagai <ul> atau comma-separated
-      let listHTML = randomNumbers.map(num => `<span style="margin-right: 5px; background: #e9ecef; padding: 2px 6px; border-radius: 3px;">${num}</span>`).join(' ');
-      if (randomNumbers.length > 50) {
-        listHTML = `<p>Nomor acak (pertama 50 dari ${n}): ${randomNumbers.slice(0, 50).join(', ')}...</p><p>Total: ${n} nomor unik.</p>`;
-      }
-      listDiv.innerHTML = listHTML;
-      
-      // Stats
-      const uniqueCount = new Set(randomNumbers).size;
-      statsDiv.innerHTML = `Sampel dihasilkan: ${n} nomor${withReplacement ? ' (dengan pengulangan, unik: ' + uniqueCount + ')' : ' unik'} dari populasi ${N}.`;
-      
-      // Scroll ke output
-      listDiv.scrollTop = 0;
-    }
-    
-    console.log('Random sample generated:', randomNumbers.slice(0, 10) + '...');  // Log sample
+  const N = parseInt(document.getElementById('populasi-rng').value) || 1000;
+  const n = parseInt(document.getElementById('sampel-rng').value) || 100;
+  const withReplacement = document.getElementById('with-replacement').checked;
+  const sorted = document.getElementById('sort-results').checked;
+  
+  // Validasi (tetap sama)
+  if (N < 1 || n < 1) {
+    alert('Populasi (N) dan Sampel (n) harus ≥ 1!');
+    return;
   }
+  if (n > N && !withReplacement) {
+    alert('Ukuran sampel (n) tidak boleh > populasi (N) tanpa pengulangan!');
+    return;
+  }
+  if (n > 10000) {
+    if (!confirm('Sampel besar (>10000) mungkin lambat. Lanjutkan?')) return;
+  }
+  
+  let randomNumbers = [];
+  
+  if (withReplacement) {
+    // Dengan pengulangan: Random independen
+    for (let i = 0; i < n; i++) {
+      randomNumbers.push(Math.floor(Math.random() * N) + 1);  // 1 sampai N
+    }
+  } else {
+    // Tanpa pengulangan: Fisher-Yates Shuffle
+    let pool = Array.from({length: N}, (_, i) => i + 1);  // Array 1 sampai N
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];  // Swap
+    }
+    randomNumbers = pool.slice(0, n);  // Ambil n pertama
+  }
+  
+  // Urutkan jika dipilih
+  if (sorted) {
+    randomNumbers.sort((a, b) => a - b);
+  }
+  
+  // Tampilkan daftar (PERBAIKAN: Tampilkan full untuk n ≤ 200, ringkas untuk lebih besar)
+  const listDiv = document.getElementById('random-numbers-list');
+  const statsDiv = document.getElementById('rng-stats');
+  if (listDiv && statsDiv) {
+    let listHTML = '';
+    
+    if (randomNumbers.length <= 200) {
+      // Tampilkan SEMUA nomor: Comma-separated dengan <br> setiap 20 untuk readability
+      const chunks = [];
+      for (let i = 0; i < randomNumbers.length; i += 20) {
+        chunks.push(randomNumbers.slice(i, i + 20).join(', '));
+      }
+      listHTML = '<p>' + chunks.join('</p><p>') + '</p>';
+      listHTML += `<p style="font-style: italic; color: #666;">(Semua ${n} nomor ditampilkan. Copy untuk gunakan.)</p>`;
+    } else {
+      // Ringkas untuk n > 200: 50 pertama + tombol tampilkan semua
+      const first50 = randomNumbers.slice(0, 50).join(', ');
+      listHTML = `
+        <p>Nomor acak (pertama 50 dari ${n}): ${first50}...</p>
+        <button class="btn-secondary" onclick="showAllRandomNumbers()" style="margin-top: 5px;">Tampilkan Semua Nomor</button>
+        <p>Total: ${n} nomor unik.</p>
+      `;
+    }
+    
+    listDiv.innerHTML = listHTML;
+    
+    // Stats (tetap sama)
+    const uniqueCount = new Set(randomNumbers).size;
+    statsDiv.innerHTML = `Sampel dihasilkan: ${n} nomor${withReplacement ? ' (dengan pengulangan, unik: ' + uniqueCount + ')' : ' unik'} dari populasi ${N}.`;
+    
+    // Scroll ke output
+    listDiv.scrollTop = 0;
+  }
+  
+  console.log('Random sample generated:', randomNumbers.slice(0, 10) + '... (total ' + n + ')');  // Log sample
+  
+  // Fungsi tambahan: Tampilkan semua nomor jika ringkas (untuk n > 200)
+let lastRandomNumbers = [];  // Simpan array terakhir untuk akses
+
+function showAllRandomNumbers() {
+  if (lastRandomNumbers.length > 0) {
+    const sorted = document.getElementById('sort-results').checked;
+    let displayNumbers = [...lastRandomNumbers];  // Copy array
+    if (sorted) displayNumbers.sort((a, b) => a - b);
+    
+    // Tampilkan full seperti di atas
+    const listDiv = document.getElementById('random-numbers-list');
+    if (listDiv) {
+      const chunks = [];
+      for (let i = 0; i < displayNumbers.length; i += 20) {
+        chunks.push(displayNumbers.slice(i, i + 20).join(', '));
+      }
+      listDiv.innerHTML = '<p>' + chunks.join('</p><p>') + '</p><p style="font-style: italic; color: #666;">(Semua nomor ditampilkan. Copy untuk gunakan.)</p>';
+    }
+  }
+}
+
+// Update generateRandomSample untuk simpan array terakhir
+// (Tambahkan di akhir fungsi generateRandomSample, sebelum console.log)
+lastRandomNumbers = [...randomNumbers];
+}
 }
 
   /**
