@@ -6,6 +6,7 @@
 <title>Statistical Analysis and Research Consulting (SARC)</title>
 <!-- Chart.js CDN for dynamic charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    color: #555;
 <style>
   /* Reset CSS */
   * {
@@ -179,7 +180,6 @@
     margin-left: 1rem; /* 16px */
     margin-top: 0.5rem; /* 8px */
     font-size: 0.8125rem; /* 13px */
-    color: #555;
     font-style: italic;
   }
 
@@ -193,13 +193,15 @@
     min-height: 30rem; /* 480px */
   }
 
-  .page-content {
+ .page-content {
     background: white;
     border-radius: 0.75rem; /* 12px */
     padding: 1.25rem; /* 20px */
     box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.1); /* 0 8px 24px */
     min-height: 25rem; /* 400px */
-    max-width: 100%; /* Ensure it doesn't overflow on small screens */
+    width: 100% !important;
+	max-width: 100%; /* Ensure it doesn't overflow on small screens */
+	max-width: none !important;  /* Izinkan ekspansi penuh, override max-width: 100% jika parent membatasi */
     margin: 0 auto; /* Center content */
   }
 
@@ -1882,10 +1884,10 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
           <input type="text" id="text-input" placeholder="Ketik teks..." style="padding: 5px; border-radius: 4px; border: 1px solid #ccc; display: none; width: 150px;" maxlength="100">
       
           <!-- Eraser -->
-          <button id="eraser-tool" class="tool-btn" style="background: #FF9800; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">🧽Erase</button>
+          <button id="eraser-tool" class="tool-btn" style="background: #FF0000; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">🧽Erase</button>
       
           <!-- Clear All -->
-          <button id="clear-tool" class="tool-btn" style="background: #F44336; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="clearCanvas()">🧹Clear</button>
+          <button id="clear-tool" class="tool-btn" style="background: #FF00FF; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="clearCanvas()">🧹Clear</button>
       
           <button id="delete-tool" class="tool-btn" style="background: #F44336; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="deleteSelected()">🗑️Delete</button>
 		  <button id="undo-tool" class="tool-btn" style="background: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="undo()">↶</button>
@@ -3266,9 +3268,9 @@ Kelompok2: 34, 56, 78"></textarea>
   <p>Menentukan ukuran sampel yang diperlukan atau kekuatan uji statistik. Gunakan accordion di bawah untuk navigasi submenu.</p>
   
   <details>
-    <summary>Sample Size Calculator</summary>
+    <summary>nCalculator</summary>
     <div class="analysis-section" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-      <h3>Sample Size Calculator</h3>
+      <h3>nCalculator</h3>
       <p>Hitung ukuran sampel berdasarkan rumus Slovin, Cochran, dan Lemeshow.</p>
       <div class="form-group">
         <label for="populasi">Ukuran Populasi (N):</label>
@@ -3310,9 +3312,9 @@ Kelompok2: 34, 56, 78"></textarea>
   </details>
   
   <details>
-    <summary>Power Analysis</summary>
+    <summary>Power Sample</summary>
     <div class="analysis-form" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-      <h3>Power Analysis</h3>
+      <h3>Power Sample</h3>
       <div class="form-group">
         <label>Jenis Uji:</label>
         <select id="powerTestType" onchange="updatePowerAnalysisForm()">
@@ -3345,7 +3347,7 @@ Kelompok2: 34, 56, 78"></textarea>
   </details>
   
   <details>
-    <summary>Random Number Generator</summary>
+    <summary>RN Generator</summary>
     <div class="analysis-section" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
       <h3>Random Number Generator (RNG)</h3>
       <p>Generate nomor acak untuk sampel terpilih dari populasi (1 sampai N). Gunakan setelah hitung ukuran sampel di atas.</p>
