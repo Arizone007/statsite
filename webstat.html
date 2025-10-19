@@ -1637,7 +1637,7 @@ body.admin-active .tools-section .material-item:hover {
     </div>
   </div>
 
- /* <!-- Section 2: Tools (Statis, Non-Editable) -->
+<!-- Section 2: Tools (Statis, Non-Editable) -->
   <div class="tools-section">
     <div class="tools-title">Tools</div> <!-- Statis, no editable -->
     
@@ -1655,7 +1655,7 @@ body.admin-active .tools-section .material-item:hover {
       <!-- No edit/delete buttons karena tools statis -->
     </div>
   </div>
-</nav> */
+</nav>
 
   <!-- Resizer for sidebar -->
   <div class="resizer" id="resizer"></div>
@@ -1852,30 +1852,31 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
           <div id="whiteboard-toolbar" style="background: #f5f5f5; padding: 10px; border-radius: 8px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); z-index: 10;">
 		  
 		  <!-- Pen Tool -->
-          <button id="pen-tool" class="tool-btn" style="background: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">🖊️Pen</button>
+          <button id="pen-tool" class="tool-btn" style="background: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">🖊️Pen </button>
       
           <!-- Color Picker -->
           <label style="display: flex; align-items: center; gap: 5px;">
-            Warna:
             <select id="color-picker" style="padding: 5px; border-radius: 4px; border: 1px solid #ccc;">
-              <option value="#000000">Hitam</option>
-              <option value="#FF0000">Merah</option>
-              <option value="#00FF00">Hijau</option>
-              <option value="#0000FF">Biru</option>
-              <option value="#FFFF00">Kuning</option>
+              <option value="#0000FF">Blue</option>
+			  <option value="#000000">Black</option>
+              <option value="#FF0000">Red</option>
+              <option value="#00FF00">Green</option>
+              <option value="#FFFF00">Yellow</option>
               <option value="#FF00FF">Magenta</option>
               <option value="#00FFFF">Cyan</option>
             </select>
-            <input type="color" id="color-input" value="#000000" style="width: 40px; height: 30px; border: none; border-radius: 4px; cursor: pointer;">
+            <input type="color" id="color-input" value="#0000FF" style="width: 40px; height: 30px; border: none; border-radius: 4px; cursor: pointer;">
           </label>
       
           <!-- Line Width -->
           <label style="display: flex; align-items: center; gap: 5px;">
-            Ketebalan:
             <input type="range" id="line-width" min="1" max="20" value="2" style="width: 80px;">
             <span id="line-width-value">2px</span>
           </label>
       
+		  <!-- Select -->
+          <button id="select-tool" class="tool-btn" style="background: #FF00FF; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">👆Select</button>
+
           <!-- Text Tool -->
           <button id="text-tool" class="tool-btn" style="background: #2196F3; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">📝Text</button>
           <input type="text" id="text-input" placeholder="Ketik teks..." style="padding: 5px; border-radius: 4px; border: 1px solid #ccc; display: none; width: 150px;" maxlength="100">
@@ -1884,13 +1885,17 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
           <button id="eraser-tool" class="tool-btn" style="background: #FF9800; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">🧽Erase</button>
       
           <!-- Clear All -->
-          <button id="clear-tool" class="tool-btn" style="background: #F44336; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="clearCanvas()">🗑️Clear</button>
+          <button id="clear-tool" class="tool-btn" style="background: #F44336; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="clearCanvas()">🧹Clear</button>
       
-          <!-- Save -->
-          <button id="save-tool" class="tool-btn" style="background: #9C27B0; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="saveCanvas()">📝 Save</button>
+          <button id="delete-tool" class="tool-btn" style="background: #F44336; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="deleteSelected()">🗑️Delete</button>
+		  <button id="undo-tool" class="tool-btn" style="background: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="undo()">↶</button>
+		  <button id="redo-tool" class="tool-btn" style="background: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="redo()">↷</button>	  
+
+		  <!-- Save -->
+            <button id="save-tool" class="tool-btn" style="background: #9C27B0; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="saveCanvas()">💾Save</button>
 		    <button id="fullscreen-tool" class="tool-btn" style="background: #607D8B; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="toggleFullscreen()">⛶ Full</button>
 		  </div>
-                            
+		  		                              
 		<!-- Canvas Container (pindah ke dalam wrapper) -->
 		  <div id="canvas-wrapper" style="position: relative; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
 		  <canvas id="whiteboard-canvas" width="800" height="500" style="display: block; cursor: crosshair;"></canvas>
@@ -3261,7 +3266,7 @@ Kelompok2: 34, 56, 78"></textarea>
   <p>Menentukan ukuran sampel yang diperlukan atau kekuatan uji statistik. Gunakan accordion di bawah untuk navigasi submenu.</p>
   
   <details>
-    <summary>Submenu 1: Sample Size Calculator</summary>
+    <summary>Sample Size Calculator</summary>
     <div class="analysis-section" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
       <h3>Sample Size Calculator</h3>
       <p>Hitung ukuran sampel berdasarkan rumus Slovin, Cochran, dan Lemeshow.</p>
@@ -3305,7 +3310,7 @@ Kelompok2: 34, 56, 78"></textarea>
   </details>
   
   <details>
-    <summary>Submenu 2: Power Analysis</summary>
+    <summary>Power Analysis</summary>
     <div class="analysis-form" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
       <h3>Power Analysis</h3>
       <div class="form-group">
@@ -3340,9 +3345,9 @@ Kelompok2: 34, 56, 78"></textarea>
   </details>
   
   <details>
-    <summary>Submenu 3: Random Number Generator</summary>
+    <summary>Random Number Generator</summary>
     <div class="analysis-section" style="margin-top: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-      <h3>Random Number Generator</h3>
+      <h3>Random Number Generator (RNG)</h3>
       <p>Generate nomor acak untuk sampel terpilih dari populasi (1 sampai N). Gunakan setelah hitung ukuran sampel di atas.</p>
       <div class="form-group">
         <label for="populasi-rng">Ukuran Populasi (N):</label>
@@ -3393,9 +3398,27 @@ Kelompok2: 34, 56, 78"></textarea>
 
 // Whiteboard Variables (Global)
 let canvas, ctx, isDrawing = false, isErasing = false, isTextMode = false;
-let currentColor = '#000000', currentLineWidth = 2;
+let currentColor = '#0000FF', currentLineWidth = 2;
 let startX, startY, textX, textY;
 let toolActive = 'pen'; // Default tool
+let isDragging = false;  // Status dragging
+let selectedObject = null;  // Objek yang dipilih (index di objects array)
+let dragOffsetX = 0;  // Offset X untuk drag
+let dragOffsetY = 0;  // Offset Y untuk drag
+let objects = [];  // Array untuk menyimpan semua objek dengan urutan (strokes, texts, images, erases)
+let currentStroke = null;  // Stroke yang sedang digambar
+let currentErase = null;  // Erase stroke yang sedang digambar
+let undoStack = [];
+let redoStack = [];
+let tempText = '';  // Untuk teks sementara saat mengetik
+
+// Tambahan variabel untuk resize
+let resizingObject = null;  // Index objek yang sedang di-resize
+let resizeHandle = null;    // Handle resize (misalnya, posisi sudut)
+let isResizing = false;     // Status apakah sedang resize
+let resizeStartX = 0;       // Posisi awal mouse untuk resize
+let resizeStartY = 0;
+let originalSize = {};      // Ukuran asli objek sebelum resize
 
 // Initialize Whiteboard when shown
 function initWhiteboard() {
@@ -3408,14 +3431,14 @@ function initWhiteboard() {
     const container = canvas.parentElement;
     canvas.width = container.clientWidth;
     canvas.height = container.clientHeight;
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    redrawCanvas();  // Redraw setelah resize
   }
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
 
   // Event Listeners for Tools
   document.getElementById('pen-tool').addEventListener('click', () => selectTool('pen'));
+  document.getElementById('select-tool').addEventListener('click', () => selectTool('select'));
   document.getElementById('text-tool').addEventListener('click', () => selectTool('text'));
   document.getElementById('eraser-tool').addEventListener('click', () => selectTool('erase'));
   
@@ -3436,28 +3459,236 @@ function initWhiteboard() {
   });
   
   // Text Input
-  document.getElementById('text-input').addEventListener('keydown', (e) => {
+  const textInput = document.getElementById('text-input');
+  textInput.addEventListener('input', (e) => {
+    tempText = e.target.value;  // Update teks sementara
+    redrawCanvas();  // Redraw untuk menampilkan teks real-time
+  });
+  textInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
-      addTextToCanvas();
+      addTextFromInput();  // Konfirmasi dan simpan teks
       e.target.style.display = 'none';
+      document.getElementById('text-cursor').style.display = 'none';
       isTextMode = false;
+    } else if (e.key === 'Escape') {
+      // Batal tanpa menambah teks
+      textInput.value = '';
+      tempText = '';
+      textInput.style.display = 'none';
+      document.getElementById('text-cursor').style.display = 'none';
+      isTextMode = false;
+      redrawCanvas();  // Redraw untuk menghapus teks sementara
     }
   });
 
-  // Drawing Events (Mouse)
-  canvas.addEventListener('mousedown', startDrawing);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseup', stopDrawing);
-  canvas.addEventListener('mouseout', stopDrawing);
+  // Tambahkan event blur untuk menambah teks jika ada isi
+  textInput.addEventListener('blur', () => {
+    if (isTextMode && tempText.trim()) {
+      addTextFromInput();
+    } else {
+      // Jika tidak ada teks, reset
+      tempText = '';
+      textInput.style.display = 'none';
+      document.getElementById('text-cursor').style.display = 'none';
+      isTextMode = false;
+      redrawCanvas();
+    }
+  });
+  
+  // Event listeners untuk mouse/touch
+  canvas.addEventListener('mousedown', handleMouseDown);
+  canvas.addEventListener('mousemove', handleMouseMove);
+  canvas.addEventListener('mouseup', handleMouseUp);
+  canvas.addEventListener('mouseout', handleMouseOut);
+  canvas.addEventListener('dblclick', handleDoubleClick);  // Tambahan untuk resize
+  canvas.addEventListener('touchstart', handleTouchStart);
+  canvas.addEventListener('touchmove', handleTouchMove);
+  canvas.addEventListener('touchend', handleTouchEnd);
 
-  // Touch Events (Mobile)
-  canvas.addEventListener('touchstart', handleTouch);
-  canvas.addEventListener('touchmove', handleTouch);
-  canvas.addEventListener('touchend', stopDrawing);
+  // Event listener untuk keyboard (Esc untuk melepas)
+  document.addEventListener('keydown', handleKeyDown);
 
   // Initial Draw
+  redrawCanvas();
+
+  // Event listener untuk paste
+  document.addEventListener('paste', handlePaste);
+
+  console.log('Whiteboard initialized successfully');
+}
+
+// Fungsi untuk menangani paste gambar (diperbaiki dengan preload)
+function handlePaste(e) {
+  e.preventDefault();
+  const items = e.clipboardData.items;
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].type.indexOf('image') !== -1) {
+      const blob = items[i].getAsFile();
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          const scale = Math.min(canvas.width / img.width, canvas.height / img.height, 1);
+          const imgObj = {
+            type: 'image',
+            src: event.target.result,
+            img: img,  // Simpan Image object yang sudah loaded
+            loaded: true,
+            x: 10,
+            y: 10,
+            width: img.width * scale,
+            height: img.height * scale
+          };
+          objects.push(imgObj);  // Push ke objects setelah loaded
+          saveState();
+          redrawCanvas();
+          alert('Gambar berhasil dipaste dan ditambahkan ke kanvas!');
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(blob);
+      return;
+    }
+  }
+  alert('Tidak ada gambar yang terdeteksi di clipboard.');
+}
+
+// Fungsi redraw untuk render ulang canvas berdasarkan urutan objects
+function redrawCanvas() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, canvas.width, canvas.height); // Background putih
+  
+  // Gambar semua objek berdasarkan urutan
+  objects.forEach(obj => {
+    if (obj.type === 'stroke') {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.strokeStyle = obj.color;
+      ctx.lineWidth = obj.width;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      obj.points.forEach((point, index) => {
+        if (index === 0) ctx.moveTo(point.x, point.y);
+        else ctx.lineTo(point.x, point.y);
+      });
+      ctx.stroke();
+    } else if (obj.type === 'erase') {
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.strokeStyle = 'rgba(0,0,0,1)'; // Tidak penting, tapi diperlukan untuk stroke
+      ctx.lineWidth = obj.width;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.beginPath();
+      obj.points.forEach((point, index) => {
+        if (index === 0) ctx.moveTo(point.x, point.y);
+        else ctx.lineTo(point.x, point.y);
+      });
+      ctx.stroke();
+      ctx.globalCompositeOperation = 'source-over'; // Reset
+    } else if (obj.type === 'text') {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = obj.color;
+      ctx.font = `${obj.fontSize}px Arial`;
+      ctx.fillText(obj.text, obj.x, obj.y);
+    } else if (obj.type === 'image' && obj.loaded) {
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(obj.img, obj.x, obj.y, obj.width, obj.height);  // Draw langsung jika loaded
+    }
+  });
+  
+  // Render teks sementara jika dalam mode text
+  if (isTextMode && tempText) {
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = currentColor;
+    ctx.font = `16px Arial`;
+    ctx.fillText(tempText, textX, textY);
+  }
+
+  // Gambar handle resize jika ada objek yang dipilih untuk resize
+  if (resizingObject !== null) {
+    const obj = objects[resizingObject];
+    let handleX, handleY;
+    if (obj.type === 'text') {
+      const textWidth = ctx.measureText(obj.text).width;
+      handleX = obj.x + textWidth;
+      handleY = obj.y;
+    } else if (obj.type === 'image') {
+      handleX = obj.x + obj.width;
+      handleY = obj.y + obj.height;
+    } else if (obj.type === 'stroke') {
+      const bounds = getStrokeBounds(obj);
+      handleX = bounds.maxX;
+      handleY = bounds.maxY;
+    }
+    // Gambar handle sebagai kotak kecil
+    ctx.fillStyle = '#FF0000';
+    ctx.fillRect(handleX - 5, handleY - 5, 10, 10);
+  }
+}
+
+// Fungsi untuk menambahkan teks ke kanvas dari input
+function addTextFromInput() {
+  const textInput = document.getElementById('text-input');
+  const text = textInput.value.trim();
+  if (text) {
+    saveState(); // Simpan state sebelum menambah teks (untuk undo/redo)
+    const textObj = {
+      type: 'text',
+      x: textX,
+      y: textY,
+      text: text,
+      fontSize: 16,
+      color: currentColor
+    };
+    objects.push(textObj);
+    redrawCanvas();
+  }
+  // Reset dan sembunyikan elemen
+  textInput.value = '';
+  tempText = '';  // Reset teks sementara
+  textInput.style.display = 'none';
+  document.getElementById('text-cursor').style.display = 'none';
+  isTextMode = false;
+}
+
+// Fungsi untuk menyimpan state sebelum perubahan
+function saveState() {
+  undoStack.push(JSON.parse(JSON.stringify(objects))); // Deep copy objects
+  redoStack = []; // Clear redo stack saat ada perubahan baru
+}
+
+// Undo: Kembali ke state sebelumnya
+function undo() {
+  if (undoStack.length > 0) {
+    redoStack.push(JSON.parse(JSON.stringify(objects)));
+    objects = undoStack.pop();
+    selectedObject = null;
+    isDragging = false;
+    redrawCanvas();
+  }
+}
+
+// Redo: Maju ke state berikutnya
+function redo() {
+  if (redoStack.length > 0) {
+    undoStack.push(JSON.parse(JSON.stringify(objects)));
+    objects = redoStack.pop();
+    selectedObject = null;
+    isDragging = false;
+    redrawCanvas();
+  }
+}
+
+// Delete objek yang dipilih
+function deleteSelected() {
+  if (selectedObject !== null) {
+    saveState(); // Simpan state sebelum delete
+    objects.splice(selectedObject, 1);
+    selectedObject = null;
+    isDragging = false;
+    redrawCanvas();
+  }
 }
 
 // Tool Selection
@@ -3470,100 +3701,439 @@ function selectTool(tool) {
   document.querySelectorAll('#whiteboard-toolbar .tool-btn').forEach(btn => btn.classList.remove('active'));
   document.getElementById(tool + '-tool')?.classList.add('active');
   
-  canvas.style.cursor = tool === 'pen' || tool === 'erase' ? 'crosshair' : 'default';
+  canvas.style.cursor = tool === 'pen' || tool === 'erase' ? 'crosshair' : tool === 'select' ? 'move' : 'default';
   
-  if (tool === 'text') {
-    document.getElementById('text-input').style.display = 'inline-block';
-    document.getElementById('text-input').focus();
-  } else {
-    document.getElementById('text-input').style.display = 'none';
+  // Hapus set globalCompositeOperation untuk erase, agar tidak erase pixel
+  ctx.globalCompositeOperation = 'source-over';  // Selalu normal draw
+}
+
+// Event Handlers (diperbaiki untuk tool lainnya)
+function handleMouseDown(e) {
+  const rect = canvas.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;  // Pindahkan ke sini agar tersedia di seluruh fungsi
+  const mouseY = e.clientY - rect.top;  // Pindahkan ke sini agar tersedia di seluruh fungsi
+
+  if (resizingObject !== null) {
+    // Hapus definisi mouseX dan mouseY di sini, karena sudah di atas
+    // const mouseX = e.clientX - rect.left;  // Hapus ini
+    // const mouseY = e.clientY - rect.top;  // Hapus ini
+    const obj = objects[resizingObject];
+    let handleX, handleY;
+    if (obj.type === 'text') {
+      const textWidth = ctx.measureText(obj.text).width;
+      handleX = obj.x + textWidth;
+      handleY = obj.y;
+    } else if (obj.type === 'image') {
+      handleX = obj.x + obj.width;
+      handleY = obj.y + obj.height;
+    } else if (obj.type === 'stroke') {
+      const bounds = getStrokeBounds(obj);
+      handleX = bounds.maxX;
+      handleY = bounds.maxY;
+    }
+    if (Math.abs(mouseX - handleX) < 10 && Math.abs(mouseY - handleY) < 10) {
+      isResizing = true;
+      resizeStartX = mouseX;
+      resizeStartY = mouseY;
+      saveState();
+      return;
+    }
   }
-  
-  if (isErasing) {
-    ctx.globalCompositeOperation = 'destination-out'; // Erase mode
-  } else {
-    ctx.globalCompositeOperation = 'source-over'; // Normal draw
+
+  if (toolActive === 'select') {
+    // Jika sudah dragging objek yang sama, klik lagi untuk stop
+    if (isDragging && selectedObject !== null) {
+      const obj = getObjectAtPosition(mouseX, mouseY);  // Sekarang mouseX tersedia
+      if (obj !== null && obj === selectedObject) {
+        isDragging = false;
+        selectedObject = null;
+        redrawCanvas();
+        return;
+      }
+    }
+    // Mulai select baru
+    handleSelectStart(e);
+  } else if (toolActive === 'pen') {
+    // Jika sedang drawing, klik lagi untuk stop
+    if (isDrawing) {
+      stopDrawing();
+      return;
+    }
+    // Mulai drawing baru
+    startDrawing(e);
+  } else if (toolActive === 'erase') {
+    // Jika sedang erasing, klik lagi untuk stop
+    if (isDrawing) {
+      stopErase();
+      return;
+    }
+    // Mulai erasing baru
+    startErase(e);
+  } else if (toolActive === 'text') {
+    textX = mouseX;  // Sekarang mouseX tersedia
+    textY = mouseY;  // Sekarang mouseY tersedia
+    const rect = canvas.getBoundingClientRect();
+    document.getElementById('text-cursor').style.left = (rect.left + textX) + 'px';
+    document.getElementById('text-cursor').style.top = (rect.top + textY) + 'px';
+    document.getElementById('text-cursor').style.display = 'block';
+    const textInput = document.getElementById('text-input');
+    textInput.style.left = (rect.left + textX) + 'px';
+    textInput.style.top = (rect.top + textY) + 'px';
+    textInput.style.display = 'block';
+    setTimeout(() => textInput.focus(), 10);  // Fokus dengan delay untuk memastikan display block
+    isTextMode = true;
   }
 }
 
-// Drawing Functions
-function startDrawing(e) {
-  if (isTextMode) {
+function handleMouseMove(e) {
+if (isResizing && resizingObject !== null) {
+  const rect = canvas.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
+  const obj = objects[resizingObject];
+  
+  // Hitung delta dari posisi awal resize
+  const deltaX = mouseX - resizeStartX;
+  const deltaY = mouseY - resizeStartY;
+  
+  if (obj.type === 'text') {
+    // Untuk text, tingkatkan fontSize berdasarkan deltaX (horizontal), minimal 10px
+    obj.fontSize = Math.max(10, originalSize.fontSize + deltaX / 10);  // /10 untuk skala halus
+  } else if (obj.type === 'image') {
+    // Untuk image, tingkatkan width dan height berdasarkan delta, minimal 10px
+    obj.width = Math.max(10, originalSize.width + deltaX);
+    obj.height = Math.max(10, originalSize.height + deltaY);
+  } else if (obj.type === 'stroke') {
+    // Untuk stroke, skalakan berdasarkan rata-rata delta, minimal 0.1x
+    const scaleFactor = Math.max(0.1, 1 + (deltaX + deltaY) / 200);  // /200 untuk skala halus, minimal 0.1x
+    const bounds = getStrokeBounds(obj);
+    const centerX = (bounds.minX + bounds.maxX) / 2;
+    const centerY = (bounds.minY + bounds.maxY) / 2;
+    obj.points.forEach(point => {
+      point.x = centerX + (point.x - centerX) * scaleFactor;
+      point.y = centerY + (point.y - centerY) * scaleFactor;
+    });
+  }
+  redrawCanvas();
+  return;
+}
+
+  if (isDragging && selectedObject !== null) {
     const rect = canvas.getBoundingClientRect();
-    textX = e.clientX - rect.left;
-    textY = e.clientY - rect.top;
-    document.getElementById('text-cursor').style.left = textX + 'px';
-    document.getElementById('text-cursor').style.top = textY + 'px';
-    document.getElementById('text-cursor').style.display = 'block';
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    
+    const obj = objects[selectedObject];
+    if (obj.type === 'text') {
+      obj.x = mouseX - dragOffsetX;
+      obj.y = mouseY - dragOffsetY;
+    } else if (obj.type === 'stroke') {
+      const deltaX = mouseX - dragOffsetX - getStrokeCenter(obj).x;
+      const deltaY = mouseY - dragOffsetY - getStrokeCenter(obj).y;
+      obj.points.forEach(point => {
+        point.x += deltaX;
+        point.y += deltaY;
+      });
+      dragOffsetX = mouseX - getStrokeCenter(obj).x;
+      dragOffsetY = mouseY - getStrokeCenter(obj).y;
+    } else if (obj.type === 'image') {
+      obj.x = mouseX - dragOffsetX;
+      obj.y = mouseY - dragOffsetY;
+    }
+    
+    redrawCanvas();
+  } else if (toolActive === 'pen' && isDrawing) {
+    draw(e);
+  } else if (toolActive === 'erase' && isDrawing) {
+    erase(e);
+  }
+}
+
+function handleMouseUp() {
+  if (isResizing) {
+    isResizing = false;
     return;
   }
-  
-  isDrawing = true;
-  const rect = canvas.getBoundingClientRect();
-  startX = e.clientX - rect.left;
-  startY = e.clientY - rect.top;
-  ctx.beginPath();
-  ctx.moveTo(startX, startY);
+
+  if (toolActive === 'pen' && isDrawing) {
+    stopDrawing();
+  } else if (toolActive === 'erase' && isDrawing) {
+    stopErase();
+  }
 }
 
-function draw(e) {
-  if (!isDrawing || isTextMode) return;
+function handleMouseOut() {
+  if (isDrawing) {
+    if (toolActive === 'pen') {
+      stopDrawing();
+    } else if (toolActive === 'erase') {
+      stopErase();
+    }
+  }
+}
+
+function handleKeyDown(e) {
+  if (e.key === 'Delete' && selectedObject !== null) {
+    deleteSelected();
+  } else if (e.ctrlKey && e.key === 'x' && selectedObject !== null) {
+    e.preventDefault(); // Cegah default browser cut jika diperlukan (meski jarang di kanvas)
+    deleteSelected();
+  } else if (e.ctrlKey && e.key === 'z') {
+    e.preventDefault(); // Cegah default browser undo
+    undo();
+  } else if (e.ctrlKey && e.key === 'y') {
+    e.preventDefault(); // Cegah default browser redo
+    redo();
+  } else if (e.key === 'Escape') {
+    if (isDragging) {
+      isDragging = false;
+      selectedObject = null;
+      redrawCanvas();
+      console.log('Dragging dilepas dengan Esc');
+    } else if (toolActive === 'pen' && isDrawing) {
+      stopDrawing();
+      console.log('Drawing dilepas dengan Esc');
+    } else if (toolActive === 'erase' && isDrawing) {
+      stopErase();
+      console.log('Erasing dilepas dengan Esc');
+    }
+  }
+}
+
+function handleDoubleClick(e) {
+  const rect = canvas.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
   
+  // Cari objek yang diklik (dari belakang)
+  for (let i = objects.length - 1; i >= 0; i--) {
+    const obj = objects[i];
+    if (isPointInObject(mouseX, mouseY, obj)) {
+      resizingObject = i;
+      originalSize = getObjectSize(obj);  // Simpan ukuran asli
+      redrawCanvas();
+      return;
+    }
+  }
+  // Jika tidak ada objek, nonaktifkan resize
+  resizingObject = null;
+  redrawCanvas();
+}
+
+// Drawing Functions untuk 'Pen' (simpan sebagai stroke di objects)
+function startDrawing(e) {
+  saveState();
+  isDrawing = true;
   const rect = canvas.getBoundingClientRect();
   const x = e.clientX - rect.left;
   const y = e.clientY - rect.top;
-  
-  ctx.lineWidth = currentLineWidth;
-  ctx.lineCap = 'round';
-  ctx.strokeStyle = isErasing ? 'white' : currentColor;
-  
-  ctx.lineTo(x, y);
-  ctx.stroke();
+  currentStroke = {
+    type: 'stroke',
+    points: [{ x, y }],
+    color: currentColor,
+    width: currentLineWidth
+  };
+  objects.push(currentStroke);  // Push ke objects
+}
+
+function draw(e) {
+  if (!isDrawing || toolActive !== 'pen') return;
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  currentStroke.points.push({ x, y });
+  redrawCanvas();
 }
 
 function stopDrawing() {
-  if (isDrawing) {
-    isDrawing = false;
-    ctx.closePath();
-  }
-  if (isTextMode) {
-    document.getElementById('text-cursor').style.display = 'none';
+  isDrawing = false;
+  currentStroke = null;
+}
+
+// Erase Functions untuk 'Erase' (simpan sebagai erase di objects)
+function startErase(e) {
+  saveState();
+  isDrawing = true;
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  currentErase = {
+    type: 'erase',
+    points: [{ x, y }],
+    width: currentLineWidth
+  };
+  objects.push(currentErase);  // Push ke objects
+}
+
+function erase(e) {
+  if (!isDrawing || toolActive !== 'erase') return;
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  currentErase.points.push({ x, y });
+  redrawCanvas();
+}
+
+function stopErase() {
+  isDrawing = false;
+  currentErase = null;
+}
+
+// Handle Select Tool
+function handleSelectStart(e) {
+  const rect = canvas.getBoundingClientRect();
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
+  
+  // Loop dari belakang (objek terbaru dulu)
+  for (let i = objects.length - 1; i >= 0; i--) {
+    const obj = objects[i];
+    if (obj.type === 'text') {
+      const textWidth = ctx.measureText(obj.text).width;
+      const textHeight = obj.fontSize;
+      if (mouseX >= obj.x && mouseX <= obj.x + textWidth &&
+          mouseY >= obj.y - textHeight && mouseY <= obj.y) {
+        selectedObject = i;
+        saveState();
+        isDragging = true;
+        dragOffsetX = mouseX - obj.x;
+        dragOffsetY = mouseY - obj.y;
+        return;
+      }
+    } else if (obj.type === 'stroke') {
+      if (isPointNearStroke(mouseX, mouseY, obj)) {
+        selectedObject = i;
+        saveState();
+        isDragging = true;
+        const center = getStrokeCenter(obj);
+        dragOffsetX = mouseX - center.x;
+        dragOffsetY = mouseY - center.y;
+        return;
+      }
+    } else if (obj.type === 'image') {
+      if (mouseX >= obj.x && mouseX <= obj.x + obj.width &&
+          mouseY >= obj.y && mouseY <= obj.y + obj.height) {
+        selectedObject = i;
+        saveState();
+        isDragging = true;
+        dragOffsetX = mouseX - obj.x;
+        dragOffsetY = mouseY - obj.y;
+        return;
+      }
+    }
   }
 }
 
-// Text Addition
-function addTextToCanvas() {
-  const text = document.getElementById('text-input').value.trim();
-  if (!text) return;
-  
-  ctx.fillStyle = currentColor;
-  ctx.font = `${currentLineWidth * 2}px Arial`;
-  ctx.fillText(text, textX, textY);
-  
-  document.getElementById('text-input').value = '';
+// Helper: Dapatkan objek di posisi mouse
+function getObjectAtPosition(mouseX, mouseY) {
+  for (let i = objects.length - 1; i >= 0; i--) {
+    const obj = objects[i];
+    if (obj.type === 'text') {
+      const textWidth = ctx.measureText(obj.text).width;
+      const textHeight = obj.fontSize;
+      if (mouseX >= obj.x && mouseX <= obj.x + textWidth &&
+          mouseY >= obj.y - textHeight && mouseY <= obj.y) {
+        return i;
+      }
+    } else if (obj.type === 'stroke') {
+      if (isPointNearStroke(mouseX, mouseY, obj)) {
+        return i;
+      }
+    } else if (obj.type === 'image') {
+      if (mouseX >= obj.x && mouseX <= obj.x + obj.width &&
+          mouseY >= obj.y && mouseY <= obj.y + obj.height) {
+        return i;
+      }
+    }
+  }
+  return null;
 }
 
-// Touch Handler
-function handleTouch(e) {
+// Helper: Cek apakah titik dekat stroke
+function isPointNearStroke(px, py, stroke) {
+  return stroke.points.some(point => Math.sqrt((point.x - px) ** 2 + (point.y - py) ** 2) < stroke.width / 2 + 5);
+}
+
+// Helper: Dapatkan center stroke
+function getStrokeCenter(stroke) {
+  const xs = stroke.points.map(p => p.x);
+  const ys = stroke.points.map(p => p.y);
+  return {
+    x: (Math.min(...xs) + Math.max(...xs)) / 2,
+    y: (Math.min(...ys) + Math.max(...ys)) / 2
+  };
+}
+
+// Helper: Dapatkan bounds stroke
+function getStrokeBounds(stroke) {
+  const xs = stroke.points.map(p => p.x);
+  const ys = stroke.points.map(p => p.y);
+  return {
+    minX: Math.min(...xs),
+    maxX: Math.max(...xs),
+    minY: Math.min(...ys),
+    maxY: Math.max(...ys)
+  };
+}
+
+// Helper: Hitung jarak antara dua titik
+function distance(x1, y1, x2, y2) {
+  return Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+}
+
+// Helper: Cek apakah titik dalam objek
+function isPointInObject(mouseX, mouseY, obj) {
+  if (obj.type === 'text') {
+    const textWidth = ctx.measureText(obj.text).width;
+    const textHeight = obj.fontSize;
+    return mouseX >= obj.x && mouseX <= obj.x + textWidth &&
+           mouseY >= obj.y - textHeight && mouseY <= obj.y;
+  } else if (obj.type === 'image') {
+    return mouseX >= obj.x && mouseX <= obj.x + obj.width &&
+           mouseY >= obj.y && mouseY <= obj.y + obj.height;
+  } else if (obj.type === 'stroke') {
+    return isPointNearStroke(mouseX, mouseY, obj);
+  }
+  return false;
+}
+
+// Helper: Dapatkan ukuran objek
+function getObjectSize(obj) {
+  if (obj.type === 'text') return { fontSize: obj.fontSize };
+  if (obj.type === 'image') return { width: obj.width, height: obj.height };
+  if (obj.type === 'stroke') {
+    const bounds = getStrokeBounds(obj);
+    return { width: bounds.maxX - bounds.minX, height: bounds.maxY - bounds.minY };
+  }
+  return {};
+}
+
+// Touch Events
+function handleTouchStart(e) {
   e.preventDefault();
-  const touch = e.touches[0];
-  const mouseEvent = new MouseEvent(e.type === 'touchstart' ? 'mousedown' : 
-                                    e.type === 'touchmove' ? 'mousemove' : 'mouseup', {
-    clientX: touch.clientX,
-    clientY: touch.clientY
-  });
-  canvas.dispatchEvent(mouseEvent);
+  handleMouseDown({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
+}
+
+function handleTouchMove(e) {
+  e.preventDefault();
+  handleMouseMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
+}
+
+function handleTouchEnd(e) {
+  e.preventDefault();
+  handleMouseUp();
 }
 
 // Clear Canvas
 function clearCanvas() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  saveState();
+  objects = [];
+  redrawCanvas();
 }
 
 // Save Canvas
 function saveCanvas() {
+  redrawCanvas();
   const link = document.createElement('a');
   link.download = 'whiteboard.png';
   link.href = canvas.toDataURL();
