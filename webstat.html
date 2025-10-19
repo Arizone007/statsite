@@ -612,11 +612,15 @@
     visibility: hidden;
     opacity: 0;
     transition: visibility 0s, opacity 0.3s ease;
+	max-height: 90vh; /* Batasi tinggi maksimal 90% dari viewport (layar HP) */
+    overflow: hidden; /* Cegah konten meluap dan menyebabkan resize */
+    box-sizing: border-box;
   }
 
   .help-faq-modal.open {
     visibility: visible;
     opacity: 1;
+	height: 90vh;
   }
 
   .help-faq-content {
