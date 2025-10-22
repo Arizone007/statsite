@@ -3695,12 +3695,13 @@ function clearSelection() {
     if (!contextMenu) return;
     if (isOnObject) {
       contextMenu.innerHTML = `
-        <div style="padding: 8px; cursor: pointer;" onclick="copySelectedObject()">📋 Copy</div>
+        <div style="padding: 8px; cursor: pointer;" onclick="copySelectedObject()">Copy</div>
+		<div style="padding: 8px; cursor: pointer;" onclick="deleteSelectedObject()">Delete</div>
       `;
     } else {
       contextMenu.innerHTML = `
-        <div style="padding: 8px; cursor: pointer; border-bottom: 1px solid #eee;" onclick="insertFromDrive()">📁 Insert from Drive</div>
-        <div style="padding: 8px; cursor: pointer;" onclick="pasteFromClipboard()">📋 Paste</div>
+        <div style="padding: 8px; cursor: pointer; border-bottom: 1px solid #eee;" onclick="insertFromDrive()">Insert object</div>
+        <div style="padding: 8px; cursor: pointer;" onclick="pasteFromClipboard()">Paste</div>
       `;
     }
   }
@@ -3727,6 +3728,18 @@ function copySelectedObject() {
       console.warn('Gagal menyimpan ke clipboard browser:', err);
     });
   }
+}
+
+function deleteSelectedObject() {
+  if (selectedObjects.length === 0) return;
+  // Hapus objek dari array objects (dari belakang ke depan untuk hindari index shift)
+  selectedObjects.sort((a, b) => b - a); // Sort descending
+  selectedObjects.forEach(index => {
+    objects.splice(index, 1);
+  });
+  selectedObjects = []; // Reset selection
+  redrawCanvas();
+  saveState(); // Asumsikan ada
 }
 
   // Fungsi untuk menampilkan menu konteks
