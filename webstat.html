@@ -1889,11 +1889,15 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
       
           <!-- Eraser -->
           <button id="eraser-tool" class="tool-btn" style="background: #FF0000; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">🧽Erase</button>
-      
+           
+		  <button id="delete-tool" class="tool-btn" style="background: #F44336; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="deleteSelected()">🗑️Delete</button>
+
           <!-- Clear All -->
           <button id="clear-tool" class="tool-btn" style="background: #FF00FF; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="clearCanvas()">🧹Clear</button>
-      
-          <button id="delete-tool" class="tool-btn" style="background: #F44336; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="deleteSelected()">🗑️Delete</button>
+		  	  
+		  <!-- Reset Canvas Tool -->
+		  <button id="reset-canvas-btn" class="tool-btn" style="background: #2196F3; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">🔄 Reset</button>      
+
 		  <button id="undo-tool" class="tool-btn" style="background: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="undo()">↶</button>
 		  <button id="redo-tool" class="tool-btn" style="background: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="redo()">↷</button>	  
 
@@ -1903,7 +1907,7 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
 		  </div>
 		  		                              
 		<!-- Canvas Container (pindah ke dalam wrapper) -->
-		  <div id="canvas-wrapper" style="position: relative; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+		<div id="canvas-wrapper" style="position: relative; border: 2px solid #ddd; border-radius: 8px; overflow: hidden; background: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
 		  <canvas id="whiteboard-canvas" width="800" height="500" style="display: block; cursor: crosshair;"></canvas>
 		  <div id="text-cursor" style="position: absolute; display: none; border: 2px dashed #2196F3; background: rgba(33, 150, 243, 0.1);"></div>
 		</div>
@@ -3399,8 +3403,8 @@ Kelompok2: 34, 56, 78"></textarea>
   
   let currentDescriptiveData = [];
 
-  // Initial content for the welcome page
-  let initialWelcomeContent = ''; // Will be set after DOMContentLoaded
+// Initial content for the welcome page
+let initialWelcomeContent = ''; // Will be set after DOMContentLoaded
 
 // Whiteboard Variables (Global)
 let canvas, ctx, isDrawing = false, isErasing = false, isTextMode = false;
@@ -3412,6 +3416,8 @@ let selectedObject = null;  // Objek yang dipilih (index di objects array)
 let dragOffsetX = 0;  // Offset X untuk drag
 let dragOffsetY = 0;  // Offset Y untuk drag
 let objects = [];  // Array untuk menyimpan semua objek dengan urutan (strokes, texts, images, erases)
+let lastMouseX = 0;
+let lastMouseY = 0;
 let currentStroke = null;  // Stroke yang sedang digambar
 let currentErase = null;  // Erase stroke yang sedang digambar
 let undoStack = [];
@@ -3424,13 +3430,31 @@ let resizeHandle = null;    // Handle resize (misalnya, posisi sudut)
 let isResizing = false;     // Status apakah sedang resize
 let resizeStartX = 0;       // Posisi awal mouse untuk resize
 let resizeStartY = 0;
-let originalSize = {};      // Ukuran asli objek sebelum resize
+let originalSize = { width: 0, height: 0, fontSize: 0 };
+
+// Tambahan: Elemen untuk menu konteks (ditambahkan secara dinamis)
+let contextMenu = null;
+let longPressTimer = null;
+let isLongPress = false;
+let copiedObject = null;
+let selectedObjects = []; // Array untuk objek yang dipilih (multiple)
+let copiedObjects = []; // Array untuk objek yang di-copy (multiple)
+let initialDistance = 0
 
 // Initialize Whiteboard when shown
 function initWhiteboard() {
   canvas = document.getElementById('whiteboard-canvas');
   if (!canvas) return;
   ctx = canvas.getContext('2d');
+  
+  // Deklarasi variabel global yang hilang (jika belum ada)
+  let lastMouseX = 0;
+  let lastMouseY = 0;
+  let longPressTimer = null;
+  let isLongPress = false;
+  let touchMoved = false;
+  let initialDistance = 0;
+  let originalSize = null;
   
   // Resize canvas to fit container
   function resizeCanvas() {
@@ -3501,17 +3525,119 @@ function initWhiteboard() {
     }
   });
   
+  // Tambahan: Event untuk klik kanan (desktop)
+  canvas.addEventListener('contextmenu', (e) => {
+    e.preventDefault(); // Selalu cegah menu browser default
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const objIndex = getObjectAtPosition(mouseX, mouseY);
+    if (objIndex !== null) {
+      selectedObject = objIndex; // Pilih objek
+      showContextMenu(e.clientX, e.clientY, true); // Menu untuk objek
+    } else {
+      showContextMenu(e.clientX, e.clientY, false); // Menu untuk area kosong
+    }
+  });
+
+  // Event listeners untuk touch dengan passive: false (menghilangkan warning)
+  canvas.addEventListener('touchstart', (e) => {
+    isLongPress = false;
+    touchMoved = false;
+    if (e.touches.length === 2 && selectedObjects.length > 0) {
+      // Prioritas: Mulai pinch resize jika 2 jari dan objek dipilih
+      initialDistance = getDistance(e.touches);
+      resizingObject = selectedObjects[0]; // Resize objek pertama yang dipilih
+      originalSize = { ...objects[resizingObject] }; // Simpan ukuran asli
+      e.preventDefault();
+      return; // Jangan lanjut ke long press
+    }
+    // Jika bukan pinch, cek long press
+    const rect = canvas.getBoundingClientRect();
+    const touchX = e.touches[0].clientX - rect.left;
+    const touchY = e.touches[0].clientY - rect.top;
+    const objIndex = getObjectAtPosition(touchX, touchY);
+    if (objIndex !== null) {
+      selectedObject = objIndex; // Pilih objek
+      longPressTimer = setTimeout(() => {
+        if (!touchMoved) { // Hanya jika tidak ada gerakan
+          isLongPress = true;
+          showContextMenu(e.touches[0].clientX, e.touches[0].clientY, true); // Menu untuk objek
+          setTimeout(hideContextMenu, 3000);
+        }
+      }, 500);
+    } else {
+      longPressTimer = setTimeout(() => {
+        if (!touchMoved) { // Hanya jika tidak ada gerakan
+          isLongPress = true;
+          showContextMenu(e.touches[0].clientX, e.touches[0].clientY, false); // Menu untuk area kosong
+          setTimeout(hideContextMenu, 3000);
+        }
+      }, 500);
+    }
+    // Lanjut ke handleTouchStart asli
+    handleTouchStart(e);
+  }, { passive: false });
+
+  canvas.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2 && resizingObject !== null) {
+      // Handle pinch resize
+      const currentDistance = getDistance(e.touches);
+      const scaleFactor = currentDistance / initialDistance;
+      const obj = objects[resizingObject];
+      
+      if (obj.type === 'text') {
+        obj.fontSize = Math.max(10, originalSize.fontSize * scaleFactor);
+      } else if (obj.type === 'image') {
+        obj.width = Math.max(10, originalSize.width * scaleFactor);
+        obj.height = Math.max(10, originalSize.height * scaleFactor);
+      } else if (obj.type === 'stroke') {
+        const bounds = getStrokeBounds(obj);
+        const centerX = (bounds.minX + bounds.maxX) / 2;
+        const centerY = (bounds.minY + bounds.maxY) / 2;
+        obj.points.forEach(point => {
+          point.x = centerX + (point.x - centerX) * scaleFactor;
+          point.y = centerY + (point.y - centerY) * scaleFactor;
+        });
+      }
+      redrawCanvas();
+      e.preventDefault();
+    } else {
+      // Jika bukan pinch, set flag gerakan dan clear long press timer
+      touchMoved = true;
+      clearTimeout(longPressTimer);
+      // Lanjut ke handleTouchMove asli
+      handleTouchMove(e);
+    }
+  }, { passive: false });
+  
+  canvas.addEventListener('touchend', (e) => {
+    if (resizingObject !== null && e.touches.length < 2) {
+      // Stop pinch resize jika kurang dari 2 jari
+      resizingObject = null;
+      initialDistance = 0;
+    } else if (!isLongPress) {
+      // Jika bukan long press, lanjut ke handleTouchEnd asli
+      handleTouchEnd(e);
+    }
+    // Clear timer jika masih ada
+    clearTimeout(longPressTimer);
+  }, { passive: false });
+  
   // Event listeners untuk mouse/touch
   canvas.addEventListener('mousedown', handleMouseDown);
   canvas.addEventListener('mousemove', handleMouseMove);
   canvas.addEventListener('mouseup', handleMouseUp);
   canvas.addEventListener('mouseout', handleMouseOut);
   canvas.addEventListener('dblclick', handleDoubleClick);  // Tambahan untuk resize
-  canvas.addEventListener('touchstart', handleTouchStart);
-  canvas.addEventListener('touchmove', handleTouchMove);
-  canvas.addEventListener('touchend', handleTouchEnd);
-
-  // Event listener untuk keyboard (Esc untuk melepas)
+  
+  // Tambahan: Event untuk Ctrl+C
+  document.addEventListener('keydown', (e) => {
+    if (e.ctrlKey && e.key === 'c' && selectedObject !== null) {
+      e.preventDefault();
+      copySelectedObject();
+    }
+  });
   document.addEventListener('keydown', handleKeyDown);
 
   // Initial Draw
@@ -3519,14 +3645,243 @@ function initWhiteboard() {
 
   // Event listener untuk paste
   document.addEventListener('paste', handlePaste);
+  
+  // Event listener untuk reset canvas
+  document.getElementById('reset-canvas-btn').addEventListener('click', resetCanvas);
 
   console.log('Whiteboard initialized successfully');
 }
 
-// Fungsi untuk menangani paste gambar (diperbaiki dengan preload)
+// Fungsi untuk select all objects
+function selectAllObjects() {
+  selectedObjects = [];
+  for (let i = 0; i < objects.length; i++) {
+    selectedObjects.push(i);
+  }
+  redrawCanvas();
+}
+
+// Fungsi untuk clear seleksi
+function clearSelection() {
+  selectedObjects = [];
+  redrawCanvas();
+}
+
+  // Modifikasi fungsi createContextMenu untuk dinamis berdasarkan posisi
+  function createContextMenu(isOnObject = false) {
+    if (contextMenu) return; // Jika sudah ada, jangan buat ulang
+    contextMenu = document.createElement('div');
+    contextMenu.id = 'context-menu';
+    contextMenu.style.position = 'absolute';
+    contextMenu.style.background = '#fff';
+    contextMenu.style.border = '1px solid #ccc';
+    contextMenu.style.borderRadius = '4px';
+    contextMenu.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+    contextMenu.style.zIndex = '1001';
+    contextMenu.style.display = 'none';
+    contextMenu.style.fontSize = '14px';
+    contextMenu.style.minWidth = '150px';
+    // Konten menu dinamis
+    updateContextMenuContent(isOnObject);
+    document.body.appendChild(contextMenu);
+
+    // Sembunyikan menu saat klik di luar
+    document.addEventListener('click', hideContextMenu);
+    document.addEventListener('touchstart', hideContextMenu);
+  }
+  
+  // Fungsi untuk update konten menu berdasarkan konteks
+  function updateContextMenuContent(isOnObject) {
+    if (!contextMenu) return;
+    if (isOnObject) {
+      contextMenu.innerHTML = `
+        <div style="padding: 8px; cursor: pointer;" onclick="copySelectedObject()">📋 Copy</div>
+      `;
+    } else {
+      contextMenu.innerHTML = `
+        <div style="padding: 8px; cursor: pointer; border-bottom: 1px solid #eee;" onclick="insertFromDrive()">📁 Insert from Drive</div>
+        <div style="padding: 8px; cursor: pointer;" onclick="pasteFromClipboard()">📋 Paste</div>
+      `;
+    }
+  }
+
+// Fungsi untuk copy objek yang dipilih
+function copySelectedObject() {
+  if (selectedObjects.length === 0) {
+    alert('Tidak ada objek yang dipilih untuk di-copy.');
+    return;
+  }
+  copiedObjects = [];
+  selectedObjects.forEach(index => {
+    const obj = objects[index];
+    const copy = JSON.parse(JSON.stringify(obj));
+    if (obj.type === 'image') {
+      copy.src = obj.src;
+      copy.img = null;
+    }
+    copiedObjects.push(copy);
+  });
+  // Simpan ke clipboard browser jika memungkinkan
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(JSON.stringify(copiedObjects)).catch(err => {
+      console.warn('Gagal menyimpan ke clipboard browser:', err);
+    });
+  }
+}
+
+  // Fungsi untuk menampilkan menu konteks
+  function showContextMenu(x, y, isOnObject = false) {
+    if (!contextMenu) createContextMenu(isOnObject);
+    updateContextMenuContent(isOnObject);
+    contextMenu.style.left = x + 'px';
+    contextMenu.style.top = y + 'px';
+    contextMenu.style.display = 'block';
+  }
+
+  // Fungsi untuk menyembunyikan menu konteks
+  function hideContextMenu() {
+    if (contextMenu) contextMenu.style.display = 'none';
+  }
+
+  // Fungsi Insert from Drive (membuka file picker lokal)
+  function insertFromDrive() {
+    hideContextMenu();
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          const img = new Image();
+          img.onload = function() {
+            const scale = Math.min(canvas.width / img.width, canvas.height / img.height, 1);
+            const imgObj = {
+              type: 'image',
+              src: event.target.result,
+              img: img,
+              loaded: true,
+              x: 10, // Posisi default, bisa disesuaikan
+              y: 10,
+              width: img.width * scale,
+              height: img.height * scale
+            };
+            saveState();
+            objects.push(imgObj);
+            redrawCanvas();
+            alert('Gambar dari drive berhasil ditambahkan!');
+          };
+          img.src = event.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  }
+
+// Modifikasi pasteFromClipboard untuk multiple objek
+async function pasteFromClipboard() {
+  hideContextMenu();
+  // Prioritas: Paste objek internal dulu
+  if (copiedObjects.length > 0) {
+    copiedObjects.forEach((obj, idx) => {
+      const copy = JSON.parse(JSON.stringify(obj));
+      // Offset bertahap agar tidak menumpuk
+      const offset = (idx + 1) * 10;
+      if (copy.type === 'text') {
+        copy.x += offset;
+        copy.y += offset;
+      } else if (copy.type === 'stroke') {
+        copy.points.forEach(point => {
+          point.x += offset;
+          point.y += offset;
+        });
+      } else if (copy.type === 'image') {
+        copy.x += offset;
+        copy.y += offset;
+        const img = new Image();
+        img.onload = function() {
+          copy.img = img;
+          copy.loaded = true;
+          saveState();
+          objects.push(copy);
+          redrawCanvas();
+        };
+        img.src = copy.src;
+        return; // Skip push langsung, tunggu onload
+      }
+      saveState();
+      objects.push(copy);
+    });
+    redrawCanvas();
+    return;
+  }
+
+  // Jika tidak ada objek internal, cek clipboard eksternal (seperti sebelumnya)
+  try {
+    if (navigator.clipboard && navigator.clipboard.read) {
+      const items = await navigator.clipboard.read();
+      for (const item of items) {
+        for (const type of item.types) {
+          if (type.startsWith('image/')) {
+            const blob = await item.getType(type);
+            const reader = new FileReader();
+            reader.onload = function(event) {
+              const img = new Image();
+              img.onload = function() {
+                const scale = Math.min(canvas.width / img.width, canvas.height / img.height, 1);
+                const imgObj = {
+                  type: 'image',
+                  src: event.target.result,
+                  img: img,
+                  loaded: true,
+                  x: 10,
+                  y: 10,
+                  width: img.width * scale,
+                  height: img.height * scale
+                };
+                saveState();
+                objects.push(imgObj);
+                redrawCanvas();
+              };
+              img.src = event.target.result;
+            };
+            reader.readAsDataURL(blob);
+            return;
+          } else if (type === 'text/plain') {
+            const text = await item.getType(type);
+            const textObj = {
+              type: 'text',
+              x: 10,
+              y: 30,
+              text: text,
+              fontSize: 16,
+              color: currentColor
+            };
+            saveState();
+            objects.push(textObj);
+            redrawCanvas();
+            return;
+          }
+        }
+      }
+      alert('Tidak ada gambar atau teks di clipboard eksternal.');
+    } else {
+      alert('Fitur paste tidak didukung di browser ini. Gunakan Ctrl+V langsung di kanvas.');
+    }
+  } catch (err) {
+    alert('Gagal mengakses clipboard: ' + err.message);
+  }
+}
+
+// Modifikasi handlePaste untuk multiple objek
 function handlePaste(e) {
   e.preventDefault();
+  
+  // Prioritas: Selalu cek clipboard eksternal dulu (untuk paste dari luar aplikasi)
   const items = e.clipboardData.items;
+  let pastedExternal = false;
   for (let i = 0; i < items.length; i++) {
     if (items[i].type.indexOf('image') !== -1) {
       const blob = items[i].getAsFile();
@@ -3538,35 +3893,72 @@ function handlePaste(e) {
           const imgObj = {
             type: 'image',
             src: event.target.result,
-            img: img,  // Simpan Image object yang sudah loaded
+            img: img,
             loaded: true,
             x: 10,
             y: 10,
             width: img.width * scale,
             height: img.height * scale
           };
-          objects.push(imgObj);  // Push ke objects setelah loaded
           saveState();
+          objects.push(imgObj);
           redrawCanvas();
-          alert('Gambar berhasil dipaste dan ditambahkan ke kanvas!');
         };
         img.src = event.target.result;
       };
       reader.readAsDataURL(blob);
-      return;
+      pastedExternal = true;
+      return;  // Hentikan setelah paste eksternal
     }
   }
-  alert('Tidak ada gambar yang terdeteksi di clipboard.');
+  
+  // Jika tidak ada paste eksternal, baru paste objek internal
+  if (!pastedExternal && copiedObjects.length > 0) {
+    copiedObjects.forEach((obj, idx) => {
+      const copy = JSON.parse(JSON.stringify(obj));
+      const offset = (idx + 1) * 10;
+      if (copy.type === 'text') {
+        copy.x += offset;
+        copy.y += offset;
+      } else if (copy.type === 'stroke') {
+        copy.points.forEach(point => {
+          point.x += offset;
+          point.y += offset;
+        });
+      } else if (copy.type === 'image') {
+        copy.x += offset;
+        copy.y += offset;
+        const img = new Image();
+        img.onload = function() {
+          copy.img = img;
+          copy.loaded = true;
+          saveState();
+          objects.push(copy);
+          redrawCanvas();
+        };
+        img.src = copy.src;
+        return;  // Skip push langsung untuk image
+      }
+      saveState();
+      objects.push(copy);
+    });
+    redrawCanvas();
+  }
+  
+  // Jika tidak ada yang ter-paste, beri alert
+  if (!pastedExternal && copiedObjects.length === 0) {
+    alert('Tidak ada gambar atau objek yang terdeteksi di clipboard.');
+  }
 }
 
-// Fungsi redraw untuk render ulang canvas berdasarkan urutan objects
+// Modifikasi redrawCanvas untuk highlight multiple objek
 function redrawCanvas() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillStyle = 'white';
-  ctx.fillRect(0, 0, canvas.width, canvas.height); // Background putih
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
   
-  // Gambar semua objek berdasarkan urutan
-  objects.forEach(obj => {
+  // Gambar semua objek
+  objects.forEach((obj, index) => {
     if (obj.type === 'stroke') {
       ctx.globalCompositeOperation = 'source-over';
       ctx.strokeStyle = obj.color;
@@ -3574,24 +3966,24 @@ function redrawCanvas() {
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.beginPath();
-      obj.points.forEach((point, index) => {
-        if (index === 0) ctx.moveTo(point.x, point.y);
+      obj.points.forEach((point, idx) => {
+        if (idx === 0) ctx.moveTo(point.x, point.y);
         else ctx.lineTo(point.x, point.y);
       });
       ctx.stroke();
     } else if (obj.type === 'erase') {
       ctx.globalCompositeOperation = 'destination-out';
-      ctx.strokeStyle = 'rgba(0,0,0,1)'; // Tidak penting, tapi diperlukan untuk stroke
+      ctx.strokeStyle = 'rgba(0,0,0,1)';
       ctx.lineWidth = obj.width;
       ctx.lineCap = 'round';
       ctx.lineJoin = 'round';
       ctx.beginPath();
-      obj.points.forEach((point, index) => {
-        if (index === 0) ctx.moveTo(point.x, point.y);
+      obj.points.forEach((point, idx) => {
+        if (idx === 0) ctx.moveTo(point.x, point.y);
         else ctx.lineTo(point.x, point.y);
       });
       ctx.stroke();
-      ctx.globalCompositeOperation = 'source-over'; // Reset
+      ctx.globalCompositeOperation = 'source-over';
     } else if (obj.type === 'text') {
       ctx.globalCompositeOperation = 'source-over';
       ctx.fillStyle = obj.color;
@@ -3599,8 +3991,51 @@ function redrawCanvas() {
       ctx.fillText(obj.text, obj.x, obj.y);
     } else if (obj.type === 'image' && obj.loaded) {
       ctx.globalCompositeOperation = 'source-over';
-      ctx.drawImage(obj.img, obj.x, obj.y, obj.width, obj.height);  // Draw langsung jika loaded
+      ctx.drawImage(obj.img, obj.x, obj.y, obj.width, obj.height);
     }
+    
+    // Highlight jika dipilih
+    if (selectedObjects.includes(index)) {
+      ctx.strokeStyle = '#2196F3';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      if (obj.type === 'text') {
+        const textWidth = ctx.measureText(obj.text).width;
+        const textHeight = obj.fontSize;
+        ctx.strokeRect(obj.x - 2, obj.y - textHeight - 2, textWidth + 4, textHeight + 4);
+      } else if (obj.type === 'stroke') {
+        const xs = obj.points.map(p => p.x);
+        const ys = obj.points.map(p => p.y);
+        const minX = Math.min(...xs) - 5;
+        const minY = Math.min(...ys) - 5;
+        const maxX = Math.max(...xs) + 5;
+        const maxY = Math.max(...ys) + 5;
+        ctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
+      } else if (obj.type === 'image') {
+        ctx.strokeRect(obj.x - 2, obj.y - 2, obj.width + 4, obj.height + 4);
+      }
+      ctx.setLineDash([]);
+    }
+// Tambahkan handle resize ('+') di pojok kanan bawah jika objek dipilih dan bisa di-resize
+if (selectedObjects.includes(index) && (obj.type === 'text' || obj.type === 'image' || obj.type === 'stroke')) {
+  let handleX, handleY;
+  if (obj.type === 'text') {
+    const textWidth = ctx.measureText(obj.text).width;
+    handleX = obj.x + textWidth;
+    handleY = obj.y;
+  } else if (obj.type === 'image') {
+    handleX = obj.x + obj.width;
+    handleY = obj.y + obj.height;
+  } else if (obj.type === 'stroke') {
+    const bounds = getStrokeBounds(obj);
+    handleX = bounds.maxX;
+    handleY = bounds.maxY;
+  }
+  // Gambar simbol '+' di posisi eksak (tanpa offset)
+  ctx.fillStyle = '#2196F3';
+  ctx.font = '16px Arial';
+  ctx.fillText('+', handleX, handleY);  // Posisi langsung di pojok
+}
   });
   
   // Render teks sementara jika dalam mode text
@@ -3609,27 +4044,6 @@ function redrawCanvas() {
     ctx.fillStyle = currentColor;
     ctx.font = `16px Arial`;
     ctx.fillText(tempText, textX, textY);
-  }
-
-  // Gambar handle resize jika ada objek yang dipilih untuk resize
-  if (resizingObject !== null) {
-    const obj = objects[resizingObject];
-    let handleX, handleY;
-    if (obj.type === 'text') {
-      const textWidth = ctx.measureText(obj.text).width;
-      handleX = obj.x + textWidth;
-      handleY = obj.y;
-    } else if (obj.type === 'image') {
-      handleX = obj.x + obj.width;
-      handleY = obj.y + obj.height;
-    } else if (obj.type === 'stroke') {
-      const bounds = getStrokeBounds(obj);
-      handleX = bounds.maxX;
-      handleY = bounds.maxY;
-    }
-    // Gambar handle sebagai kotak kecil
-    ctx.fillStyle = '#FF0000';
-    ctx.fillRect(handleX - 5, handleY - 5, 10, 10);
   }
 }
 
@@ -3686,43 +4100,47 @@ function redo() {
   }
 }
 
-// Delete objek yang dipilih
+// Modifikasi deleteSelected untuk multiple objek
 function deleteSelected() {
-  if (selectedObject !== null) {
-    saveState(); // Simpan state sebelum delete
-    objects.splice(selectedObject, 1);
-    selectedObject = null;
-    isDragging = false;
-    redrawCanvas();
-  }
+  if (selectedObjects.length === 0) return;
+  saveState();
+  // Sort descending untuk delete dari belakang
+  selectedObjects.sort((a, b) => b - a);
+  selectedObjects.forEach(index => {
+    objects.splice(index, 1);
+  });
+  selectedObjects = [];
+  redrawCanvas();
 }
 
-// Tool Selection
+// Modifikasi selectTool untuk selalu aktifkan select mode tanpa toggle
 function selectTool(tool) {
-  toolActive = tool;
-  isErasing = tool === 'erase';
-  isTextMode = tool === 'text';
+  if (tool === 'select') {
+    toolActive = 'select'; // Selalu set ke select, tanpa toggle
+  } else {
+    toolActive = tool;
+  }
+  isErasing = toolActive === 'erase'; // Update berdasarkan toolActive
+  isTextMode = toolActive === 'text';
   
   // Update active class
   document.querySelectorAll('#whiteboard-toolbar .tool-btn').forEach(btn => btn.classList.remove('active'));
-  document.getElementById(tool + '-tool')?.classList.add('active');
+  document.getElementById(toolActive + '-tool')?.classList.add('active'); // Gunakan toolActive
   
-  canvas.style.cursor = tool === 'pen' || tool === 'erase' ? 'crosshair' : tool === 'select' ? 'move' : 'default';
+  canvas.style.cursor = toolActive === 'pen' || toolActive === 'erase' ? 'crosshair' : toolActive === 'select' ? 'move' : 'default';
   
   // Hapus set globalCompositeOperation untuk erase, agar tidak erase pixel
   ctx.globalCompositeOperation = 'source-over';  // Selalu normal draw
 }
 
+
 // Event Handlers (diperbaiki untuk tool lainnya)
 function handleMouseDown(e) {
   const rect = canvas.getBoundingClientRect();
-  const mouseX = e.clientX - rect.left;  // Pindahkan ke sini agar tersedia di seluruh fungsi
-  const mouseY = e.clientY - rect.top;  // Pindahkan ke sini agar tersedia di seluruh fungsi
+  const mouseX = e.clientX - rect.left;
+  const mouseY = e.clientY - rect.top;
 
   if (resizingObject !== null) {
-    // Hapus definisi mouseX dan mouseY di sini, karena sudah di atas
-    // const mouseX = e.clientX - rect.left;  // Hapus ini
-    // const mouseY = e.clientY - rect.top;  // Hapus ini
     const obj = objects[resizingObject];
     let handleX, handleY;
     if (obj.type === 'text') {
@@ -3741,6 +4159,9 @@ function handleMouseDown(e) {
       isResizing = true;
       resizeStartX = mouseX;
       resizeStartY = mouseY;
+      // Inisialisasi lastMouseX dan lastMouseY ke posisi mouse saat ini untuk menghindari loncatan awal
+      lastMouseX = mouseX;
+      lastMouseY = mouseY;
       saveState();
       return;
     }
@@ -3791,61 +4212,105 @@ function handleMouseDown(e) {
   }
 }
 
+// Modifikasi handleMouseMove untuk mendukung resize (dari kode asli) dan drag multiple
 function handleMouseMove(e) {
-if (isResizing && resizingObject !== null) {
+// Deteksi hover pada handle resize dan ubah cursor
+let isNearHandle = false;
+if (selectedObjects.length > 0) {
+  selectedObjects.forEach(index => {
+    const obj = objects[index];
+    if (obj.type === 'text' || obj.type === 'image' || obj.type === 'stroke') {
+      let handleX, handleY;
+      if (obj.type === 'text') {
+        const textWidth = ctx.measureText(obj.text).width;
+        handleX = obj.x + textWidth;
+        handleY = obj.y;
+      } else if (obj.type === 'image') {
+        handleX = obj.x + obj.width;
+        handleY = obj.y + obj.height;
+      } else if (obj.type === 'stroke') {
+        const bounds = getStrokeBounds(obj);
+        handleX = bounds.maxX;
+        handleY = bounds.maxY;
+      }
+      // Cek jarak mouse ke handle (toleransi 10px)
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+      if (Math.abs(mouseX - handleX) < 10 && Math.abs(mouseY - handleY) < 10) {
+        isNearHandle = true;
+      }
+    }
+  });
+}
+// Ubah cursor jika dekat handle
+if (isNearHandle) {
+  canvas.style.cursor = 'se-resize';  // Panah diagonal untuk resize
+} else if (toolActive === 'select') {
+  canvas.style.cursor = 'move';  // Default untuk select
+} else {
+  canvas.style.cursor = toolActive === 'pen' || toolActive === 'erase' ? 'crosshair' : 'default';
+}
+
+  // Prioritas: Handle resize jika aktif
+if (isResizing) {
+  const obj = objects[resizingObject];
   const rect = canvas.getBoundingClientRect();
   const mouseX = e.clientX - rect.left;
   const mouseY = e.clientY - rect.top;
-  const obj = objects[resizingObject];
-  
-  // Hitung delta dari posisi awal resize
-  const deltaX = mouseX - resizeStartX;
-  const deltaY = mouseY - resizeStartY;
+  const deltaX = mouseX - lastMouseX;
+  const deltaY = mouseY - lastMouseY;
   
   if (obj.type === 'text') {
-    // Untuk text, tingkatkan fontSize berdasarkan deltaX (horizontal), minimal 10px
-    obj.fontSize = Math.max(10, originalSize.fontSize + deltaX / 10);  // /10 untuk skala halus
+    // Resize text: Ubah font size berdasarkan delta
+    const scaleFactor = 1 + (deltaY / 100);  // Scale berdasarkan Y
+    obj.fontSize = Math.max(10, obj.fontSize * scaleFactor);
   } else if (obj.type === 'image') {
-    // Untuk image, tingkatkan width dan height berdasarkan delta, minimal 10px
-    obj.width = Math.max(10, originalSize.width + deltaX);
-    obj.height = Math.max(10, originalSize.height + deltaY);
+    // Resize image: Ubah width dan height
+    obj.width = Math.max(10, obj.width + deltaX);
+    obj.height = Math.max(10, obj.height + deltaY);
   } else if (obj.type === 'stroke') {
-    // Untuk stroke, skalakan berdasarkan rata-rata delta, minimal 0.1x
-    const scaleFactor = Math.max(0.1, 1 + (deltaX + deltaY) / 200);  // /200 untuk skala halus, minimal 0.1x
-    const bounds = getStrokeBounds(obj);
-    const centerX = (bounds.minX + bounds.maxX) / 2;
-    const centerY = (bounds.minY + bounds.maxY) / 2;
+    // Resize stroke: Scale semua points berdasarkan faktor dari delta
+    const centerX = (obj.points[0].x + obj.points[obj.points.length - 1].x) / 2;  // Center berdasarkan titik awal dan akhir
+    const centerY = (obj.points[0].y + obj.points[obj.points.length - 1].y) / 2;
+    const scaleFactorX = 1 + (deltaX / 100);  // Faktor scale dari delta (bisa disesuaikan)
+    const scaleFactorY = 1 + (deltaY / 100);
     obj.points.forEach(point => {
-      point.x = centerX + (point.x - centerX) * scaleFactor;
-      point.y = centerY + (point.y - centerY) * scaleFactor;
+      point.x = centerX + (point.x - centerX) * scaleFactorX;
+      point.y = centerY + (point.y - centerY) * scaleFactorY;
     });
   }
+  
+  lastMouseX = mouseX;
+  lastMouseY = mouseY;
   redrawCanvas();
-  return;
 }
 
-  if (isDragging && selectedObject !== null) {
+  // Jika tidak resize, handle drag multiple objek
+  if (isDragging && selectedObjects.length > 0) {
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
     
-    const obj = objects[selectedObject];
-    if (obj.type === 'text') {
-      obj.x = mouseX - dragOffsetX;
-      obj.y = mouseY - dragOffsetY;
-    } else if (obj.type === 'stroke') {
-      const deltaX = mouseX - dragOffsetX - getStrokeCenter(obj).x;
-      const deltaY = mouseY - dragOffsetY - getStrokeCenter(obj).y;
-      obj.points.forEach(point => {
-        point.x += deltaX;
-        point.y += deltaY;
-      });
-      dragOffsetX = mouseX - getStrokeCenter(obj).x;
-      dragOffsetY = mouseY - getStrokeCenter(obj).y;
-    } else if (obj.type === 'image') {
-      obj.x = mouseX - dragOffsetX;
-      obj.y = mouseY - dragOffsetY;
-    }
+    selectedObjects.forEach(index => {
+      const obj = objects[index];
+      if (obj.type === 'text') {
+        obj.x = mouseX - dragOffsetX;
+        obj.y = mouseY - dragOffsetY;
+      } else if (obj.type === 'stroke') {
+        const deltaX = mouseX - dragOffsetX - getStrokeCenter(obj).x;
+        const deltaY = mouseY - dragOffsetY - getStrokeCenter(obj).y;
+        obj.points.forEach(point => {
+          point.x += deltaX;
+          point.y += deltaY;
+        });
+        dragOffsetX = mouseX - getStrokeCenter(obj).x;
+        dragOffsetY = mouseY - getStrokeCenter(obj).y;
+      } else if (obj.type === 'image') {
+        obj.x = mouseX - dragOffsetX;
+        obj.y = mouseY - dragOffsetY;
+      }
+    });
     
     redrawCanvas();
   } else if (toolActive === 'pen' && isDrawing) {
@@ -3855,6 +4320,7 @@ if (isResizing && resizingObject !== null) {
   }
 }
 
+// Modifikasi handleMouseUp untuk mendukung stop resize (dari kode asli) dan stop drawing/erasing
 function handleMouseUp() {
   if (isResizing) {
     isResizing = false;
@@ -3866,6 +4332,7 @@ function handleMouseUp() {
   } else if (toolActive === 'erase' && isDrawing) {
     stopErase();
   }
+  isDragging = false;
 }
 
 function handleMouseOut() {
@@ -3878,32 +4345,64 @@ function handleMouseOut() {
   }
 }
 
+// Modifikasi handleKeyDown untuk menambahkan keyboard drag
 function handleKeyDown(e) {
-  if (e.key === 'Delete' && selectedObject !== null) {
+  if (e.key === 'Delete' && selectedObjects.length > 0) {
     deleteSelected();
-  } else if (e.ctrlKey && e.key === 'x' && selectedObject !== null) {
-    e.preventDefault(); // Cegah default browser cut jika diperlukan (meski jarang di kanvas)
+  } else if (e.ctrlKey && e.key === 'x' && selectedObjects.length > 0) {
+    e.preventDefault();
     deleteSelected();
   } else if (e.ctrlKey && e.key === 'z') {
-    e.preventDefault(); // Cegah default browser undo
+    e.preventDefault();
     undo();
   } else if (e.ctrlKey && e.key === 'y') {
-    e.preventDefault(); // Cegah default browser redo
+    e.preventDefault();
     redo();
+  } else if (e.ctrlKey && e.key === 'c' && selectedObjects.length > 0) {
+    e.preventDefault();
+    copySelectedObject();
+  } else if (e.ctrlKey && e.key === 'a' && toolActive === 'select') {
+    e.preventDefault();
+    selectAllObjects();
+  } else if (selectedObjects.length > 0 && ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+    // Keyboard drag: Pindahkan objek yang dipilih dengan panah
+    e.preventDefault();
+    const moveStep = 5; // 5px per tekanan
+    selectedObjects.forEach(index => {
+      const obj = objects[index];
+      if (e.key === 'ArrowUp') obj.y -= moveStep;
+      else if (e.key === 'ArrowDown') obj.y += moveStep;
+      else if (e.key === 'ArrowLeft') obj.x -= moveStep;
+      else if (e.key === 'ArrowRight') obj.x += moveStep;
+      // Untuk stroke, pindahkan semua points
+      if (obj.type === 'stroke') {
+        obj.points.forEach(point => {
+          if (e.key === 'ArrowUp') point.y -= moveStep;
+          else if (e.key === 'ArrowDown') point.y += moveStep;
+          else if (e.key === 'ArrowLeft') point.x -= moveStep;
+          else if (e.key === 'ArrowRight') point.x += moveStep;
+        });
+      }
+    });
+    redrawCanvas();
   } else if (e.key === 'Escape') {
     if (isDragging) {
       isDragging = false;
-      selectedObject = null;
+      selectedObjects = [];
       redrawCanvas();
-      console.log('Dragging dilepas dengan Esc');
     } else if (toolActive === 'pen' && isDrawing) {
       stopDrawing();
-      console.log('Drawing dilepas dengan Esc');
     } else if (toolActive === 'erase' && isDrawing) {
       stopErase();
-      console.log('Erasing dilepas dengan Esc');
     }
   }
+}
+
+// Fungsi helper untuk menghitung jarak antara 2 titik (untuk pinch)
+function getDistance(touches) {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.sqrt(dx * dx + dy * dy);
 }
 
 function handleDoubleClick(e) {
@@ -3985,8 +4484,9 @@ function stopErase() {
   currentErase = null;
 }
 
-// Handle Select Tool
+// Modifikasi handleSelectStart untuk mode select tetap aktif saat klik objek, lepas hanya jika klik kosong
 function handleSelectStart(e) {
+  console.log('Before handleSelectStart, toolActive:', toolActive); // Debug
   const rect = canvas.getBoundingClientRect();
   const mouseX = e.clientX - rect.left;
   const mouseY = e.clientY - rect.top;
@@ -3999,35 +4499,47 @@ function handleSelectStart(e) {
       const textHeight = obj.fontSize;
       if (mouseX >= obj.x && mouseX <= obj.x + textWidth &&
           mouseY >= obj.y - textHeight && mouseY <= obj.y) {
-        selectedObject = i;
-        saveState();
+        // Tambah ke seleksi jika belum ada (tanpa hapus jika sudah ada)
+        if (!selectedObjects.includes(i)) {
+          selectedObjects.push(i);
+        }
         isDragging = true;
         dragOffsetX = mouseX - obj.x;
         dragOffsetY = mouseY - obj.y;
-        return;
+        redrawCanvas();
+        return; // Jangan lanjut ke clear
       }
     } else if (obj.type === 'stroke') {
       if (isPointNearStroke(mouseX, mouseY, obj)) {
-        selectedObject = i;
-        saveState();
+        // Tambah ke seleksi jika belum ada (tanpa hapus jika sudah ada)
+        if (!selectedObjects.includes(i)) {
+          selectedObjects.push(i);
+        }
         isDragging = true;
         const center = getStrokeCenter(obj);
         dragOffsetX = mouseX - center.x;
         dragOffsetY = mouseY - center.y;
-        return;
+        redrawCanvas();
+        return; // Jangan lanjut ke clear
       }
     } else if (obj.type === 'image') {
       if (mouseX >= obj.x && mouseX <= obj.x + obj.width &&
           mouseY >= obj.y && mouseY <= obj.y + obj.height) {
-        selectedObject = i;
-        saveState();
+        // Tambah ke seleksi jika belum ada (tanpa hapus jika sudah ada)
+        if (!selectedObjects.includes(i)) {
+          selectedObjects.push(i);
+        }
         isDragging = true;
         dragOffsetX = mouseX - obj.x;
         dragOffsetY = mouseY - obj.y;
-        return;
+        redrawCanvas();
+        return; // Jangan lanjut ke clear
       }
     }
   }
+  // Jika klik di area kosong, clear seleksi (tapi mode select tetap aktif)
+  clearSelection();
+  console.log('After handleSelectStart, toolActive:', toolActive); // Debug
 }
 
 // Helper: Dapatkan objek di posisi mouse
@@ -4116,11 +4628,17 @@ function getObjectSize(obj) {
 
 // Touch Events
 function handleTouchStart(e) {
+if (e.target === canvas) {
+    e.preventDefault();
+  }
   e.preventDefault();
   handleMouseDown({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
 }
 
 function handleTouchMove(e) {
+if (isDrawing || isResizing) {
+    e.preventDefault();
+  }
   e.preventDefault();
   handleMouseMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY });
 }
@@ -4144,6 +4662,44 @@ function saveCanvas() {
   link.download = 'whiteboard.png';
   link.href = canvas.toDataURL();
   link.click();
+}
+
+function resetCanvas() {
+  // Kosongkan semua objek
+  objects = [];
+  
+  // Reset variabel state
+  selectedObjects = [];
+  selectedObject = null;
+  copiedObjects = [];
+  resizingObject = null;
+  isResizing = false;
+  isDrawing = false;
+  isTextMode = false;
+  tempText = '';
+  
+  // Reset tool ke default (misalnya, pen)
+  selectTool('pen');
+  
+  // Clear undo/redo history jika ada (opsional, jika Anda punya array undoStack/redoStack)
+  // undoStack = [];
+  // redoStack = [];
+  
+  // Redraw kanvas kosong
+  redrawCanvas();
+  
+  // Sembunyikan input teks jika sedang aktif
+  const textInput = document.getElementById('text-input');
+  if (textInput) {
+    textInput.style.display = 'none';
+    textInput.value = '';
+  }
+  const textCursor = document.getElementById('text-cursor');
+  if (textCursor) {
+    textCursor.style.display = 'none';
+  }
+  
+  console.log('Canvas reset to initial state');
 }
 
 // Fullscreen Toggle (Base dari kode sederhana Anda + fix toolbar visible, resize, switch text)
