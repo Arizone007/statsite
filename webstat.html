@@ -1882,7 +1882,7 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
       
 		  <!-- Select -->
           <button id="select-tool" class="tool-btn" style="background: #FF00FF; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">👆Select</button>
-
+         <button id="insert-tool" class="tool-btn" style="background: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="insertFromDrive()">📁insert</button>
           <!-- Text Tool -->
           <button id="text-tool" class="tool-btn" style="background: #2196F3; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">📝Text</button>
           <input type="text" id="text-input" placeholder="Ketik teks..." style="padding: 5px; border-radius: 4px; border: 1px solid #ccc; display: none; width: 150px;" maxlength="100">
@@ -1890,13 +1890,13 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
           <!-- Eraser -->
           <button id="eraser-tool" class="tool-btn" style="background: #FF0000; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">🧽Erase</button>
            
-		  <button id="delete-tool" class="tool-btn" style="background: #F44336; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="deleteSelected()">🗑️Delete</button>
+		  <button id="delete-tool" class="tool-btn" style="background: #2196F3; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="deleteSelected()">🗑️Delete</button>
 
           <!-- Clear All -->
           <button id="clear-tool" class="tool-btn" style="background: #FF00FF; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="clearCanvas()">🧹Clear</button>
 		  	  
 		  <!-- Reset Canvas Tool -->
-		  <button id="reset-canvas-btn" class="tool-btn" style="background: #2196F3; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">🔄 Reset</button>      
+		  <button id="reset-canvas-btn" class="tool-btn" style="background: #F44336; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;">🔄 Reset</button>      
 
 		  <button id="undo-tool" class="tool-btn" style="background: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="undo()">↶</button>
 		  <button id="redo-tool" class="tool-btn" style="background: #4CAF50; color: white; padding: 8px 12px; border: none; border-radius: 4px; cursor: pointer;" onclick="redo()">↷</button>	  
