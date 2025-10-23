@@ -879,11 +879,25 @@
     }
 
     .help-faq-btn {
-      bottom: 1rem;
-      right: 1rem;
-      width: 2.5rem;
-      height: 2.5rem;
-      font-size: 0.8rem;
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  background: linear-gradient(135deg, #3f51b5, #5c6bc0);
+  color: white;
+  width: 3rem; /* kotak */
+  height: 3rem; /* kotak */
+  border-radius: 0.625rem 0.625rem 0 0.625rem; /* lancip di bawah kiri */
+  border: none;
+  cursor: pointer;
+  font-size: 1.25rem;
+  font-weight: bold;
+  text-align: center;
+  box-shadow: 0 0.375rem 1.25rem rgba(63,81,181,0.4);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
     }
 
     .help-faq-btn svg {
@@ -1407,11 +1421,53 @@
     height: auto !important;
   }
   #whiteboard-toolbar {
-    flex-direction: column;
-    align-items: stretch;
-  }
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 5px;
+    width: 100%;
+  } 
   #whiteboard-toolbar label {
     justify-content: space-between;
+  }
+}
+
+/* Tambahan: Responsive untuk portrait (layar sempit, tinggi > lebar) */
+@media (orientation: portrait) and (max-width: 768px) {
+  #whiteboard-toolbar {
+    justify-content: center; /* Pusatkan elemen agar rapi */
+    gap: 5px; /* Kurangi jarak untuk muat lebih banyak elemen */
+    padding: 5px; /* Padding lebih kecil */
+  }
+  
+  #whiteboard-toolbar .tool-btn {
+    font-size: 12px;
+    padding: 6px 8px;
+    min-width: auto;
+    height: 32px;
+  }
+  
+  /* Khusus untuk input/select panjang (sesuai kode asal) */
+  #whiteboard-toolbar input[type="color"],
+  #whiteboard-toolbar input[type="text"],
+  #whiteboard-toolbar select,
+  #whiteboard-toolbar input[type="range"] {
+    width: auto; /* Biarkan auto, tapi batasi jika perlu */
+    max-width: 80px; /* Maksimal lebar agar tidak dominan */
+    font-size: 12px;
+    padding: 5px;
+    height: 30px;
+  }
+}
+
+/* Opsional: Untuk landscape atau desktop, pastikan tetap horizontal (sesuai kode asal) */
+@media (orientation: landscape) or (min-width: 769px) {
+  #whiteboard-toolbar {
+    justify-content: flex-start; /* Rata kiri, sesuai kode asal */
+    gap: 10px; /* Jarak asal */
   }
 }
 
@@ -1706,11 +1762,11 @@ body.admin-active .tools-section .material-item:hover {
 
   <!-- Help & FAQ Button (Draggable) -->
   <button class="help-faq-btn" id="help-faq-btn" onclick="toggleHelpFAQModal()">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-      <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM7 9h2v2H7V9zm4 0h2v2h-2V9zm4 0h2v2h-2V9z"/>
-    </svg>
+   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM7 9h2v2H7V9zm4 0h2v2h-2V9zm4 0h2v2h-2V9z"/>
+   </svg>
   </button>
-
+  
   <!-- Help & FAQ Modal (contains Chatbot) -->
   <div class="help-faq-modal" id="help-faq-modal">
     <div class="help-faq-content">
@@ -4877,6 +4933,42 @@ function toggleHelpFAQModal() {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
 }
+
+const btn = document.getElementById('help-faq-btn');
+
+btn.style.position = 'fixed'; // Atur posisi fixed supaya bisa dipindah
+
+// Event drag mulai
+btn.addEventListener('pointerdown', (e) => {
+  isDragging = true;
+  startX = e.clientX;
+  startY = e.clientY;
+  const rect = btn.getBoundingClientRect();
+  origX = rect.left;
+  origY = rect.top;
+  btn.setPointerCapture(e.pointerId);
+});
+
+// Event saat drag berlangsung
+btn.addEventListener('pointermove', (e) => {
+  if (!isDragging) return;
+  const dx = e.clientX - startX;
+  const dy = e.clientY - startY;
+  let newLeft = origX + dx;
+  let newTop = origY + dy;
+  const maxLeft = window.innerWidth - btn.offsetWidth;
+  const maxTop = window.innerHeight - btn.offsetHeight;
+  newLeft = Math.min(Math.max(0, newLeft), maxLeft);
+  newTop = Math.min(Math.max(0, newTop), maxTop);
+  btn.style.left = `${newLeft}px`;
+  btn.style.top = `${newTop}px`;
+});
+
+// Event drag berhenti
+btn.addEventListener('pointerup', (e) => {
+  isDragging = false;
+  btn.releasePointerCapture(e.pointerId);
+});
 
 /**
  * Sends a message to the ChatAI and displays the response.
