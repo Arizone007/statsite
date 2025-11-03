@@ -4,9 +4,14 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Statistical Analysis and Research Consulting (SARC)</title>
-<!-- Chart.js CDN for dynamic charts -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    color: #555;
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/handsontable@12.3.0/dist/handsontable.full.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/handsontable@12.3.0/dist/handsontable.full.min.css" rel="stylesheet">
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://accounts.google.com/gsi/client"></script>
+<script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
 <style>
   /* Reset CSS */
   * {
@@ -1588,6 +1593,358 @@ body.admin-active .tools-section .material-item:hover {
       padding: 10px;
       border-left: 2px solid #2196f3; /* Garis pemisah */
     }
+	
+        /* Tambahkan CSS baru untuk Data Analysis Tool */
+        .data-analysis-content {
+            padding: 20px;
+            background-color: white;
+        }
+        .data-analysis-content .data-toolbar {
+            background-color: #ecf0f1;
+            padding: 10px 20px;
+            border-bottom: 1px solid #bdc3c7;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .data-analysis-content .data-toolbar button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .data-analysis-content .data-toolbar button:hover {
+            background-color: #2980b9;
+        }
+        .data-analysis-content .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .data-analysis-content .data-table th, .data-analysis-content .data-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .data-analysis-content .data-table th {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        .data-analysis-content .data-table .row-number {
+            background-color: #f9f9f9;
+            text-align: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .data-analysis-content .analysis-output {
+            background-color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+/* Analysis Panel (Sidebar Kanan - Floating & Resizable - Icon Only) */
+.analysis-panel {
+    position: fixed;
+    top: 20px; /* Jarak dari atas untuk efek floating */
+    right: 10px; /* Jarak dari kanan */
+    width: 60px; /* Lebar awal kecil untuk ikon saja */
+    min-width: 50px; /* Lebar minimal */
+    max-width: 300px; /* Lebar maksimal saat hover */
+    height: 700px; /* Tinggi awal, bisa diubah */
+    min-height: 300px; /* Tinggi minimal */
+    max-height: 90vh; /* Tinggi maksimal */
+    background-color: rgba(255, 255, 255, 0.9); /* Background semi-transparan */
+    border: 0.75px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); /* Efek floating dengan shadow */
+    z-index: 1001;
+    overflow-y: auto; /* Scroll vertikal */
+    overflow-x: hidden; /* Matikan scroll horizontal */
+    padding: 10px;
+    resize: both; /* Membuat panel resizable */
+    transition: all 0.3s ease; /* Smooth transition */
+    opacity: 0.7; /* Semi-transparan secara default untuk efek bersembunyi */
+}
+.analysis-panel:hover {
+    width: 200px; /* Lebar lebih besar saat hover untuk teks */
+    opacity: 1; /* Opacity penuh saat hover */
+    background-color: white; /* Background solid saat hover */
+}
+.analysis-panel .close-panel {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0; /* Sembunyi secara default */
+}
+.analysis-panel:hover .close-panel {
+    opacity: 1; /* Muncul saat hover */
+}
+.analysis-panel .tools-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Kolom tunggal untuk ikon vertikal */
+    gap: 10px;
+}
+.analysis-panel button {
+    width: 30px; /* Lebar ikon saja */
+    height: 30px; /* Tinggi ikon */
+    padding: 0;
+    background: transparent; /* Background transparan */
+    color: #3498db; /* Warna ikon */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 20px; /* Ukuran ikon */
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    transition: all 0.3s ease;
+    position: relative;
+}
+.analysis-panel button:hover {
+    background-color: #ecf0f1; /* Background saat hover */
+    width: 100%; /* Lebar penuh saat hover untuk teks */
+    padding: 10px;
+    font-size: 14px; /* Ukuran font teks */
+}
+.analysis-panel button::before {
+    content: attr(data-text); /* Teks dari data attribute */
+    position: absolute;
+    left: 50px; /* Posisi teks di sebelah ikon */
+    opacity: 0; /* Sembunyi secara default */
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+}
+.analysis-panel button:hover::before {
+    opacity: 1; /* Muncul saat hover */
+}
+
+/* Sample Size Submenu - Warna dan Font Berbeda - Icon Only */
+.analysis-panel .sample-size-submenu {
+    margin-top: 20px;
+    background-color: #e3f2fd; /* Background biru muda berbeda dari putih */
+    border: 2px solid #2196f3; /* Border biru untuk membedakan */
+    border-radius: 8px;
+    padding: 15px;
+    font-family: 'Arial', sans-serif; /* Font berbeda */
+    font-style: italic; /* Font italic untuk beda */
+    color: #0d47a1; /* Warna font biru gelap */
+    opacity: 0; /* Sembunyi secara default */
+    transition: opacity 0.3s ease;
+}
+.analysis-panel:hover .sample-size-submenu {
+    opacity: 1; /* Muncul saat hover panel */
+}
+.analysis-panel .sample-size-submenu .submenu-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Kolom tunggal */
+    gap: 10px;
+}
+.analysis-panel .sample-size-submenu button {
+    width: 30px; /* Lebar ikon */
+    height: 30px; /* Tinggi ikon */
+    padding: 0;
+    background-color: cyan; /* Background button biru berbeda */
+    color: black;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 20px; /* Ukuran ikon */
+    display: flex;
+    align-items: center;
+    justify-content: left;
+    transition: all 0.3s ease;
+    position: relative;
+}
+.analysis-panel .sample-size-submenu button:hover {
+    background-color: #1e88e5; /* Hover warna berbeda */
+    width: 100%; /* Lebar penuh saat hover */
+    padding: 10px;
+    font-size: 14px;
+}
+.analysis-panel .sample-size-submenu button::before {
+    content: attr(data-text); /* Teks dari data attribute */
+    position: absolute;
+    left: 50px; /* Posisi teks di sebelah ikon */
+    opacity: 0; /* Sembunyi secara default */
+    white-space: nowrap;
+    transition: opacity 0.3s ease;
+}
+.analysis-panel .sample-size-submenu button:hover::before {
+    opacity: 1; /* Muncul saat hover */
+}
+
+@media (max-width: 768px) {
+    .analysis-panel {
+        width: 50px; /* Lebar lebih kecil di mobile */
+        right: 5%;
+        max-height: 60vh; /* Tinggi lebih kecil di mobile */
+        resize: none; /* Matikan resize di mobile untuk menghindari masalah */
+    }
+    .analysis-panel:hover {
+        width: 150px; /* Lebar hover lebih kecil di mobile */
+    }
+}
+
+/* Kontainer khusus untuk tool phone-screen, tanpa mengubah page-content yang sudah ada */
+.phone-tool-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 50vh; /* Sesuaikan tinggi sesuai layout tools Anda, misal 50vh atau auto */
+    padding: 20px; /* Opsional, untuk spacing */
+    box-sizing: border-box;
+    width: 100%; /* Pastikan lebar penuh dalam kontainer tool */
+}
+
+/* Kode ponsel dengan ukuran lebih kecil */
+.phone-container {
+    position: absolute;
+    z-index: 2147483647; /* Tinggi untuk overlay di atas semua */
+    width: 280px;
+    height: auto;
+    aspect-ratio: 5/10;
+    background: linear-gradient(145deg, #ccc, #999);
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    padding: 10px;
+    box-sizing: border-box;
+    cursor: move;
+}
+
+.resize-handle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 5px;
+    height: 5px;
+    background: #666;
+    cursor: nw-resize; /* Cursor untuk resize */
+    border-radius: 0 0 20px 0; /* Match border radius */
+}
+
+@keyframes phoneOverlayFadeIn {
+    from {opacity:0;}
+    to {opacity:0.97;}
+}
+
+.phone-screen {
+    width: 100%;
+    height: 100%;
+    background: #000;
+    border-radius: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.screen-content {
+    width: 90%;
+    height: 90%;
+    background: #fff;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #333;
+}
+
+.phone-notch {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 20px;
+    background: #bbb;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.phone-speaker {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: #bbb;
+    border-radius: 2px;
+}
+
+.phone-camera {
+    position: absolute;
+    top: 15px;
+    right: 40px;
+    width: 8px;
+    height: 8px;
+    background: #666;
+    border-radius: 50%;
+}
+
+.phone-home-button {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    background: #ccc;
+    border-radius: 50%;
+    border: 1px solid #999;
+}
+
+button {
+    margin-top: 20px;
+    padding: 8px 16px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+/* Media Queries untuk Responsivitas */
+@media (max-width: 768px) {
+    .phone-container {
+        width: 95vw; /* Lebih lebar di mobile */
+        padding: 8px; /* Lebih tipis di mobile */
+    }
+    .phone-notch {
+        width: 18px; /* Sedikit lebih kecil di mobile */
+        height: 18px;
+    }
+    .phone-speaker {
+        width: 60px;
+    }
+    .phone-home-button {
+        width: 35px;
+        height: 35px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .phone-container {
+        max-width: 1200px; /* Dikurangi dari 400px untuk lebih kecil di desktop besar */
+    }
+}
+
 
 </style>
 </head>
@@ -1703,9 +2060,16 @@ body.admin-active .tools-section .material-item:hover {
   <div class="tools-section">
     <div class="tools-title">Tools</div> <!-- Statis, no editable -->
     
-    <!-- Item 8: Analysis (Statis, no editable-content atau tombol edit/hapus) -->
+    <!-- Item: Analysis (Statis, no editable-content atau tombol edit/hapus) -->
     <div class="material-item" data-material-id='analysis' onclick="showMaterial('analysis')">
       <strong>Analysis</strong> <!-- Hapus editable-content -->
+      <div class="material-subtitle">Tools analisis data statistik interaktif</div> <!-- Hapus editable-content -->
+      <!-- No edit/delete buttons -->
+    </div>
+
+    <!-- Item: Analysis (Statis, no editable-content atau tombol edit/hapus) -->
+    <div class="material-item" data-material-id='Data Analysis' onclick="onclick="showDataAnalysisTool()"('Data Analysis')">
+      <strong>Data Analysis</strong> <!-- Hapus editable-content -->
       <div class="material-subtitle">Tools analisis data statistik interaktif</div> <!-- Hapus editable-content -->
       <!-- No edit/delete buttons -->
     </div>
@@ -1714,6 +2078,13 @@ body.admin-active .tools-section .material-item:hover {
     <div class="material-item" data-material-id='whiteboard' onclick="showMaterial('whiteboard')">
       <strong>Whiteboard</strong>
       <div class="material-subtitle">Tools untuk menggambar, menulis catatan, dan brainstorming</div>
+      <!-- No edit/delete buttons karena tools statis -->
+    </div>
+	
+	<!-- Item Baru: Mirror Screen (di dalam tools-section, setelah Whiteboard) -->
+    <div class="material-item" data-material-id='phone-screen' onclick="showMaterial('phone-screen')">
+      <strong>Mirror Screen</strong>
+      <div class="material-subtitle">Tools untuk menampilkan layar hape di desktop</div>
       <!-- No edit/delete buttons karena tools statis -->
     </div>
   </div>
@@ -1847,7 +2218,7 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
     id: 'analysis', 
     title: 'Analysis', 
     subtitle: 'Tools analisis data statistik interaktif',
-    content:`/*analysisToolContents['deskriptif']*/
+    content:`
         <h2>Analysis - Tools Analisis Statistik</h2>
         <p>Platform tools interaktif untuk melakukan berbagai jenis analisis statistik dengan mudah dan akurat.</p>
         
@@ -1898,6 +2269,77 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
 		
 		<div id="analysis-content" style="margin-top: 30px; padding: 20px; background: #f9f9f9; border-radius: 8px; min-height: 400px;">
           <p><em>Pilih tool dari grid di atas untuk memulai analisis. Contoh: Klik "Power Analysis" untuk fitur power uji dan sample size.</em></p>
+        </div>
+    `
+  },
+  {
+    id: 'data-analysis',  // Diubah menjadi 'data-analysis'
+    title: 'Data Analysis',  // Tetap 'Data Analysis'
+    subtitle: 'Tools analisis data statistik interaktif dengan tabel data dan kalkulasi real-time',
+    content: `
+        <div class="data-analysis-content">
+            <h2>Data Analysis Tool</h2>
+            <p><strong>Tip:</strong> Klik kanan pada nomor urut baris (kolom kiri) untuk menu konteks operasi baris. Klik kanan pada header kolom variabel untuk menu konteks operasi kolom. Paste data langsung juga didukung!</p>
+            <div class="data-toolbar">
+                <button onclick="addRow()">Add Row</button>
+                <button onclick="deleteRow()">Delete Row</button>
+                <button onclick="editCell()">Edit Cell</button>
+                <button onclick="importData()">Import Data</button>
+                <button onclick="exportData()">Export Data</button>
+                <button onclick="clearData()">Clear Data</button>
+                <button onclick="toggleAnalysisPanel()">Show Analysis Tools</button>
+            </div>
+            <table id="dataTable" class="data-table">
+                <thead>
+                    <tr>
+                        <th class="row-number">#</th>
+                        <th>Variable 1</th>
+                        <th>Variable 2</th>
+                        <th>Variable 3</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="row-number">1</td>
+                        <td contenteditable="true">1</td>
+                        <td contenteditable="true">2</td>
+                        <td contenteditable="true">3</td>
+                    </tr>
+                    <tr>
+                        <td class="row-number">2</td>
+                        <td contenteditable="true">4</td>
+                        <td contenteditable="true">5</td>
+                        <td contenteditable="true">6</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div id="analysisOutput" class="analysis-output" style="display: none;">
+                <h3>Analysis Results</h3>
+                <p>Analysis output will appear here after running an analysis.</p>
+            </div>
+            <div id="analysisPanel" class="analysis-panel" style="display: none;">
+<div class="tools-grid">
+    <button data-text="Statistik Deskriptif" onclick="showAnalysisTool('deskriptif')">📊</button>
+    <button data-text="Uji t (t-Test)" onclick="showAnalysisTool('uji-mean')">📈</button>
+    <button data-text="ANOVA" onclick="showAnalysisTool('anova')">📉</button>
+    <button data-text="Mann-Whitney U" onclick="showAnalysisTool('mann-whitney')">🔬</button>
+    <button data-text="Chi-Square Test" onclick="showAnalysisTool('chi-square')">📊</button>
+    <button data-text="Analisis Korelasi" onclick="showAnalysisTool('korelasi')">📈</button>
+    <button data-text="Regresi Linear" onclick="showAnalysisTool('regresi')">📉</button>
+    <button data-text="Clustering" onclick="showAnalysisTool('clustering')">🔬</button>
+    <button data-text="Factor Analysis" onclick="showAnalysisTool('factor-analysis')">📊</button>
+    <button data-text="Uji Asumsi Klasik" onclick="showAnalysisTool('uji-asumsi')">📈</button>
+    <button data-text="Uji Validitas & Reliabilitas" onclick="showAnalysisTool('uji-instrumen')">📉</button>
+    <button data-text="Sample Size" onclick="showSampleSizeSubmenu()">📏</button>
+</div>
+<div id="sampleSizeSubmenu" class="sample-size-submenu" style="display: none;">
+    <div class="submenu-grid">
+        <button data-text="Calculator" onclick="showSampleSizeTool('calculator')">🧮</button>
+        <button data-text="Power Sample" onclick="showSampleSizeTool('power')">⚡</button>
+        <button data-text="RNG" onclick="showSampleSizeTool('rng')">🎲</button>
+    </div>
+</div>
+            </div>
         </div>
     `
   },
@@ -1974,7 +2416,34 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
           Instruksi: Pilih tool, lalu klik dan drag di canvas. Untuk text, klik canvas setelah pilih tool Text, lalu ketik di input.
         </p>
       `
-    }
+    },
+{ 
+    id: 'phone-screen', 
+    title: 'Mirror Screen', 
+    subtitle: 'Tools untuk menampilkan layar hape di desktop',
+    content: `
+	<div class="phone-tool-container">
+    <div class="phone-container" style="position: relative;">
+		<div class="resize-handle"></div>
+        <div class="phone-notch"></div>
+        <div class="phone-speaker"></div>
+        <div class="phone-camera"></div>
+        <div class="phone-home-button"></div>
+        
+        <div class="phone-screen">
+            <div class="screen-content" id="screenContent">
+                <h2>Mirror Layar HP</h2>
+                <p>Masukkan URL HP:</p>
+                <input id="urlInput" type="text" placeholder="http://..." style="width: 200px; padding: 5px;">
+                <br><br>
+                <button onclick="startMirroring()">Start Mirroring</button>
+                <p id="statusMessage" style="color: blue; font-size: 12px;"></p>
+            </div>
+        </div>
+    </div>
+	</div>
+    `
+}
 ];
 
 // Fungsi load materials dari localStorage (default jika kosong)
@@ -4851,6 +5320,10 @@ function showMaterial(materialId) {
   const clickedItem = document.querySelector(`[data-material-id="${materialId}"]`);
   if (clickedItem) clickedItem.classList.add('active');
 
+  // Hapus container hape jika ada (cleanup)
+  const existingPhone = document.querySelector('.phone-container');
+  if (existingPhone) existingPhone.remove();
+
   const pageContentDiv = document.getElementById('pageContent');
   let content = '<p>Materi tidak ditemukan.</p>';
 
@@ -4862,16 +5335,39 @@ function showMaterial(materialId) {
   // Handle tools (ID string)
   else if (typeof materialId === 'string') {
     const tool = toolsArray.find(t => t.id === materialId);
-    if (tool) content = tool.content;
+    if (tool) {
+      if (materialId === 'phone-screen') {
+        // Append ke pageContent dulu untuk default di halaman tool
+        pageContentDiv.innerHTML = tool.content;
+        setTimeout(() => {
+          const phoneContainer = document.querySelector('.phone-container');
+          if (phoneContainer) {
+            // Ubah ke position fixed untuk floating
+            phoneContainer.style.position = 'fixed';
+            phoneContainer.style.zIndex = '100000';
+            phoneContainer.style.top = '100px';
+            phoneContainer.style.left = '20px';
+            initPhoneDrag();
+            console.log('initPhoneDrag() dipanggil untuk tool Mirror Screen.');
+          } else {
+            console.error('Phone container tidak ditemukan setelah timeout.');
+          }
+        }, 200);
+        return; // Keluar tanpa set content lagi
+      } else {
+        content = tool.content;
+      }
+    }
   }
 
   pageContentDiv.innerHTML = content;
 
   // Re-enable editing jika admin
   if (isAdminMode) enableAdminEditing();
-
+  
   destroyChart(); // Destroy chart jika ada
 }
+
 
   /**
    * Displays the content of a selected analysis tool.
@@ -8995,7 +9491,407 @@ lastRandomNumbers = [...randomNumbers];
   if (window.location.hostname !== 'localhost') {
     console.log = function() {}; // Disable console.log in production
   }
+ 
 
+        // Function to toggle analysis panel
+        function toggleAnalysisPanel() {
+            const panel = document.getElementById('analysisPanel');
+            panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Fungsi pendukung lainnya
+        function updateRowNumbers() {
+            const rows = document.querySelectorAll('#dataTable tbody tr');
+            rows.forEach((row, index) => {
+                row.cells[0].textContent = index + 1;
+            });
+        }
+
+        function addRow() {
+            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            const cols = document.querySelectorAll('#dataTable thead th').length;
+            for (let i = 0; i < cols; i++) {
+                const newCell = newRow.insertCell(i);
+                if (i === 0) {
+                    newCell.className = 'row-number';
+                    newCell.textContent = table.rows.length;
+                } else {
+                    newCell.contentEditable = true;
+                    newCell.textContent = '';
+                }
+            }
+            updateRowNumbers();
+        }
+
+        function deleteRow() {
+            const table = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+            if (table.rows.length > 0) {
+                table.deleteRow(-1);
+                updateRowNumbers();
+            }
+        }
+
+        function editCell() {
+            alert('Click on a cell to edit it directly.');
+        }
+
+        function importData() {
+            alert('Import data functionality would be implemented here (e.g., file upload).');
+        }
+
+        function exportData() {
+            alert('Export data functionality would be implemented here (e.g., download CSV).');
+        }
+
+        function clearData() {
+            const tbody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+            tbody.innerHTML = '';
+        }
+
+        function showSampleSizeSubmenu() {
+            const submenu = document.getElementById('sampleSizeSubmenu');
+            submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Fungsi analisis lainnya (salin dari respons sebelumnya jika diperlukan)
+        function showAnalysisTool(tool) {
+            const output = document.getElementById('analysisOutput');
+            output.style.display = 'block';
+            switch (tool) {
+                case 'deskriptif':
+                    runDescriptiveStats();
+                    break;
+                // Tambahkan case lainnya sesuai respons sebelumnya
+                default:
+                    output.innerHTML = '<h3>Analysis Tool</h3><p>Tool not implemented yet.</p>';
+            }
+        }
+
+        function showSampleSizeTool(tool) {
+            const output = document.getElementById('analysisOutput');
+            output.style.display = 'block';
+            switch (tool) {
+                case 'calculator':
+                    output.innerHTML = '<h3>Sample Size Calculator</h3><p>Population Size: <input type="number" id="popSize" placeholder="e.g., 1000"></p><p>Confidence Level: <input type="number" id="confLevel" placeholder="e.g., 95"></p><p>Margin Error: <input type="number" id="marginError" placeholder="e.g., 5"></p><button onclick="calculateSampleSize()">Calculate</button><p id="calcResult"></p>';
+                    break;
+                // Tambahkan case lainnya
+                default:
+                    output.innerHTML = '<h3>Sample Size Tool</h3><p>Tool not implemented yet.</p>';
+            }
+        }
+
+        function calculateSampleSize() {
+            const popSize = parseFloat(document.getElementById('popSize').value);
+            const confLevel = parseFloat(document.getElementById('confLevel').value) / 100;
+            const marginError = parseFloat(document.getElementById('marginError').value) / 100;
+            if (isNaN(popSize) || isNaN(confLevel) || isNaN(marginError)) {
+                document.getElementById('calcResult').textContent = 'Please enter valid numbers.';
+                return;
+            }
+            const z = 1.96;
+            const p = 0.5;
+            const sampleSize = (z * z * p * (1 - p)) / (marginError * marginError);
+            const adjustedSize = Math.min(sampleSize, popSize);
+            document.getElementById('calcResult').textContent = 'Estimated Sample Size: ' + Math.ceil(adjustedSize);
+        }
+
+        // Tambahkan fungsi analisis lengkap dari respons sebelumnya (runDescriptiveStats, dll.)
+        function runDescriptiveStats() {
+            const output = document.getElementById('analysisOutput');
+            output.style.display = 'block';
+            const data = getNumericData();
+            if (data.length === 0) {
+                output.innerHTML = '<h3>Descriptive Statistics</h3><p>No valid numeric data found.</p>';
+                return;
+            }
+            let results = '<h3>Descriptive Statistics</h3><table border="1"><tr><th>Variable</th><th>Mean</th><th>Median</th><th>Mode</th><th>Variance</th><th>Std Dev</th><th>Min</th><th>Max</th><th>Range</th><th>Skewness</th><th>Kurtosis</th></tr>';
+            for (let col = 0; col < data[0].length; col++) {
+                const colData = data.map(row => row[col]).filter(val => !isNaN(val));
+                if (colData.length === 0) continue;
+                const mean = colData.reduce((a, b) => a + b, 0) / colData.length;
+                const sorted = [...colData].sort((a, b) => a - b);
+                const median = sorted.length % 2 === 0 ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2 : sorted[Math.floor(sorted.length / 2)];
+                const mode = colData.reduce((a, b, i, arr) => (arr.filter(v => v === a).length >= arr.filter(v => v === b).length ? a : b));
+                const variance = colData.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / colData.length;
+                const stdDev = Math.sqrt(variance);
+                const min = Math.min(...colData);
+                const max = Math.max(...colData);
+                const range = max - min;
+                const skewness = colData.reduce((sum, val) => sum + Math.pow((val - mean) / stdDev, 3), 0) / colData.length;
+                const kurtosis = colData.reduce((sum, val) => sum + Math.pow((val - mean) / stdDev, 4), 0) / colData.length - 3;
+                results += `<tr><td>Variable ${col + 1}</td><td>${mean.toFixed(2)}</td><td>${median.toFixed(2)}</td><td>${mode}</td><td>${variance.toFixed(2)}</td><td>${stdDev.toFixed(2)}</td><td>${min}</td><td>${max}</td><td>${range}</td><td>${skewness.toFixed(2)}</td><td>${kurtosis.toFixed(2)}</td></tr>`;
+            }
+            results += '</table>';
+            output.innerHTML = results;
+        }
+
+        function getNumericData() {
+            const rows = document.querySelectorAll('#dataTable tbody tr');
+            let data = [];
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                let rowData = [];
+                cells.forEach((cell, i) => {
+                    if (i > 0) {
+                        const val = parseFloat(cell.textContent.trim());
+                        if (!isNaN(val)) rowData.push(val);
+                    }
+                });
+                if (rowData.length > 0) data.push(rowData);
+            });
+            return data;
+        }
+
+// Fungsi Phone Dragable
+function initPhoneDrag() {
+    const phoneContainer = document.querySelector('.phone-container');
+    const resizeHandle = document.querySelector('.resize-handle');
+    
+    if (!phoneContainer) {
+        console.warn('Phone container belum ditemukan, menunggu...');
+        // Hapus setTimeout loop untuk menghindari performa buruk; panggil ulang secara manual jika perlu
+        return;  // Keluar tanpa loop
+    }
+    
+    console.log('Phone container ditemukan dan drag diinisialisasi.');
+    
+    // Load posisi dari localStorage
+    const savedLeft = localStorage.getItem('phoneLeft') || '20px';
+    const savedTop = localStorage.getItem('phoneTop') || '20px';
+    const savedWidth = localStorage.getItem('phoneWidth') || '280px';
+    const savedHeight = localStorage.getItem('phoneHeight') || '560px'; // 280 * 2 for aspect ratio
+    
+    phoneContainer.style.left = savedLeft;
+    phoneContainer.style.top = savedTop;
+    phoneContainer.style.width = savedWidth;
+    phoneContainer.style.height = savedHeight;
+    
+    let isDragging = false;
+    let isResizing = false;
+    let startX, startY, initialX, initialY, initialWidth, initialHeight;
+
+function startDrag(e) {
+    if (e.target === resizeHandle || e.target.closest('.resize-handle') || e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('#urlInput')) return; // Jangan drag jika klik handle, input, atau button
+    isDragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+    
+    initialX = parseInt(phoneContainer.style.left || '20px', 10);
+    initialY = parseInt(phoneContainer.style.top || '20px', 10);
+    
+    document.addEventListener('mousemove', drag);
+    document.addEventListener('mouseup', stopDrag);
+    e.preventDefault();
+}
+
+    function drag(e) {
+        if (!isDragging) return;
+        const dx = e.clientX - startX;
+        const dy = e.clientY - startY;
+        
+        phoneContainer.style.left = initialX + dx + 'px';
+        phoneContainer.style.top = initialY + dy + 'px';
+    }
+
+    function stopDrag() {
+        isDragging = false;
+        document.removeEventListener('mousemove', drag);
+        document.removeEventListener('mouseup', stopDrag);
+        
+        // Simpan posisi ke localStorage
+        localStorage.setItem('phoneLeft', phoneContainer.style.left);
+        localStorage.setItem('phoneTop', phoneContainer.style.top);
+    }
+
+    phoneContainer.addEventListener('mousedown', startDrag);
+
+    // Fungsi Resize
+    function startResize(e) {
+        isResizing = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        
+        initialWidth = parseInt(phoneContainer.style.width || '280px', 10);
+        initialHeight = parseInt(phoneContainer.style.height || '560px', 10);
+        
+        document.addEventListener('mousemove', resize);
+        document.addEventListener('mouseup', stopResize);
+        e.preventDefault();
+    }
+
+function resize(e) {
+    if (!isResizing) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    
+    // Hapus batas minimal untuk fleksibilitas
+    const newWidth = initialWidth + dx;
+    const newHeight = initialHeight + dy;
+    
+    // Logging untuk debug
+    console.log('Resize - dx:', dx, 'dy:', dy, 'newWidth:', newWidth, 'newHeight:', newHeight);
+    
+    phoneContainer.style.width = newWidth + 'px';
+    phoneContainer.style.height = newHeight + 'px';
+}
+
+
+    function stopResize() {
+        isResizing = false;
+        document.removeEventListener('mousemove', resize);
+        document.removeEventListener('mouseup', stopResize);
+        
+        // Simpan ukuran ke localStorage
+        localStorage.setItem('phoneWidth', phoneContainer.style.width);
+        localStorage.setItem('phoneHeight', phoneContainer.style.height);
+    }
+
+    resizeHandle.addEventListener('mousedown', startResize);
+
+    // Touch events untuk mobile
+    function startTouchDrag(e) {
+        if (e.target === resizeHandle) return;
+        isDragging = true;
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        
+        initialX = parseInt(phoneContainer.style.left || '20px', 10);
+        initialY = parseInt(phoneContainer.style.top || '20px', 10);
+        
+        document.addEventListener('touchmove', touchDrag, { passive: false });
+        document.addEventListener('touchend', stopTouchDrag);
+        e.preventDefault();
+    }
+
+    function touchDrag(e) {
+        if (!isDragging) return;
+        const touch = e.touches[0];
+        const dx = touch.clientX - startX;
+        const dy = touch.clientY - startY;
+        
+        phoneContainer.style.left = initialX + dx + 'px';
+        phoneContainer.style.top = initialY + dy + 'px';
+    }
+
+    function stopTouchDrag() {
+        isDragging = false;
+        document.removeEventListener('touchmove', touchDrag);
+        document.removeEventListener('touchend', stopTouchDrag);
+        
+        localStorage.setItem('phoneLeft', phoneContainer.style.left);
+        localStorage.setItem('phoneTop', phoneContainer.style.top);
+    }
+
+    phoneContainer.addEventListener('touchstart', startTouchDrag, { passive: false });
+
+    function startTouchResize(e) {
+        isResizing = true;
+        const touch = e.touches[0];
+        startX = touch.clientX;
+        startY = touch.clientY;
+        
+        initialWidth = parseInt(phoneContainer.style.width || '280px', 10);
+        initialHeight = parseInt(phoneContainer.style.height || '560px', 10);
+        
+        document.addEventListener('touchmove', touchResize, { passive: false });
+        document.addEventListener('touchend', stopTouchResize);
+        e.preventDefault();
+    }
+
+function touchResize(e) {
+    if (!isResizing) return;
+    const touch = e.touches[0];
+    const dx = touch.clientX - startX;
+    const dy = touch.clientY - startY;
+    
+    // Hapus batas minimal
+    const newWidth = initialWidth + dx;
+    const newHeight = initialHeight + dy;
+    
+    // Logging untuk debug
+    console.log('Touch Resize - dx:', dx, 'dy:', dy, 'newWidth:', newWidth, 'newHeight:', newHeight);
+    
+    phoneContainer.style.width = newWidth + 'px';
+    phoneContainer.style.height = newHeight + 'px';
+}
+
+    function stopTouchResize() {
+        isResizing = false;
+        document.removeEventListener('touchmove', touchResize);
+        document.removeEventListener('touchend', stopTouchResize);
+        
+        localStorage.setItem('phoneWidth', phoneContainer.style.width);
+        localStorage.setItem('phoneHeight', phoneContainer.style.height);
+    }
+
+    resizeHandle.addEventListener('touchstart', startTouchResize, { passive: false });
+}
+
+// Fungsi startMirroring() ganti dengan ini
+function startMirroring() {
+    const urlInput = document.getElementById('urlInput');
+    const statusMessage = document.getElementById('statusMessage');
+    const screenContent = document.getElementById('screenContent');
+    
+    const url = urlInput.value.trim();
+    if (!url || !url.startsWith('http')) {
+        statusMessage.textContent = 'Masukkan URL valid dari app HP!';
+        statusMessage.style.color = 'red';
+        return;
+    }
+    
+    statusMessage.textContent = 'Menghubungkan ke HP...';
+    statusMessage.style.color = 'blue';
+    
+    // Gunakan iframe untuk stream HTTP dari app (lebih kompatibel dengan Screen Stream Mirroring)
+    const iframe = document.createElement('iframe');
+    iframe.src = url;
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    iframe.style.position = 'absolute';
+    iframe.style.top = '0';
+    iframe.style.left = '0';
+    iframe.onload = () => {
+        statusMessage.textContent = 'Stream berhasil! Layar HP ditampilkan full.';
+        statusMessage.style.color = 'green';
+    };
+    iframe.onerror = () => {
+        statusMessage.textContent = 'Error iframe. Cek URL dan konfigurasi app HP.';
+        statusMessage.style.color = 'red';
+    };
+    
+    screenContent.innerHTML = '';
+    screenContent.appendChild(iframe);
+    
+    // Tambah tombol stop dan refresh
+    const stopBtn = document.createElement('button');
+    stopBtn.textContent = 'Stop Mirroring';
+    stopBtn.onclick = () => {
+        iframe.remove();
+        screenContent.innerHTML = `
+            <h2>Mirror Layar HP</h2>
+            <p>Masukkan URL dari app HP (e.g., http://192.168.1.100:8080):</p>
+            <input id="urlInput" type="text" placeholder="http://..." style="width: 200px; padding: 5px;">
+            <br><br>
+            <button onclick="startMirroring()">Start Mirroring</button>
+            <p id="statusMessage" style="color: blue; font-size: 12px;"></p>
+        `;
+    };
+    screenContent.appendChild(stopBtn);
+    
+    const refreshBtn = document.createElement('button');
+    refreshBtn.textContent = 'Refresh Stream';
+    refreshBtn.onclick = () => {
+        iframe.src = iframe.src;  // Force refresh jika layar gelap
+        statusMessage.textContent = 'Stream di-refresh...';
+    };
+    screenContent.appendChild(refreshBtn);
+}
+   
+	
 </script>
 </body>
 </html>
