@@ -2434,7 +2434,7 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
             <div class="screen-content" id="screenContent">
                 <h2>Mirror Layar HP</h2>
                 <p>Masukkan URL HP:</p>
-                <input id="urlInput" type="text" placeholder="http://..." style="width: 200px; padding: 5px;">
+                <input id="urlInput" type="text" placeholder="http://... or Stream ID: xxx, Pwd: xxx" style="width: 250px; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
                 <br><br>
                 <button onclick="startMirroring()">Start Mirroring</button>
                 <p id="statusMessage" style="color: blue; font-size: 12px;"></p>
@@ -9835,62 +9835,124 @@ function startMirroring() {
     const statusMessage = document.getElementById('statusMessage');
     const screenContent = document.getElementById('screenContent');
     
-    const url = urlInput.value.trim();
-    if (!url || !url.startsWith('http')) {
-        statusMessage.textContent = 'Masukkan URL valid dari app HP!';
-        statusMessage.style.color = 'red';
-        return;
+    const input = urlInput.value.trim();
+    let url, streamId, password;
+    
+    // Parse input: jika URL lokal, gunakan langsung; jika global, parse ID dan password
+    if (input.startsWith('http')) {
+        url = input;
+    } else {
+        // Asumsikan format "Stream ID: 815973xx, Stream password: xxxxxx"
+        const idMatch = input.match(/Stream ID: (\w+)/);
+        const passMatch = input.match(/Stream password: (\w+)/);
+        if (idMatch && passMatch) {
+            streamId = idMatch[1];
+            password = passMatch[1];
+            url = `https://screenstream.io/${streamId}`;  // URL global
+        } else {
+            statusMessage.textContent = 'Format input salah. Masukkan URL lokal atau "Stream ID: xxx, Stream password: xxx".';
+            statusMessage.style.color = 'red';
+            return;
+        }
     }
     
     statusMessage.textContent = 'Menghubungkan ke HP...';
     statusMessage.style.color = 'blue';
     
-    // Gunakan iframe untuk stream HTTP dari app (lebih kompatibel dengan Screen Stream Mirroring)
-    const iframe = document.createElement('iframe');
-    iframe.src = url;
-    iframe.style.width = '100%';
-    iframe.style.height = '100%';
-    iframe.style.border = 'none';
-    iframe.style.position = 'absolute';
-    iframe.style.top = '0';
-    iframe.style.left = '0';
-    iframe.onload = () => {
-        statusMessage.textContent = 'Stream berhasil! Layar HP ditampilkan full.';
-        statusMessage.style.color = 'green';
-    };
-    iframe.onerror = () => {
-        statusMessage.textContent = 'Error iframe. Cek URL dan konfigurasi app HP.';
+    // Gunakan PeerJS untuk WebRTC global
+    const peer = new Peer(undefined, {
+        host: 'screenstream.io',  // Server global app
+        port: 443,
+        secure: true,
+        debug: 2
+    });
+    
+    peer.on('open', (id) => {
+        console.log('Peer ID laptop:', id);
+        statusMessage.textContent = 'Peer siap. Menghubungkan ke stream...';
+        
+        // Connect dengan ID dan password
+        const conn = peer.connect(streamId, { metadata: { password: password } });
+        
+        conn.on('open', () => {
+            statusMessage.textContent = 'Terhubung! Menunggu stream dari HP...';
+            statusMessage.style.color = 'green';
+        });
+        
+        conn.on('error', (err) => {
+            statusMessage.textContent = 'Error koneksi: ' + err.message;
+            statusMessage.style.color = 'red';
+            peer.destroy();
+        });
+    });
+    
+    peer.on('call', (call) => {
+        call.answer();
+        
+        call.on('stream', (remoteStream) => {
+            statusMessage.textContent = 'Stream diterima! Menampilkan layar HP...';
+            statusMessage.style.color = 'green';
+            
+            const video = document.createElement('video');
+            video.srcObject = remoteStream;
+            video.autoplay = true;
+            video.controls = true;
+            video.style.width = '100%';
+            video.style.height = '100%';
+            video.style.objectFit = 'cover';
+            video.style.position = 'absolute';
+            video.style.top = '0';
+            video.style.left = '0';
+            
+            screenContent.innerHTML = '';
+            screenContent.appendChild(video);
+            
+            const stopBtn = document.createElement('button');
+            stopBtn.textContent = 'Stop Mirroring';
+            stopBtn.onclick = () => {
+                call.close();
+                peer.destroy();
+                screenContent.innerHTML = `
+                    <h2>Mirror Layar HP</h2>
+                    <p>Masukkan URL lokal atau "Stream ID: xxx, Stream password: xxx":</p>
+                    <input id="urlInput" type="text" placeholder="http://... atau Stream ID..." style="width: 250px; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
+                    <br><br>
+                    <button onclick="startMirroring()">Start Mirroring</button>
+                    <p id="statusMessage" style="color: blue; font-size: 12px;"></p>
+                `;
+            };
+            screenContent.appendChild(stopBtn);
+        });
+        
+        call.on('close', () => {
+            statusMessage.textContent = 'Koneksi ditutup.';
+            statusMessage.style.color = 'orange';
+        });
+        
+        call.on('error', (err) => {
+            statusMessage.textContent = 'Error stream: ' + err.message;
+            statusMessage.style.color = 'red';
+        });
+    });
+    
+    peer.on('error', (err) => {
+        statusMessage.textContent = 'Error Peer: ' + err.message;
         statusMessage.style.color = 'red';
-    };
+    });
     
-    screenContent.innerHTML = '';
-    screenContent.appendChild(iframe);
+    peer.on('disconnected', () => {
+        statusMessage.textContent = 'Terputus. Coba lagi.';
+        statusMessage.style.color = 'orange';
+    });
     
-    // Tambah tombol stop dan refresh
-    const stopBtn = document.createElement('button');
-    stopBtn.textContent = 'Stop Mirroring';
-    stopBtn.onclick = () => {
-        iframe.remove();
-        screenContent.innerHTML = `
-            <h2>Mirror Layar HP</h2>
-            <p>Masukkan URL dari app HP (e.g., http://192.168.1.100:8080):</p>
-            <input id="urlInput" type="text" placeholder="http://..." style="width: 200px; padding: 5px;">
-            <br><br>
-            <button onclick="startMirroring()">Start Mirroring</button>
-            <p id="statusMessage" style="color: blue; font-size: 12px;"></p>
-        `;
-    };
-    screenContent.appendChild(stopBtn);
-    
-    const refreshBtn = document.createElement('button');
-    refreshBtn.textContent = 'Refresh Stream';
-    refreshBtn.onclick = () => {
-        iframe.src = iframe.src;  // Force refresh jika layar gelap
-        statusMessage.textContent = 'Stream di-refresh...';
-    };
-    screenContent.appendChild(refreshBtn);
+    setTimeout(() => {
+        if (!peer.destroyed) {
+            peer.destroy();
+            statusMessage.textContent = 'Timeout: Kode mungkin salah.';
+            statusMessage.style.color = 'red';
+        }
+    }, 30000);
 }
-   
 	
 </script>
 </body>
