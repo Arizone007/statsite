@@ -5342,24 +5342,24 @@ function showMaterial(materialId) {
   else if (typeof materialId === 'string') {
     const tool = toolsArray.find(t => t.id === materialId);
     if (tool) {
-      if (materialId === 'phone-screen') {
-        // Append ke pageContent dulu untuk default di halaman tool
+    if (materialId === 'phone-screen') {
         pageContentDiv.innerHTML = tool.content;
         setTimeout(() => {
-          const phoneContainer = document.querySelector('.phone-container');
-          if (phoneContainer) {
-            // Ubah ke position fixed untuk floating
-            phoneContainer.style.position = 'fixed';
-            phoneContainer.style.zIndex = '100000';
-            phoneContainer.style.top = '100px';
-            phoneContainer.style.left = '20px';
-            initPhoneDrag();
-            console.log('initPhoneDrag() dipanggil untuk tool Mirror Screen.');
-          } else {
-            console.error('Phone container tidak ditemukan setelah timeout.');
-          }
+            const phoneContainer = document.querySelector('.phone-container');
+            if (phoneContainer) {
+                phoneContainer.style.position = 'fixed';
+                phoneContainer.style.zIndex = '100000';
+                phoneContainer.style.top = '100px';
+                phoneContainer.style.left = '20px';
+                initPhoneDrag();
+                console.log('initPhoneDrag() dipanggil untuk tool Mirror Screen.');
+                // Panggil attachModeSwitch di sini
+                attachModeSwitch();
+            } else {
+                console.error('Phone container tidak ditemukan setelah timeout.');
+            }
         }, 200);
-        return; // Keluar tanpa set content lagi
+        return;
       } else {
         content = tool.content;
       }
@@ -9840,11 +9840,9 @@ function startMirroring() {
     const statusMessage = document.getElementById('statusMessage');
     const screenContent = document.getElementById('screenContent');
     
-    // Ambil mode pilihan
     const selectedMode = document.querySelector('input[name="streamMode"]:checked').value;
     
     if (selectedMode === 'local') {
-        // Mode Local (MJPEG)
         const urlInput = document.getElementById('urlInput');
         const url = urlInput.value.trim();
         
@@ -9856,20 +9854,21 @@ function startMirroring() {
         
         statusMessage.textContent = 'Menghubungkan ke HP (Local MJPEG)...';
         statusMessage.style.color = 'blue';
+        console.log('Connecting to local URL:', url);
         
-        // Gunakan XMLHttpRequest untuk stream MJPEG
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.responseType = 'blob';
-        
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                const videoUrl = URL.createObjectURL(xhr.response);
+        // Gunakan fetch untuk MJPEG dengan mode no-cors jika perlu
+        fetch(url, { mode: 'cors' })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.blob();
+            })
+            .then(blob => {
+                const videoUrl = URL.createObjectURL(blob);
                 const video = document.createElement('video');
                 video.src = videoUrl;
                 video.autoplay = true;
                 video.controls = true;
-                video.muted = true;
+                video.muted = true;  // Muted untuk autoplay
                 video.style.width = '100%';
                 video.style.height = '100%';
                 video.style.objectFit = 'cover';
@@ -9880,15 +9879,25 @@ function startMirroring() {
                 video.onloadeddata = () => {
                     statusMessage.textContent = 'Stream berhasil! Layar HP ditampilkan (Local).';
                     statusMessage.style.color = 'green';
+                    console.log('Video loaded successfully');
                 };
                 
-                video.onerror = () => {
+                video.onerror = (e) => {
                     statusMessage.textContent = 'Error memuat video. Cek URL dan mode app.';
                     statusMessage.style.color = 'red';
+                    console.error('Video error:', e);
                 };
+                
+                video.onplay = () => console.log('Video started playing');
                 
                 screenContent.innerHTML = '';
                 screenContent.appendChild(video);
+                
+                // Force play jika autoplay gagal
+                video.play().catch(e => {
+                    console.warn('Autoplay failed, user interaction needed:', e);
+                    statusMessage.textContent = 'Klik play di video untuk mulai.';
+                });
                 
                 const stopBtn = document.createElement('button');
                 stopBtn.textContent = 'Stop Mirroring';
@@ -9910,25 +9919,18 @@ function startMirroring() {
                         <button onclick="startMirroring()">Start Mirroring</button>
                         <p id="statusMessage" style="color: blue; font-size: 12px;"></p>
                     `;
-                    // Re-attach event listener untuk radio button
                     attachModeSwitch();
                 };
                 screenContent.appendChild(stopBtn);
-            } else {
-                statusMessage.textContent = 'Error: Tidak dapat mengakses URL (' + xhr.status + ').';
+            })
+            .catch(err => {
+                statusMessage.textContent = 'Error koneksi: ' + err.message;
                 statusMessage.style.color = 'red';
-            }
-        };
-        
-        xhr.onerror = function() {
-            statusMessage.textContent = 'Error koneksi: Cek jaringan dan URL.';
-            statusMessage.style.color = 'red';
-        };
-        
-        xhr.send();
+                console.error('Fetch error:', err);
+            });
         
     } else if (selectedMode === 'global') {
-        // Mode Global (WebRTC)
+        // Mode Global (WebRTC) - kode sama seperti sebelumnya
         const streamId = document.getElementById('streamIdInput').value.trim();
         const streamPassword = document.getElementById('streamPwdInput').value.trim();
         
@@ -9946,7 +9948,6 @@ function startMirroring() {
         statusMessage.textContent = 'Menghubungkan ke HP (Global WebRTC)...';
         statusMessage.style.color = 'blue';
         
-        // Gunakan PeerJS untuk WebRTC global
         const peer = new Peer(undefined, {
             host: 'screenstream.io',
             port: 443,
@@ -10013,7 +10014,6 @@ function startMirroring() {
                         <button onclick="startMirroring()">Start Mirroring</button>
                         <p id="statusMessage" style="color: blue; font-size: 12px;"></p>
                     `;
-                    // Re-attach event listener untuk radio button
                     attachModeSwitch();
                 };
                 screenContent.appendChild(stopBtn);
@@ -10050,7 +10050,7 @@ function startMirroring() {
     }
 }
 
-// Fungsi untuk toggle input berdasarkan mode
+// Fungsi attachModeSwitch
 function attachModeSwitch() {
     const radios = document.querySelectorAll('input[name="streamMode"]');
     const localContainer = document.getElementById('localInputContainer');
@@ -10068,9 +10068,6 @@ function attachModeSwitch() {
         });
     });
 }
-
-// Panggil attachModeSwitch saat tool dimuat
-// Tambahkan di showMaterial() setelah append content
 	
 </script>
 </body>
