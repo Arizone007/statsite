@@ -2433,15 +2433,14 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
         <div class="phone-screen">
             <div class="screen-content" id="screenContent">
                 <h2>Mirror Layar HP</h2>
-<label><input type="radio" name="streamMode" value="local" checked> Local mode (MJPEG)</label>
-<label><input type="radio" name="streamMode" value="global"> Global mode (WebRTC)</label>
-<div id="localInputContainer">
-  <input id="urlInput" type="text" placeholder="Masukkan URL stream lokal (MJPEG)" style="width: 100%;">
-</div>
-<div id="globalInputContainer" style="display:none;">
-  <input id="streamIdInput" type="text" placeholder="Stream ID" style="width: 48%; margin-right: 4%;">
-  <input id="streamPwdInput" type="password" placeholder="Stream password" style="width: 48%;">
-</div>
+				<label><input type="radio" name="streamMode" value="local" checked> Local mode (MJPEG)</label>
+				<label><input type="radio" name="streamMode" value="global"> Global mode (WebRTC)</label>
+                <div id="localInputContainer">
+                    <input id="urlInput" type="text" placeholder="Masukkan URL stream lokal (MJPEG)" style="width: 100%; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
+                </div>
+                <div id="globalInputContainer" style="display:none;">
+                    <input id="globalUrlInput" type="text" placeholder="Paste URL share dari app HP (e.g., https://screenstream.io/?id=...&p=...)" style="width: 100%; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
+                </div>
                 <button onclick="startMirroring()">Start Mirroring</button>
                 <p id="statusMessage" style="color: blue; font-size: 12px;"></p>
             </div>
@@ -9911,8 +9910,7 @@ function startMirroring() {
                             <input id="urlInput" type="text" placeholder="Masukkan URL stream lokal (MJPEG)" style="width: 100%; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
                         </div>
                         <div id="globalInputContainer" style="display:none;">
-                            <input id="streamIdInput" type="text" placeholder="Stream ID" style="width: 48%; margin-right: 4%; padding: 5px;">
-                            <input id="streamPwdInput" type="password" placeholder="Stream password" style="width: 48%; padding: 5px;">
+                            <input id="globalUrlInput" type="text" placeholder="Paste URL share dari app HP (e.g., https://screenstream.io/?id=...&p=...)" style="width: 100%; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
                         </div>
                         <br><br>
                         <button onclick="startMirroring()">Start Mirroring</button>
@@ -9929,35 +9927,41 @@ function startMirroring() {
             });
         
     } else if (selectedMode === 'global') {
-        // Mode Global (WebRTC) dengan reconnect dan debug
-        const streamId = document.getElementById('streamIdInput').value.trim();
-        const streamPassword = document.getElementById('streamPwdInput').value.trim();
+        // Mode Global (WebRTC) dengan parse URL share
+        const globalUrlInput = document.getElementById('globalUrlInput');
+        const url = globalUrlInput.value.trim();
         
-        if (!streamId) {
-            statusMessage.textContent = 'Stream ID tidak boleh kosong.';
+        if (!url || !url.includes('screenstream.io')) {
+            statusMessage.textContent = 'Masukkan URL share dari app HP!';
             statusMessage.style.color = 'red';
             return;
         }
-        if (!streamPassword) {
-            statusMessage.textContent = 'Password stream tidak boleh kosong.';
+        
+        // Parse ID dan password dari URL
+        const urlParams = new URLSearchParams(url.split('?')[1]);
+        const streamId = urlParams.get('id');
+        const streamPassword = urlParams.get('p');
+        
+        if (!streamId || !streamPassword) {
+            statusMessage.textContent = 'URL tidak valid. Pastikan format https://screenstream.io/?id=...&p=...';
             statusMessage.style.color = 'red';
             return;
         }
         
         statusMessage.textContent = 'Menghubungkan ke HP (Global WebRTC)...';
         statusMessage.style.color = 'blue';
-        console.log('Attempting global connection with ID:', streamId, 'Password:', streamPassword);
+        console.log('Parsed ID:', streamId, 'Password:', streamPassword);
         
         const peer = new Peer(undefined, {
             host: 'screenstream.io',
             port: 443,
             secure: true,
-            debug: 3,  // Tingkatkan debug level
+            debug: 3,
             config: {
                 iceServers: [
                     { urls: 'stun:stun.l.google.com:19302' },
                     { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'turn:turn.bistri.com:80', credential: 'homeo', username: 'homeo' }  // Tambah TURN server
+                    { urls: 'turn:turn.bistri.com:80', credential: 'homeo', username: 'homeo' }
                 ]
             }
         });
@@ -10022,8 +10026,7 @@ function startMirroring() {
                             <input id="urlInput" type="text" placeholder="Masukkan URL stream lokal (MJPEG)" style="width: 100%; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
                         </div>
                         <div id="globalInputContainer" style="display:none;">
-                            <input id="streamIdInput" type="text" placeholder="Stream ID" style="width: 48%; margin-right: 4%; padding: 5px;">
-                            <input id="streamPwdInput" type="password" placeholder="Stream password" style="width: 48%; padding: 5px;">
+                            <input id="globalUrlInput" type="text" placeholder="Paste URL share dari app HP (e.g., https://screenstream.io/?id=...&p=...)" style="width: 100%; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
                         </div>
                         <br><br>
                         <button onclick="startMirroring()">Start Mirroring</button>
@@ -10049,7 +10052,7 @@ function startMirroring() {
         
         peer.on('error', (err) => {
             console.error('Peer error:', err);
-            statusMessage.textContent = 'Error Peer: ' + err.message + '. Cek ID/Password atau server.';
+            statusMessage.textContent = 'Error Peer: ' + err.message + '. Cek URL share.';
             statusMessage.style.color = 'red';
         });
         
@@ -10058,9 +10061,9 @@ function startMirroring() {
             if (reconnectAttempts < maxReconnect) {
                 reconnectAttempts++;
                 statusMessage.textContent = `Terputus. Mencoba reconnect (${reconnectAttempts}/${maxReconnect})...`;
-                setTimeout(() => peer.reconnect(), 2000);  // Delay reconnect 2 detik
+                setTimeout(() => peer.reconnect(), 2000);
             } else {
-                statusMessage.textContent = 'Terputus. Cek ID/Password atau gunakan mode local.';
+                statusMessage.textContent = 'Terputus. Cek URL share atau gunakan mode local.';
                 statusMessage.style.color = 'red';
                 peer.destroy();
             }
@@ -10069,7 +10072,7 @@ function startMirroring() {
         setTimeout(() => {
             if (!peer.destroyed) {
                 peer.destroy();
-                statusMessage.textContent = 'Timeout: Kode mungkin salah atau server down.';
+                statusMessage.textContent = 'Timeout: URL share mungkin salah.';
                 statusMessage.style.color = 'red';
             }
         }, 60000);
