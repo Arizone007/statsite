@@ -9929,7 +9929,7 @@ function startMirroring() {
             });
         
     } else if (selectedMode === 'global') {
-        // Mode Global (WebRTC) dengan reconnect
+        // Mode Global (WebRTC) dengan reconnect dan debug
         const streamId = document.getElementById('streamIdInput').value.trim();
         const streamPassword = document.getElementById('streamPwdInput').value.trim();
         
@@ -9946,16 +9946,18 @@ function startMirroring() {
         
         statusMessage.textContent = 'Menghubungkan ke HP (Global WebRTC)...';
         statusMessage.style.color = 'blue';
+        console.log('Attempting global connection with ID:', streamId, 'Password:', streamPassword);
         
         const peer = new Peer(undefined, {
             host: 'screenstream.io',
             port: 443,
             secure: true,
-            debug: 2,
+            debug: 3,  // Tingkatkan debug level
             config: {
                 iceServers: [
                     { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' }
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'turn:turn.bistri.com:80', credential: 'homeo', username: 'homeo' }  // Tambah TURN server
                 ]
             }
         });
@@ -9964,12 +9966,13 @@ function startMirroring() {
         const maxReconnect = 3;
         
         peer.on('open', (id) => {
-            console.log('Peer ID laptop:', id);
+            console.log('Peer opened with ID:', id);
             statusMessage.textContent = 'Peer siap. Menghubungkan ke stream...';
             
             const conn = peer.connect(streamId, { metadata: { password: streamPassword } });
             
             conn.on('open', () => {
+                console.log('Connection opened to stream');
                 statusMessage.textContent = 'Terhubung! Menunggu stream dari HP...';
                 statusMessage.style.color = 'green';
                 reconnectAttempts = 0;
@@ -10046,7 +10049,7 @@ function startMirroring() {
         
         peer.on('error', (err) => {
             console.error('Peer error:', err);
-            statusMessage.textContent = 'Error Peer: ' + err.message + '. Server mungkin down.';
+            statusMessage.textContent = 'Error Peer: ' + err.message + '. Cek ID/Password atau server.';
             statusMessage.style.color = 'red';
         });
         
@@ -10055,9 +10058,9 @@ function startMirroring() {
             if (reconnectAttempts < maxReconnect) {
                 reconnectAttempts++;
                 statusMessage.textContent = `Terputus. Mencoba reconnect (${reconnectAttempts}/${maxReconnect})...`;
-                peer.reconnect();
+                setTimeout(() => peer.reconnect(), 2000);  // Delay reconnect 2 detik
             } else {
-                statusMessage.textContent = 'Terputus. Coba lagi atau gunakan mode local.';
+                statusMessage.textContent = 'Terputus. Cek ID/Password atau gunakan mode local.';
                 statusMessage.style.color = 'red';
                 peer.destroy();
             }
