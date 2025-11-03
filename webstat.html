@@ -2434,13 +2434,14 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
             <div class="screen-content" id="screenContent">
                 <h2>Mirror Layar HP</h2>
 				<label><input type="radio" name="streamMode" value="local" checked> Local mode (MJPEG)</label>
-				<label><input type="radio" name="streamMode" value="global"> Global mode (WebRTC)</label>
+				<label><input type="radio" name="streamMode" value="global"> Global mode (WebRTC via ngrok)</label>
                 <div id="localInputContainer">
                     <input id="urlInput" type="text" placeholder="Masukkan URL stream lokal (MJPEG)" style="width: 100%; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
                 </div>
                 <div id="globalInputContainer" style="display:none;">
                     <input id="globalUrlInput" type="text" placeholder="Paste URL share dari app HP (e.g., https://screenstream.io/?id=...&p=...)" style="width: 100%; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
                 </div>
+				<br><br>
                 <button onclick="startMirroring()">Start Mirroring</button>
                 <p id="statusMessage" style="color: blue; font-size: 12px;"></p>
             </div>
@@ -9905,12 +9906,12 @@ function startMirroring() {
                     screenContent.innerHTML = `
                         <h2>Mirror Layar HP</h2>
                         <label><input type="radio" name="streamMode" value="local" checked> Local mode (MJPEG)</label>
-                        <label><input type="radio" name="streamMode" value="global"> Global mode (WebRTC)</label>
+                        <label><input type="radio" name="streamMode" value="global"> Global mode (WebRTC via ngrok)</label>
                         <div id="localInputContainer">
                             <input id="urlInput" type="text" placeholder="Masukkan URL stream lokal (MJPEG)" style="width: 100%; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
                         </div>
                         <div id="globalInputContainer" style="display:none;">
-                            <input id="globalUrlInput" type="text" placeholder="Paste URL share dari app HP (e.g., https://screenstream.io/?id=...&p=...)" style="width: 100%; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
+                            <input id="globalUrlInput" type="text" placeholder="Paste URL ngrok HTTPS dari HP (e.g., https://xxxxx.ngrok.io)" style="width: 100%; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
                         </div>
                         <br><br>
                         <button onclick="startMirroring()">Start Mirroring</button>
@@ -9927,82 +9928,33 @@ function startMirroring() {
             });
         
     } else if (selectedMode === 'global') {
-        // Mode Global (WebRTC) dengan parse URL share
+        // Mode Global menggunakan ngrok URL (HTTPS)
         const globalUrlInput = document.getElementById('globalUrlInput');
         const url = globalUrlInput.value.trim();
         
-        if (!url || !url.includes('screenstream.io')) {
-            statusMessage.textContent = 'Masukkan URL share dari app HP!';
+        if (!url || !url.startsWith('https://')) {
+            statusMessage.textContent = 'Masukkan URL HTTPS dari ngrok!';
             statusMessage.style.color = 'red';
             return;
         }
         
-        // Parse ID dan password dari URL
-        const urlParams = new URLSearchParams(url.split('?')[1]);
-        const streamId = urlParams.get('id');
-        const streamPassword = urlParams.get('p');
-        
-        if (!streamId || !streamPassword) {
-            statusMessage.textContent = 'URL tidak valid. Pastikan format https://screenstream.io/?id=...&p=...';
-            statusMessage.style.color = 'red';
-            return;
-        }
-        
-        statusMessage.textContent = 'Menghubungkan ke HP (Global WebRTC)...';
+        statusMessage.textContent = 'Menghubungkan ke HP (Global via ngrok)...';
         statusMessage.style.color = 'blue';
-        console.log('Parsed ID:', streamId, 'Password:', streamPassword);
+        console.log('Connecting to ngrok URL:', url);
         
-        const peer = new Peer(undefined, {
-            host: 'screenstream.io',
-            port: 443,
-            secure: true,
-            debug: 3,
-            config: {
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'turn:turn.bistri.com:80', credential: 'homeo', username: 'homeo' }
-                ]
-            }
-        });
-        
-        let reconnectAttempts = 0;
-        const maxReconnect = 3;
-        
-        peer.on('open', (id) => {
-            console.log('Peer opened with ID:', id);
-            statusMessage.textContent = 'Peer siap. Menghubungkan ke stream...';
-            
-            const conn = peer.connect(streamId, { metadata: { password: streamPassword } });
-            
-            conn.on('open', () => {
-                console.log('Connection opened to stream');
-                statusMessage.textContent = 'Terhubung! Menunggu stream dari HP...';
-                statusMessage.style.color = 'green';
-                reconnectAttempts = 0;
-            });
-            
-            conn.on('error', (err) => {
-                console.error('Connection error:', err);
-                statusMessage.textContent = 'Error koneksi: ' + err.message;
-                statusMessage.style.color = 'red';
-                peer.destroy();
-            });
-        });
-        
-        peer.on('call', (call) => {
-            console.log('Incoming call from HP');
-            call.answer();
-            
-            call.on('stream', (remoteStream) => {
-                console.log('Stream received');
-                statusMessage.textContent = 'Stream diterima! Menampilkan layar HP (Global).';
-                statusMessage.style.color = 'green';
-                
+        // Gunakan fetch untuk stream dari ngrok (mirip local tapi HTTPS)
+        fetch(url, { mode: 'cors' })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.blob();
+            })
+            .then(blob => {
+                const videoUrl = URL.createObjectURL(blob);
                 const video = document.createElement('video');
-                video.srcObject = remoteStream;
+                video.src = videoUrl;
                 video.autoplay = true;
                 video.controls = true;
+                video.muted = true;
                 video.style.width = '100%';
                 video.style.height = '100%';
                 video.style.objectFit = 'cover';
@@ -10010,23 +9962,42 @@ function startMirroring() {
                 video.style.top = '0';
                 video.style.left = '0';
                 
+                video.onloadeddata = () => {
+                    statusMessage.textContent = 'Stream berhasil! Layar HP ditampilkan (Global via ngrok).';
+                    statusMessage.style.color = 'green';
+                    console.log('Video loaded successfully');
+                };
+                
+                video.onerror = (e) => {
+                    statusMessage.textContent = 'Error memuat video. Cek URL ngrok dan koneksi HP.';
+                    statusMessage.style.color = 'red';
+                    console.error('Video error:', e);
+                };
+                
+                video.onplay = () => console.log('Video started playing');
+                
                 screenContent.innerHTML = '';
                 screenContent.appendChild(video);
+                
+                video.play().catch(e => {
+                    console.warn('Autoplay failed, user interaction needed:', e);
+                    statusMessage.textContent = 'Klik play di video untuk mulai.';
+                });
                 
                 const stopBtn = document.createElement('button');
                 stopBtn.textContent = 'Stop Mirroring';
                 stopBtn.onclick = () => {
-                    call.close();
-                    peer.destroy();
+                    video.pause();
+                    URL.revokeObjectURL(videoUrl);
                     screenContent.innerHTML = `
                         <h2>Mirror Layar HP</h2>
                         <label><input type="radio" name="streamMode" value="local" checked> Local mode (MJPEG)</label>
-                        <label><input type="radio" name="streamMode" value="global"> Global mode (WebRTC)</label>
+                        <label><input type="radio" name="streamMode" value="global"> Global mode (WebRTC via ngrok)</label>
                         <div id="localInputContainer">
                             <input id="urlInput" type="text" placeholder="Masukkan URL stream lokal (MJPEG)" style="width: 100%; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
                         </div>
                         <div id="globalInputContainer" style="display:none;">
-                            <input id="globalUrlInput" type="text" placeholder="Paste URL share dari app HP (e.g., https://screenstream.io/?id=...&p=...)" style="width: 100%; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
+                            <input id="globalUrlInput" type="text" placeholder="Paste URL ngrok HTTPS dari HP (e.g., https://xxxxx.ngrok.io)" style="width: 100%; padding: 5px;" onmousedown="event.stopPropagation();" oncontextmenu="return true;" onpaste="return true;">
                         </div>
                         <br><br>
                         <button onclick="startMirroring()">Start Mirroring</button>
@@ -10035,47 +10006,12 @@ function startMirroring() {
                     attachModeSwitch();
                 };
                 screenContent.appendChild(stopBtn);
-            });
-            
-            call.on('close', () => {
-                console.log('Call closed');
-                statusMessage.textContent = 'Koneksi ditutup.';
-                statusMessage.style.color = 'orange';
-            });
-            
-            call.on('error', (err) => {
-                console.error('Stream error:', err);
-                statusMessage.textContent = 'Error stream: ' + err.message;
+            })
+            .catch(err => {
+                statusMessage.textContent = 'Error koneksi: ' + err.message + '. Gunakan mode local jika global gagal.';
                 statusMessage.style.color = 'red';
+                console.error('Fetch error:', err);
             });
-        });
-        
-        peer.on('error', (err) => {
-            console.error('Peer error:', err);
-            statusMessage.textContent = 'Error Peer: ' + err.message + '. Cek URL share.';
-            statusMessage.style.color = 'red';
-        });
-        
-        peer.on('disconnected', () => {
-            console.log('Peer disconnected, attempt:', reconnectAttempts);
-            if (reconnectAttempts < maxReconnect) {
-                reconnectAttempts++;
-                statusMessage.textContent = `Terputus. Mencoba reconnect (${reconnectAttempts}/${maxReconnect})...`;
-                setTimeout(() => peer.reconnect(), 2000);
-            } else {
-                statusMessage.textContent = 'Terputus. Cek URL share atau gunakan mode local.';
-                statusMessage.style.color = 'red';
-                peer.destroy();
-            }
-        });
-        
-        setTimeout(() => {
-            if (!peer.destroyed) {
-                peer.destroy();
-                statusMessage.textContent = 'Timeout: URL share mungkin salah.';
-                statusMessage.style.color = 'red';
-            }
-        }, 60000);
     }
 }
 
