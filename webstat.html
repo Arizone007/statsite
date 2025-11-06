@@ -2498,6 +2498,7 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
                                    style="width: 100%; max-width: 300px; padding: 12px 50px 12px 12px; 
                                           border: 1px solid #ddd; border-radius: 4px; font-family: monospace; 
                                           box-sizing: border-box; margin-bottom: 10px;">
+							<br><br>
 							<p style="font-size: 11px; color: #888; margin-bottom: 10px;">
 								📋 Paste URL lengkap dari ScreenStream "Share Link"!
 							</p>
@@ -10044,11 +10045,11 @@ function startMirroringGlobal() {
             <!-- Open in Browser Button -->
             <button onclick="openInNewTab('${directUrl}')" 
                     title="Open in Full Browser"
-                    style="position: absolute; top: 50px; right: 10px; 
+                    style="position: absolute; bottom: 50px; right: 10px;
                            background: rgba(33, 150, 243, 0.9); color: white; border: none; 
                            padding: 6px 12px; border-radius: 15px; cursor: pointer; 
                            font-size: 12px; opacity: 0.8; transition: all 0.3s ease;">
-                🔗 Fullscreen
+					🔗 Fullscreen
             </button>
             
             <div style="position: absolute; bottom: 15px; right: 15px; 
@@ -10059,8 +10060,13 @@ function startMirroringGlobal() {
                         box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
                 <button id="stopBtnGlobal" onclick="stopMirroring()" 
                         title="Stop Mirroring (ESC)"
-                        style="background: none; border: none; color: white; 
-                               width: 40px; height: 40px; font-size: 18px; cursor: pointer;"
+						style="position: absolute; bottom: 10px; right: 10px;
+							background: rgba(255, 68, 68, 0.9); color: white; border: none; 
+							padding: 4px 10px; border-radius: 15%; cursor: pointer;
+							font-size: 12px; opacity: 0.1;
+							transition: opacity 0.3s ease, transform 0.2s ease;
+							box-shadow: 0 2px 8px rgba(0,0,0,0.4);"
+							display: flex; align-items: center; justify-content: center;
                         onmouseover="this.parentElement.style.opacity='1'; this.parentElement.style.transform='scale(1.1)';"
                         onmouseout="this.parentElement.style.opacity='0.3'; this.parentElement.style.transform='scale(1)';">
                     ⏹
@@ -10211,12 +10217,12 @@ function stopMirroring() {
             <!-- Global Mode Form -->
             <div id="globalModeForm" style="display: none;">
                 <p style="font-size: 12px; color: #666;">Mode: Via Internet (WebRTC)</p>
-                <div style="position: relative; max-width: 300px; margin: 0 auto;">
-                    <input id="globalUrlInput" type="text" 
+                <input id="globalUrlInput" type="text" 
                            placeholder="https://screenstream.io/?id=74045606&p=c8IOiY" 
                            style="width: 100%; padding: 12px 50px 12px 12px; 
                                   border: 1px solid #ddd; border-radius: 4px; font-family: monospace; 
                                   box-sizing: border-box; margin-bottom: 10px;">
+				<br><br>
                 <p style="font-size: 11px; color: #888; text-align: center; margin-bottom: 10px;">
                     📋 Paste URL lengkap dari ScreenStream "Share Link"
                 </p> 
@@ -10225,7 +10231,7 @@ function stopMirroring() {
                                border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
                     ▶ Start Mirroring
                 </button>
-            </div>
+			</div>
             
             <p id="statusMessage" style="color: green; font-size: 12px; margin-top: 10px;">
                 ✓ Mirroring dihentikan - Pilih mode dan mulai baru
