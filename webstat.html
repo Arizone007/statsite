@@ -10045,33 +10045,26 @@ function startMirroringGlobal() {
             <!-- Open in Browser Button -->
             <button onclick="openInNewTab('${directUrl}')" 
                     title="Open in Full Browser"
-                    style="position: absolute; bottom: 50px; right: 10px;
+                    style="position: absolute; bottom: 10px; left: 50%;
                            background: rgba(33, 150, 243, 0.9); color: white; border: none; 
                            padding: 6px 12px; border-radius: 15px; cursor: pointer; 
                            font-size: 12px; opacity: 0.8; transition: all 0.3s ease;">
 					🔗 Fullscreen
             </button>
             
-            <div style="position: absolute; bottom: 15px; right: 15px; 
-                        background: rgba(255, 68, 68, 0.9); color: white; border: none; 
-                        width: 40px; height: 40px; border-radius: 50%; cursor: pointer; 
-                        font-size: 18px; opacity: 0.3; transition: all 0.3s ease;
-                        display: flex; align-items: center; justify-content: center;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-                <button id="stopBtnGlobal" onclick="stopMirroring()" 
-                        title="Stop Mirroring (ESC)"
-						style="position: absolute; bottom: 10px; right: 10px;
+            <button id="stopBtnGlobal" onclick="stopMirroring()" 
+                    title="Stop Mirroring (ESC)"
+					style="position: absolute; bottom: 10px; right: 10px;
 							background: rgba(255, 68, 68, 0.9); color: white; border: none; 
 							padding: 4px 10px; border-radius: 15%; cursor: pointer;
 							font-size: 12px; opacity: 0.1;
 							transition: opacity 0.3s ease, transform 0.2s ease;
 							box-shadow: 0 2px 8px rgba(0,0,0,0.4);"
 							display: flex; align-items: center; justify-content: center;
-                        onmouseover="this.parentElement.style.opacity='1'; this.parentElement.style.transform='scale(1.1)';"
-                        onmouseout="this.parentElement.style.opacity='0.3'; this.parentElement.style.transform='scale(1)';">
-                    ⏹
-                </button>
-            </div>
+                    onmouseover="this.parentElement.style.opacity='1'; this.parentElement.style.transform='scale(1.1)';"
+                    onmouseout="this.parentElement.style.opacity='0.3'; this.parentElement.style.transform='scale(1)';">
+                  ⏹
+            </button>
         </div>
     `;
     
@@ -10200,7 +10193,7 @@ function stopMirroring() {
             
             <!-- Local Mode Form -->
             <div id="localModeForm" style="display: block;">
-                <p style="font-size: 12px; color: #666;">Mode: Jaringan WiFi lokal</p>
+                <p style="font-size: 12px; color: #666; text-align: center;">Mode: Jaringan WiFi lokal</p>
                 <input id="urlInput" type="text" placeholder="http://192.168.1.100:8080" 
                        style="width: 220px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
                 <br><br>
@@ -10216,7 +10209,7 @@ function stopMirroring() {
             
             <!-- Global Mode Form -->
             <div id="globalModeForm" style="display: none;">
-                <p style="font-size: 12px; color: #666;">Mode: Via Internet (WebRTC)</p>
+                <p style="font-size: 12px; color: #666; text-align: center;">Mode: Via Internet (WebRTC)</p>
                 <input id="globalUrlInput" type="text" 
                            placeholder="https://screenstream.io/?id=74045606&p=c8IOiY" 
                            style="width: 100%; padding: 12px 50px 12px 12px; 
