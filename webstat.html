@@ -1802,6 +1802,8 @@ body.admin-active .tools-section .material-item:hover {
     padding: 20px; /* Opsional, untuk spacing */
     box-sizing: border-box;
     width: 100%; /* Pastikan lebar penuh dalam kontainer tool */
+    flex-direction: column;
+    gap: 20px;
 }
 
 /* Kode ponsel dengan ukuran lebih kecil */
@@ -1817,6 +1819,7 @@ body.admin-active .tools-section .material-item:hover {
     padding: 10px;
     box-sizing: border-box;
     cursor: move;
+	flex-shrink: 0;
 }
 
 .resize-handle {
@@ -1918,7 +1921,29 @@ button {
 
 button:hover {
     background: #0056b3;
+	transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2) !important;
 }
+       
+        button:active {
+            transform: translateY(0);
+        }
+        
+        /* Input focus */
+        input:focus {
+            outline: none;
+            border-color: #2196F3 !important;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+		
+		/* Help text responsive */
+        @media (max-width: 480px) {
+            #helpTextLocal, #helpTextGlobal {
+                max-width: 100% !important;
+                font-size: 16px;
+                padding: 0 10px;
+            }
+        }
 
 /* Media Queries untuk Responsivitas */
 @media (max-width: 768px) {
@@ -2423,28 +2448,30 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
     subtitle: 'Tools untuk menampilkan layar hape di desktop',
     content: `
     <div class="phone-tool-container">
-	                <!-- Help Text -->
-                    <div style="margin-top: 5px; padding: 24px; background: #e3f2fd; 
-                                border-radius: 16px; font-size: 20px; text-align: left;">
-                        <strong>📱 Cara Menggunakan</strong>
-                        <div id="helpTextLocal" style="display: block;">
-                            <strong>Local Mode:</strong><br>
-                            1. Install "ScreenStream" dari Play Store<br>
-                            2. Pilih mode "Local (MJPEG)"<br>
-                            3. Tekan "Start Stream"<br>
-                            4. Salin URL (contoh: http://192.168.1.100:8080)<br>
-                            5. Paste di form, klik "Start Mirroring"
-                        </div>
-                        <div id="helpTextGlobal" style="display: none;">
-                            <strong>Global Mode:</strong><br>
-                            1. Install "ScreenStream" dari Play Store<br>
-                            2. Pilih mode "Global (WebRTC)"<br>
-                            3. Tekan "Start Stream"<br>
-                            4. Salin Stream ID yang muncul<br>
-                            5. Masukkan Stream ID (dan password jika ada)<br>
-                            6. Klik "Start Mirroring"
-                        </div>
-                    </div>
+        <!-- Help Text - Centered Horizontally -->
+        <div style="margin-top: 5px; padding: 24px; background: #e3f2fd; 
+                    border-radius: 16px; font-size: 20px; text-align: center; 
+                    display: flex; flex-direction: column; align-items: center;">
+            <strong style="font-size: 24px; margin-bottom: 16px; color: #1976d2;">📱 Cara Menggunakan</strong>
+            <div id="helpTextLocal" style="display: block; max-width: 800px; text-align: left; line-height: 1.6;">
+                <strong style="color: #333; font-size: 18px;">Local Mode:</strong><br>
+                1. Install "ScreenStream" dari Play Store<br>
+                2. Pilih mode "Local (MJPEG)"<br>
+                3. Tekan "Start Stream"<br>
+                4. Salin URL (contoh: http://192.168.1.100:8080)<br>
+                5. Paste di form, klik "Start Mirroring"
+            </div>
+            <div id="helpTextGlobal" style="display: none; max-width: 800px; text-align: left; line-height: 1.6;">
+                <strong style="color: #333; font-size: 18px;">Global Mode:</strong><br>
+                1. Install "ScreenStream" dari Play Store<br>
+                2. Pilih mode "Global (WebRTC)"<br>
+                3. Tekan "Start Stream"<br>
+                4. Klik "Share Link" dan salin URL lengkap<br>
+                5. Paste URL lengkap di form ini<br>
+                6. Klik "Start Mirroring"
+            </div>
+        </div>
+        
         <div class="phone-container" style="position: relative;">
             <div class="resize-handle"></div>
             <div class="phone-notch"></div>
@@ -2454,54 +2481,92 @@ let toolsArray = [  // Array statis untuk tools (ID string, tidak ikut numbering
             
             <div class="phone-screen">
                 <div class="screen-content" id="screenContent">
-                    <h2>Mirror Layar HP</h2>
+                    <h2 style="text-align: center; margin-bottom: 20px;">Mirror Layar HP</h2>
                     
                     <!-- Mode Selector -->
-                    <div style="margin: 15px 0; padding: 10px; background: #f5f5f5; border-radius: 8px;">
-                        <label style="font-weight: bold; font-size: 13px;">Pilih Mode:</label><br>
-                        <div style="margin-top: 8px;">
-                            <label style="cursor: pointer; margin-right: 20px;">
+                    <div style="margin: 15px 0; padding: 12px; background: #f5f5f5; 
+                                border-radius: 12px; text-align: center;">
+                        <label style="font-weight: bold; font-size: 14px; color: #333;">Pilih Mode:</label><br>
+                        <div style="margin-top: 10px; display: flex; justify-content: center; gap: 25px;">
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
                                 <input type="radio" name="mirrorMode" value="local" checked onchange="switchMode('local')">
-                                📡 Local
+                                <span style="font-size: 16px;">📡 Local</span>
                             </label>
-                            <label style="cursor: pointer;">
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
                                 <input type="radio" name="mirrorMode" value="global" onchange="switchMode('global')">
-                                🌐 Global
+                                <span style="font-size: 16px;">🌐 Global</span>
                             </label>
                         </div>
                     </div>
                     
                     <!-- Local Mode Form -->
-                    <div id="localModeForm" style="display: block;">
-                        <p style="font-size: 12px; color: #666;">Mode: Jaringan WiFi lokal</p>
-                        <input id="urlInput" type="text" placeholder="http://192.168.1.100:8080" 
-                               style="width: 220px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                        <br><br>
+                    <div id="localModeForm" style="display: block; text-align: center;">
+                        <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Mode: Jaringan WiFi lokal</p>
+                        <input id="urlInput" type="text" 
+                               placeholder="http://192.168.1.100:8080" 
+                               style="width: 100%; max-width: 300px; padding: 12px; 
+                                      border: 2px solid #ddd; border-radius: 8px; font-size: 14px; 
+                                      text-align: center; font-family: monospace; 
+                                      box-sizing: border-box; margin-bottom: 15px;">
+                        <br>
                         <button onclick="startMirroring()" 
-                                style="padding: 10px 20px; background: #4CAF50; color: white; 
-                                       border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                                style="padding: 12px 30px; background: linear-gradient(135deg, #4CAF50, #45a049); 
+                                       color: white; border: none; border-radius: 25px; cursor: pointer; 
+                                       font-weight: bold; font-size: 15px; box-shadow: 0 4px 12px rgba(76,175,80,0.3);
+                                       transition: all 0.3s ease;">
                             ▶ Start Mirroring
                         </button>
                     </div>
                     
                     <!-- Global Mode Form -->
-                    <div id="globalModeForm" style="display: none;">
-                        <p style="font-size: 12px; color: #666;">Mode: Via Internet (WebRTC)</p>
-                        <input id="streamIdInput" type="text" placeholder="Stream ID" 
-                               style="width: 220px; padding: 8px; margin-bottom: 8px; 
-                                      border: 1px solid #ddd; border-radius: 4px;">
-                        <br>
-                        <input id="passwordInput" type="password" placeholder="Password (opsional)" 
-                               style="width: 220px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                        <br><br>
+                    <div id="globalModeForm" style="display: none; text-align: center;">
+                        <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Mode: Via Internet (WebRTC)</p>
+                        
+                        <!-- URL Input Container -->
+                        <div style="position: relative; max-width: 380px; margin: 0 auto 15px;">
+                            <input id="globalUrlInput" type="text" 
+                                   placeholder="https://screenstream.io/?id=74045606&p=c8IOiY" 
+                                   style="width: 100%; padding: 12px 50px 12px 15px; 
+                                          border: 2px solid #ddd; border-radius: 10px; font-size: 14px; 
+                                          font-family: monospace; text-align: left; 
+                                          box-sizing: border-box; background: #f9f9f9;">
+                            
+                            <!-- Parse Button -->
+                            <button id="parseUrlBtn" onclick="parseGlobalUrl()" 
+                                    style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+                                           background: linear-gradient(135deg, #2196F3, #1976d2); 
+                                           color: white; border: none; width: 36px; height: 36px; 
+                                           border-radius: 50%; cursor: pointer; font-size: 14px; 
+                                           display: flex; align-items: center; justify-content: center;
+                                           box-shadow: 0 2px 8px rgba(33,150,243,0.3); transition: all 0.3s;">
+                                🔍
+                            </button>
+                        </div>
+                        
+                        <p style="font-size: 12px; color: #888; margin-bottom: 15px; 
+                                  background: #f0f8ff; padding: 8px; border-radius: 6px;">
+                            📋 Paste URL lengkap dari ScreenStream Share Link
+                        </p>
+                        
                         <button onclick="startMirroring()" 
-                                style="padding: 10px 20px; background: #2196F3; color: white; 
-                                       border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                                style="padding: 12px 30px; background: linear-gradient(135deg, #2196F3, #1976d2); 
+                                       color: white; border: none; border-radius: 25px; cursor: pointer; 
+                                       font-weight: bold; font-size: 15px; width: 100%; max-width: 300px;
+                                       box-shadow: 0 4px 12px rgba(33,150,243,0.3); transition: all 0.3s ease;">
                             ▶ Start Mirroring
                         </button>
+                        
+                        <!-- Parsed Info -->
+                        <div id="parsedInfo" style="display: none; margin-top: 15px; 
+                                                    padding: 12px; background: #e8f5e8; 
+                                                    border-radius: 8px; border-left: 4px solid #4CAF50;">
+                            <strong style="color: #2e7d32; font-size: 13px;">✅ URL berhasil di-parse:</strong>
+                            <div id="parsedDetails" style="margin-top: 8px; font-size: 12px; color: #388e3c;"></div>
+                        </div>
                     </div>
                     
-                    <p id="statusMessage" style="color: blue; font-size: 12px; margin-top: 10px;"></p>
+                    <p id="statusMessage" style="color: #2196F3; font-size: 13px; margin-top: 15px; 
+                                                text-align: center; font-weight: 500;"></p>
                 </div>
             </div>
         </div>
@@ -9897,8 +9962,7 @@ function touchResize(e) {
 // FUNGSI GABUNGAN - START MIRRORING
 // ============================================
 function startMirroring() {
-    // Deteksi mode yang sedang aktif
-    const selectedMode = document.querySelector('input[name="mirrorMode"]:checked').value;
+    const selectedMode = document.querySelector('input[name="mirrorMode"]:checked')?.value;
     
     if (selectedMode === 'local') {
         startMirroringLocal();
@@ -9908,18 +9972,20 @@ function startMirroring() {
 }
 
 // ============================================
-// HELPER: LOCAL MODE (MJPEG)
+// LOCAL MODE - Dengan fix CSS di button stop
 // ============================================
 function startMirroringLocal() {
     const urlInput = document.getElementById('urlInput');
     const statusMessage = document.getElementById('statusMessage');
     const screenContent = document.getElementById('screenContent');
     
-    let url = urlInput.value.trim();
+    let url = urlInput?.value.trim() || '';
     
     if (!url) {
-        statusMessage.textContent = '❌ Masukkan URL terlebih dahulu!';
-        statusMessage.style.color = 'red';
+        if (statusMessage) {
+            statusMessage.textContent = '❌ Masukkan URL terlebih dahulu!';
+            statusMessage.style.color = 'red';
+        }
         return;
     }
     
@@ -9928,58 +9994,75 @@ function startMirroringLocal() {
         url = 'http://' + url;
     }
     
-    // Tambahkan /stream.mjpeg
     if (!url.includes('/stream.mjpeg')) {
         url = url.replace(/\/$/, '') + '/stream.mjpeg';
     }
     
-    statusMessage.textContent = '🔄 Menghubungkan ke Local stream...';
-    statusMessage.style.color = 'blue';
-   
-	screenContent.innerHTML = `
-    <div style="position: relative; width: 100%; height: 100%; background: #000;" 
-         onmouseenter="document.getElementById('stopBtn').style.opacity='1'" 
-         onmouseleave="document.getElementById('stopBtn').style.opacity='0.3'">
+    if (statusMessage) {
+        statusMessage.textContent = '🔄 Menghubungkan ke Local stream...';
+        statusMessage.style.color = 'blue';
+    }
+    
+    if (!screenContent) return;
+    
+    screenContent.innerHTML = `
+        <div style="position: relative; width: 100%; height: 100%; background: #000;" 
+             onmouseenter="showStopButton()" 
+             onmouseleave="hideStopButton()">
+            
+            <img id="mjpegStream" 
+                 src="${url}" 
+                 style="width: 100%; height: 100%; object-fit: contain;"
+                 alt="Phone Screen Mirror" />
+            
+            <!-- Mode & Status Indicators -->
+            <div style="position: absolute; top: 8px; left: 8px; 
+                        background: rgba(76, 175, 80, 0.85); color: white; 
+                        padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: bold;">
+                📡 Local
+            </div>
+            <div id="streamStatus" 
+                 style="position: absolute; top: 8px; right: 8px; 
+                        background: rgba(0,255,0,0.8); color: white; 
+                        padding: 3px 8px; border-radius: 10px; font-size: 10px;">
+                🟢 Connecting...
+            </div>
+            
+            <!-- Stop Button - Fixed positioning -->
+            <button id="stopBtnLocal" onclick="stopMirroring()" 
+                    title="Stop Mirroring"
+                    style="position: absolute; bottom: 10px; right: 10px;
+                           background: rgba(255, 68, 68, 0.9); color: white; border: none; 
+                           width: 40px; height: 40px; border-radius: 50%; cursor: pointer; 
+                           font-size: 18px; opacity: 0.3; transition: all 0.3s ease;
+                           display: flex; align-items: center; justify-content: center;
+                           box-shadow: 0 2px 8px rgba(0,0,0,0.4);">
+                ⏹
+            </button>
+        </div>
+    `;
+    
+    // Event handlers
+    setTimeout(() => {
+        const streamImg = document.getElementById('mjpegStream');
+        if (!streamImg) return;
         
-        <img id="mjpegStream" 
-             src="${url}" 
-             style="width: 100%; height: 100%; object-fit: contain;"
-             alt="Phone Screen Mirror" />
+        streamImg.onload = function() {
+            const streamStatus = document.getElementById('streamStatus');
+            if (streamStatus) {
+                streamStatus.textContent = '🟢 Live';
+                streamStatus.style.background = 'rgba(0,255,0,0.9)';
+            }
+        };
         
-        <!-- Tombol Stop - Transparant, muncul saat hover -->
-        <button id="stopBtn" onclick="stopMirroring()" 
-                title="Stop Mirroring"
-                style="position: absolute; bottom: 10px; right: 10px;
-                       background: rgba(255, 68, 68, 0.9); color: white; border: none; 
-                       padding: 4px 10px; border-radius: 15%; cursor: pointer;
-                       font-size: 12px; opacity: 0.1;
-                       transition: opacity 0.3s ease, transform 0.2s ease;
-                       box-shadow: 0 2px 8px rgba(0,0,0,0.4);"
-					   display: flex; align-items: center; justify-content: center;
-                onmouseover="this.style.transform='scale(1.1)'; this.style.opacity='1'" 
-                onmouseout="this.style.transform='scale(1)'">
-            ⏹
-        </button>
-    </div>
-`;
-    
-    const streamImg = document.getElementById('mjpegStream');
-    
-    streamImg.onload = function() {
-        const streamStatus = document.getElementById('streamStatus');
-        if (streamStatus) {
-            streamStatus.textContent = '🟢 Streaming Active';
-            streamStatus.style.background = 'rgba(0,255,0,0.9)';
-        }
-    };
-    
-    streamImg.onerror = function() {
-        showConnectionError(url, 'local');
-    };
+        streamImg.onerror = function() {
+            showConnectionError(url, 'local');
+        };
+    }, 100);
 }
 
 // ============================================
-// HELPER: GLOBAL MODE (WebRTC)
+// GLOBAL MODE - Custom WebRTC dalam phone frame
 // ============================================
 function startMirroringGlobal() {
     const streamIdInput = document.getElementById('streamIdInput');
@@ -9987,61 +10070,144 @@ function startMirroringGlobal() {
     const statusMessage = document.getElementById('statusMessage');
     const screenContent = document.getElementById('screenContent');
     
-    const streamId = streamIdInput.value.trim();
-    const password = passwordInput.value.trim();
+    const streamId = streamIdInput?.value.trim() || '';
+    const password = passwordInput?.value.trim() || '';
     
     if (!streamId) {
-        statusMessage.textContent = '❌ Masukkan Stream ID terlebih dahulu!';
-        statusMessage.style.color = 'red';
+        if (statusMessage) {
+            statusMessage.textContent = '❌ Masukkan Stream ID terlebih dahulu!';
+            statusMessage.style.color = 'red';
+        }
         return;
     }
-      
-    statusMessage.textContent = '🔄 Menghubungkan ke Global stream...';
-    statusMessage.style.color = 'blue';
     
-    // Buat URL untuk web client ScreenStream
-    let webClientUrl = `https://screenstream.io/?streamId=${encodeURIComponent(streamId)}`;
-    if (password) {
-        webClientUrl += `&password=${encodeURIComponent(password)}`;
+    if (statusMessage) {
+        statusMessage.textContent = '🔄 Menghubungkan ke Global stream...';
+        statusMessage.style.color = 'blue';
     }
     
-    // Tampilkan iframe dengan web client
+    if (!screenContent) return;
+    
+    // URL untuk web client (fallback)
+    const webClientUrl = `https://screenstream.io/?streamId=${encodeURIComponent(streamId)}` + 
+                        (password ? `&password=${encodeURIComponent(password)}` : '');
+    
     screenContent.innerHTML = `
-        <div style="position: relative; width: 100%; height: 100%; background: #000;">
-            <iframe id="webrtcFrame" 
-                    src="${webClientUrl}" 
-                    style="width: 100%; height: 100%; border: none; background: #000;"
-                    allow="camera; microphone; display-capture">
-            </iframe>
-            <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); 
-                        background: rgba(0,0,0,0.7); padding: 8px 15px; border-radius: 20px;">
-			<!-- Tombol Stop - Transparant, muncul saat hover -->
-				<button id="stopBtn" onclick="stopMirroring()" 
-					title="Stop Mirroring"
-					style="position: absolute; bottom: 10px; right: 10px;
-                       background: rgba(255, 68, 68, 0.9); color: white; border: none; 
-                       padding: 4px 10px; border-radius: 15%; cursor: pointer;
-                       font-size: 12px; opacity: 0.1;
-                       transition: opacity 0.3s ease, transform 0.2s ease;
-                       box-shadow: 0 2px 8px rgba(0,0,0,0.4);"
-					   display: flex; align-items: center; justify-content: center;
-					onmouseover="this.style.transform='scale(1.1)'; this.style.opacity='1'" 
-					onmouseout="this.style.transform='scale(1)'">
-					⏹
-				</button>
-                <button onclick="openInNewTab('${webClientUrl}')" 
-                        style="background: #2196F3; color: white; border: none; margin-left: 10px;
-                               padding: 6px 10px; border-radius: 5px; cursor: pointer; font-weight: bold;">
-                    🔗 Open in Browser
+        <div style="position: relative; width: 100%; height: 100%; background: #000;" 
+             onmouseenter="showStopButton()" onmouseleave="hideStopButton()">
+            
+            <!-- Custom WebRTC Container -->
+            <div id="globalStreamContainer" style="width: 100%; height: 100%; position: relative;">
+                
+                <!-- Top Control Bar -->
+                <div style="position: absolute; top: 0; left: 0; right: 0;
+                            background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent);
+                            padding: 8px 10px; display: flex; justify-content: space-between; align-items: center;
+                            z-index: 10;">
+                    
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <!-- Mode Badge -->
+                        <span style="background: rgba(33, 150, 243, 0.9); color: white; 
+                                     padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: bold;">
+                            🌐 Global
+                        </span>
+                        <!-- Status -->
+                        <span id="globalStatus" 
+                              style="background: rgba(255,193,7,0.9); color: #000; 
+                                     padding: 3px 8px; border-radius: 10px; font-size: 10px; font-weight: bold;">
+                            ⏳ Connecting...
+                        </span>
+                    </div>
+                    
+                    <!-- Controls -->
+                    <div style="display: flex; gap: 6px;">
+                        <button onclick="openInNewTab('${webClientUrl}')" 
+                                title="Open in browser"
+                                style="background: rgba(33, 150, 243, 0.9); color: white; border: none; 
+                                       width: 32px; height: 32px; border-radius: 50%; cursor: pointer; 
+                                       font-size: 14px; font-weight: bold; display: flex; align-items: center; 
+                                       justify-content: center; opacity: 0.8; transition: opacity 0.3s;">
+                            🔗
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Stream Content -->
+                <div style="width: 100%; height: 100%; position: relative; background: #000;">
+                    <iframe id="webrtcFrame" 
+                            src="${webClientUrl}" 
+                            style="width: 100%; height: 100%; border: none; background: #000;"
+                            allow="camera; microphone; display-capture; fullscreen"
+                            sandbox="allow-scripts allow-same-origin allow-forms allow-popups">
+                    </iframe>
+                </div>
+                
+                <!-- Stop Button -->
+                <button id="stopBtnGlobal" onclick="stopMirroring()" 
+                        title="Stop Mirroring"
+                        style="position: absolute; bottom: 10px; right: 10px;
+                               background: rgba(255, 68, 68, 0.9); color: white; border: none; 
+                               width: 40px; height: 40px; border-radius: 50%; cursor: pointer; 
+                               font-size: 18px; opacity: 0.3; transition: all 0.3s ease;
+                               display: flex; align-items: center; justify-content: center;
+                               box-shadow: 0 2px 8px rgba(0,0,0,0.4);">
+                    ⏹
                 </button>
             </div>
         </div>
     `;
+    
+    // Iframe event handlers
+    setTimeout(() => {
+        const iframe = document.getElementById('webrtcFrame');
+        if (iframe) {
+            iframe.onload = function() {
+                const statusEl = document.getElementById('globalStatus');
+                if (statusEl) {
+                    statusEl.innerHTML = '🟢 Live';
+                    statusEl.style.background = 'rgba(0,255,0,0.9)';
+                    statusEl.style.color = 'white';
+                }
+            };
+            
+            iframe.onerror = function() {
+                showConnectionError('', 'global');
+            };
+        }
+    }, 500);
 }
 
 // ============================================
-// FUNGSI SWITCH MODE
+// HELPER FUNCTIONS - Fixed untuk struktur Anda
 // ============================================
+function showStopButton() {
+    const localBtn = document.getElementById('stopBtnLocal');
+    const globalBtn = document.getElementById('stopBtnGlobal');
+    
+    if (localBtn) {
+        localBtn.style.opacity = '1';
+        localBtn.style.transform = 'scale(1.1)';
+    }
+    if (globalBtn) {
+        globalBtn.style.opacity = '1';
+        globalBtn.style.transform = 'scale(1.1)';
+    }
+}
+
+function hideStopButton() {
+    const localBtn = document.getElementById('stopBtnLocal');
+    const globalBtn = document.getElementById('stopBtnGlobal');
+    
+    if (localBtn) {
+        localBtn.style.opacity = '0.3';
+        localBtn.style.transform = 'scale(1)';
+    }
+    if (globalBtn) {
+        globalBtn.style.opacity = '0.3';
+        globalBtn.style.transform = 'scale(1)';
+    }
+}
+
 function switchMode(mode) {
     const localForm = document.getElementById('localModeForm');
     const globalForm = document.getElementById('globalModeForm');
@@ -10049,31 +10215,40 @@ function switchMode(mode) {
     const helpTextGlobal = document.getElementById('helpTextGlobal');
     const statusMessage = document.getElementById('statusMessage');
     
-    if (mode === 'local') {
-        localForm.style.display = 'block';
-        globalForm.style.display = 'none';
-        helpTextLocal.style.display = 'block';
-        helpTextGlobal.style.display = 'none';
-        statusMessage.textContent = '';
-    } else {
-        localForm.style.display = 'none';
-        globalForm.style.display = 'block';
-        helpTextLocal.style.display = 'none';
-        helpTextGlobal.style.display = 'block';
+    // Update help text (yang ada di luar phone-container)
+    if (helpTextLocal && helpTextGlobal) {
+        if (mode === 'local') {
+            localForm.style.display = 'block';
+            globalForm.style.display = 'none';
+            helpTextLocal.style.display = 'block';
+            helpTextGlobal.style.display = 'none';
+        } else {
+            localForm.style.display = 'none';
+            globalForm.style.display = 'block';
+            helpTextLocal.style.display = 'none';
+            helpTextGlobal.style.display = 'block';
+        }
+    }
+    
+    if (statusMessage) {
         statusMessage.textContent = '';
     }
 }
 
-// ============================================
-// FUNGSI STOP MIRRORING
-// ============================================
 function stopMirroring() {
     const screenContent = document.getElementById('screenContent');
+    if (!screenContent) return;
+    
+    // Stop iframe if exists
+    const iframe = document.getElementById('webrtcFrame');
+    if (iframe) {
+        iframe.src = 'about:blank';
+    }
     
     screenContent.innerHTML = `
         <h2>Mirror Layar HP</h2>
         
-      <!-- Mode Selector -->
+        <!-- Mode Selector -->
         <div style="margin: 15px 0; padding: 10px; background: #f5f5f5; border-radius: 8px;">
             <label style="font-weight: bold; font-size: 13px;">Pilih Mode:</label><br>
             <div style="margin-top: 8px;">
@@ -10120,49 +10295,35 @@ function stopMirroring() {
         
         <p id="statusMessage" style="color: green; font-size: 12px; margin-top: 10px;">
             ✓ Mirroring dihentikan
-        </p>       
+        </p>
     `;
+    
+    // Reinitialize switch mode untuk help text
+    setTimeout(() => {
+        switchMode('local'); // Default to local mode
+    }, 50);
 }
 
-// ============================================
-// FUNGSI HELPER LAINNYA
-// ============================================
 function showConnectionError(url, mode) {
     const screenContent = document.getElementById('screenContent');
-    const modeText = mode === 'local' ? 'Local (MJPEG)' : 'Global (WebRTC)';
+    if (!screenContent) return;
+    
+    const modeText = mode === 'local' ? 'Local' : 'Global';
     
     screenContent.innerHTML = `
-        <div style="padding: 20px; text-align: center;">
-            <h3 style="color: #ff4444;">❌ Gagal Terhubung ke Stream</h3>
-            <p style="font-size: 13px; color: #666; margin-bottom: 10px;">
-                Mode: <strong>${modeText}</strong>
+        <div style="padding: 20px; text-align: center; color: #fff;">
+            <h3 style="color: #ff4444;">❌ Gagal Terhubung</h3>
+            <p style="font-size: 13px; margin: 10px 0; color: #ccc;">Mode: <strong>${modeText}</strong></p>
+            <p style="font-size: 12px; color: #ccc; line-height: 1.6;">
+                ${mode === 'local' ? 
+                    'Pastikan ScreenStream berjalan, URL benar, dan HP/PC dalam WiFi yang sama.' : 
+                    'Pastikan Stream ID benar dan koneksi internet stabil.'
+                }
+                ${mode === 'local' ? `<br><code style="background: #333; padding: 2px 6px; border-radius: 3px; font-size: 11px;">${url}</code>` : ''}
             </p>
-            <p style="font-size: 12px; color: #666;">
-                Pastikan:<br>
-                ${mode === 'local' ? `
-                • ScreenStream app sudah running di HP<br>
-                • Mode "Local (MJPEG)" dipilih<br>
-                • Tombol "Start Stream" sudah ditekan<br>
-                • HP dan PC terhubung ke WiFi yang sama<br>
-                • URL yang dimasukkan benar<br>
-                • Firewall tidak memblokir koneksi
-                ` : `
-                • ScreenStream app sudah running di HP<br>
-                • Mode "Global (WebRTC)" dipilih<br>
-                • Tombol "Start Stream" sudah ditekan<br>
-                • Stream ID dan Password benar<br>
-                • Koneksi internet stabil
-                `}
-            </p>
-            ${mode === 'local' ? `
-            <p style="font-size: 11px; margin-top: 15px;">
-                <strong>URL yang dicoba:</strong><br>
-                <code style="background: #f0f0f0; padding: 3px 8px; border-radius: 3px;">${url}</code>
-            </p>
-            ` : ''}
             <button onclick="stopMirroring()" 
                     style="margin-top: 15px; padding: 10px 20px; background: #4CAF50; 
-                           color: white; border: none; border-radius: 5px; cursor: pointer;">
+                           color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
                 🔄 Coba Lagi
             </button>
         </div>
@@ -10172,8 +10333,7 @@ function showConnectionError(url, mode) {
 function openInNewTab(url) {
     window.open(url, '_blank');
 }
-  
-	
+
 </script>
 </body>
 </html>
